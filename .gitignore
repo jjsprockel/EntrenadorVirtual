@@ -1,0 +1,17 @@
+# Dependencies
+app/node_modules/
+
+# Build output
+app/dist/
+
+# Environment variables (contains API keys)
+app/.env.local
+app/.env*.local
+
+# Editor & OS
+.DS_Store
+*.swp
+.vscode/
+
+# Temp Word files
+~$*
