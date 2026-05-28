@@ -1,9 +1,21 @@
 import { useState } from 'react';
-import { Dumbbell, Eye, EyeOff } from 'lucide-react';
+import { Dumbbell, Eye, EyeOff, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUsersStore } from '@/stores/usersStore';
+
+// ── Demo credentials for quick testing ───────────────────────────────────────
+
+const DEMO_ACCOUNTS = [
+  { label: 'Admin',  email: 'admin@entrenador.app', password: 'Admin1234', color: '#FF6B35' },
+  { label: 'Carlos', email: 'carlos@demo.com',       password: 'Entrena123', color: '#3B82F6' },
+  { label: 'María',  email: 'maria@demo.com',         password: 'Entrena123', color: '#EC4899' },
+  { label: 'Lucas',  email: 'lucas@demo.com',         password: 'Entrena123', color: '#10B981' },
+  { label: 'Sofía',  email: 'sofia@demo.com',         password: 'Entrena123', color: '#F59E0B' },
+];
+
+// ── Component ─────────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
   const login = useUsersStore((s) => s.login);
@@ -12,6 +24,7 @@ export default function LoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showDemo, setShowDemo] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,9 +36,22 @@ export default function LoginPage() {
     if (!ok) setError('Correo o contraseña incorrectos.');
   }
 
+  async function handleQuickLogin(acc: typeof DEMO_ACCOUNTS[number]) {
+    setLoading(true);
+    setError('');
+    const ok = await login(acc.email, acc.password);
+    setLoading(false);
+    if (!ok) {
+      // Demo user not yet created — show helpful message
+      setError(`"${acc.label}" no existe aún. Carga los datos demo desde el Panel Admin primero.`);
+      setShowDemo(true);
+    }
+  }
+
   return (
     <div className="min-h-dvh flex flex-col items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm space-y-8">
+
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -37,7 +63,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Form */}
+        {/* Login form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="email">Correo electrónico</Label>
@@ -79,7 +105,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-destructive text-center">{error}</p>
+            <p className="text-sm text-destructive text-center leading-snug">{error}</p>
           )}
 
           <Button
@@ -97,6 +123,55 @@ export default function LoginPage() {
             )}
           </Button>
         </form>
+
+        {/* Quick-access demo panel */}
+        <div className="border border-dashed border-border rounded-xl overflow-hidden">
+          <button
+            type="button"
+            onClick={() => setShowDemo((v) => !v)}
+            className="w-full flex items-center justify-between px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+          >
+            <span className="flex items-center gap-2">
+              <Zap className="h-3.5 w-3.5 text-amber-500" />
+              Acceso rápido — modo demo
+            </span>
+            {showDemo
+              ? <ChevronUp className="h-4 w-4" />
+              : <ChevronDown className="h-4 w-4" />}
+          </button>
+
+          {showDemo && (
+            <div className="px-4 pb-4 space-y-2">
+              <p className="text-[11px] text-muted-foreground">
+                Carga los datos demo desde el Panel Admin (cuenta de admin) antes de usar las cuentas de usuario.
+              </p>
+              <div className="grid grid-cols-1 gap-2">
+                {DEMO_ACCOUNTS.map((acc) => (
+                  <button
+                    key={acc.email}
+                    type="button"
+                    disabled={loading}
+                    onClick={() => handleQuickLogin(acc)}
+                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg border border-border bg-card hover:bg-muted/40 transition-colors text-left disabled:opacity-50"
+                  >
+                    <span
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
+                      style={{ backgroundColor: acc.color }}
+                    >
+                      {acc.label.charAt(0)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium leading-none">{acc.label}</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5 font-mono truncate">{acc.email}</p>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground font-mono shrink-0">{acc.password}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );

@@ -11,6 +11,8 @@ import {
   Trash2,
   FlaskConical,
   CheckCircle2,
+  Mail,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,6 +38,7 @@ import { useUsersStore } from '@/stores/usersStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useRoutineStore } from '@/stores/routineStore';
 import { isDemoDataLoaded, seedDemoData } from '@/lib/seedData';
+import { sendWelcomeEmail, isEmailConfigured } from '@/lib/emailService';
 import UserAvatar from '@/components/admin/UserAvatar';
 import UserFormModal from '@/components/admin/UserFormModal';
 import type { AppUser } from '@/types/user';
@@ -126,6 +129,29 @@ function UserCredentialCard({ user }: { user: AppUser }) {
   const [showPw, setShowPw] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'error' | 'unconfigured'>('idle');
+
+  async function handleSendEmail() {
+    if (!user.email) return;
+    if (!isEmailConfigured()) {
+      setEmailStatus('unconfigured');
+      setTimeout(() => setEmailStatus('idle'), 5000);
+      return;
+    }
+    setEmailStatus('sending');
+    try {
+      await sendWelcomeEmail({
+        toName: user.profile.name,
+        toEmail: user.email,
+        initialPassword: user.tempPassword ?? '(contraseña configurada)',
+      });
+      setEmailStatus('sent');
+      setTimeout(() => setEmailStatus('idle'), 4000);
+    } catch {
+      setEmailStatus('error');
+      setTimeout(() => setEmailStatus('idle'), 4000);
+    }
+  }
 
   const sessions = getSessionsByUser(user.id);
   const lastSession = sessions.length > 0
@@ -233,14 +259,49 @@ function UserCredentialCard({ user }: { user: AppUser }) {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <Dumbbell className="h-3 w-3" />
-            {sessions.length} sesiones
-          </span>
-          <span>{lastSessionLabel()}</span>
+        {/* Stats + email action */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-1">
+            <span className="flex items-center gap-1">
+              <Dumbbell className="h-3 w-3" />
+              {sessions.length} sesiones
+            </span>
+            <span>{lastSessionLabel()}</span>
+          </div>
+          {user.email && (
+            <button
+              type="button"
+              onClick={handleSendEmail}
+              disabled={emailStatus === 'sending'}
+              title="Enviar correo de bienvenida"
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                emailStatus === 'sent'
+                  ? 'border-green-500/40 text-green-500 bg-green-500/10'
+                  : emailStatus === 'error' || emailStatus === 'unconfigured'
+                  ? 'border-destructive/40 text-destructive bg-destructive/10'
+                  : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5'
+              }`}
+            >
+              {emailStatus === 'sending' ? (
+                <span className="w-3 h-3 rounded-full border border-current border-t-transparent animate-spin" />
+              ) : emailStatus === 'sent' ? (
+                <CheckCircle2 className="h-3 w-3" />
+              ) : emailStatus === 'error' ? (
+                <AlertCircle className="h-3 w-3" />
+              ) : emailStatus === 'unconfigured' ? (
+                <AlertCircle className="h-3 w-3" />
+              ) : (
+                <Mail className="h-3 w-3" />
+              )}
+              {emailStatus === 'sent' ? 'Enviado' : emailStatus === 'error' ? 'Error' : emailStatus === 'unconfigured' ? 'Sin config' : 'Bienvenida'}
+            </button>
+          )}
         </div>
+        {emailStatus === 'unconfigured' && (
+          <p className="text-[10px] text-muted-foreground">
+            Configura VITE_EMAILJS_* en las variables de entorno de Vercel para habilitar el envío de correos.
+          </p>
+        )}
       </div>
 
       <UserFormModal open={editOpen} onClose={() => setEditOpen(false)} editUser={user} />

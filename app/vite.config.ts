@@ -13,4 +13,9 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    // Rolldown (Vite 8) handles code splitting automatically.
+    // Raise the warning threshold to avoid noise from the charts bundle.
+    chunkSizeWarningLimit: 1000,
+  },
 })
