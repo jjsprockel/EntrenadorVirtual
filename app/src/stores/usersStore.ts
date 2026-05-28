@@ -23,6 +23,8 @@ interface UsersState {
 
   // Auth actions
   login: (email: string, password: string) => Promise<boolean>;
+  checkCredentials: (email: string, password: string) => Promise<string | null>;
+  setSession: (userId: string) => void;
   logout: () => void;
   changePassword: (userId: string, currentPassword: string, newPassword: string) => Promise<boolean>;
   resetUserPassword: (userId: string, newPassword: string) => Promise<void>;
@@ -107,6 +109,18 @@ export const useUsersStore = create<UsersState>()(
         set({ sessionUserId: user.id, activeUserId: user.id });
         return true;
       },
+
+      // Verify credentials without touching state — use with startTransition + setSession
+      checkCredentials: async (email, password) => {
+        const { users } = get();
+        const user = users.find((u) => u.email?.toLowerCase() === email.trim().toLowerCase());
+        if (!user || !user.passwordHash) return null;
+        const valid = await verifyPassword(password, user.passwordHash);
+        return valid ? user.id : null;
+      },
+
+      // Set session after credentials have been verified — safe to wrap in startTransition
+      setSession: (userId) => set({ sessionUserId: userId, activeUserId: userId }),
 
       logout: () => set({ sessionUserId: null }),
 

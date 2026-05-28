@@ -13,8 +13,10 @@ const baseNavItems = [
 const adminNavItem = { to: '/admin', label: 'Admin', icon: Shield, exact: false };
 
 export default function Sidebar() {
-  const activeUser = useUsersStore((s) => s.getActiveUser());
-  const isAdmin = activeUser?.role === 'admin';
+  // Select a stable boolean — avoids re-renders on every unrelated store update
+  const isAdmin = useUsersStore(
+    (s) => s.users.find((u) => u.id === s.activeUserId)?.role === 'admin',
+  );
   const navItems = isAdmin ? [...baseNavItems, adminNavItem] : baseNavItems;
 
   return (

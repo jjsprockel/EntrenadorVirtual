@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Dumbbell, Eye, EyeOff, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,31 +18,40 @@ const DEMO_ACCOUNTS = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
-  const login = useUsersStore((s) => s.login);
+  const checkCredentials = useUsersStore((s) => s.checkCredentials);
+  const setSession = useUsersStore((s) => s.setSession);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showDemo, setShowDemo] = useState(false);
+  // startTransition defers the large React tree mount (LoginPage → full app)
+  // so it doesn't block the main thread for 200+ ms
+  const [, startTransition] = useTransition();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim() || !password) return;
     setLoading(true);
     setError('');
-    const ok = await login(email, password);
+    const userId = await checkCredentials(email, password);
     setLoading(false);
-    if (!ok) setError('Correo o contraseña incorrectos.');
+    if (userId) {
+      startTransition(() => setSession(userId));
+    } else {
+      setError('Correo o contraseña incorrectos.');
+    }
   }
 
   async function handleQuickLogin(acc: typeof DEMO_ACCOUNTS[number]) {
     setLoading(true);
     setError('');
-    const ok = await login(acc.email, acc.password);
+    const userId = await checkCredentials(acc.email, acc.password);
     setLoading(false);
-    if (!ok) {
-      // Demo user not yet created — show helpful message
+    if (userId) {
+      startTransition(() => setSession(userId));
+    } else {
       setError(`"${acc.label}" no existe aún. Carga los datos demo desde el Panel Admin primero.`);
       setShowDemo(true);
     }

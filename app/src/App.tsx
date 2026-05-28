@@ -33,8 +33,11 @@ function AppBootstrap() {
     setExercises(getExercises());
   }, [setExercises]);
 
-  const activeUser = useUsersStore((s) => s.getActiveUser());
-  const theme = activeUser?.profile.theme ?? legacyProfile.theme;
+  // Select only the theme string — stable primitive, avoids unnecessary re-renders
+  const activeTheme = useUsersStore(
+    (s) => s.users.find((u) => u.id === s.activeUserId)?.profile.theme,
+  );
+  const theme = activeTheme ?? legacyProfile.theme;
 
   useEffect(() => {
     const root = document.documentElement;
