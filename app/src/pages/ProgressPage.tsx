@@ -9,48 +9,116 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2, Dumbbell } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { useUsersStore } from '@/stores/usersStore';
+import UserAvatar from '@/components/admin/UserAvatar';
 import {
-  getWeeklyVolume,
-  getExerciseProgress,
+  getChartData,
+  getExercisePoints,
   getPersonalRecords,
   getSummaryStats,
   getLoggedExerciseCodes,
+  TIME_RANGES,
+  METRIC_LABELS,
+  METRIC_UNITS,
 } from '@/lib/statsEngine';
+import type { MetricType } from '@/lib/statsEngine';
+import type { MuscleGroup } from '@/types/exercise';
 
-// ── Chart theme constants ─────────────────────────────────────────────────────
-// Hex approximations matching the CSS oklch values defined in index.css
+// ── Chart theme ───────────────────────────────────────────────────────────────
+
 const C = {
-  primary:   '#FF6B35',  // oklch(0.66 0.21 35)  — orange
-  secondary: '#3B82F6',  // oklch(0.6 0.2 265)   — blue
-  success:   '#10B981',  // oklch(0.7 0.17 160)  — green
-  muted:     '#737373',  // oklch(0.49 0 0)
+  primary:   '#FF6B35',
+  secondary: '#3B82F6',
+  success:   '#10B981',
+  warning:   '#F59E0B',
+  purple:    '#8B5CF6',
+  pink:      '#EC4899',
+  teal:      '#14B8A6',
+  red:       '#EF4444',
+  muted:     '#737373',
   grid:      'rgba(255,255,255,0.07)',
   tooltip:   '#1c1c1c',
-} as const;
+};
 
-// ── Custom tooltip factory ────────────────────────────────────────────────────
-// Returns a render function accepted by recharts Tooltip `content` prop.
-// Using `any` avoids the complex recharts generic type mismatch.
+// ── PPL config ────────────────────────────────────────────────────────────────
+
+type PPLKey = 'push' | 'pull' | 'legs';
+
+const PPL_CONFIG: Record<PPLKey, { label: string; color: string; muscleGroups: MuscleGroup[] }> = {
+  push: {
+    label: 'Push',
+    color: C.primary,
+    muscleGroups: ['pecho', 'hombros', 'triceps'],
+  },
+  pull: {
+    label: 'Pull',
+    color: C.secondary,
+    muscleGroups: ['espalda', 'biceps'],
+  },
+  legs: {
+    label: 'Piernas',
+    color: C.success,
+    muscleGroups: ['cuadriceps', 'isquiotibiales_gluteos', 'pantorrillas', 'core'],
+  },
+};
+
+// ── Muscle group config ───────────────────────────────────────────────────────
+
+const MG_CONFIG: Record<MuscleGroup, { label: string; color: string }> = {
+  pecho:                   { label: 'Pecho',           color: C.primary   },
+  espalda:                 { label: 'Espalda',         color: C.secondary },
+  hombros:                 { label: 'Hombros',         color: C.success   },
+  biceps:                  { label: 'Bíceps',          color: C.warning   },
+  triceps:                 { label: 'Tríceps',         color: C.purple    },
+  cuadriceps:              { label: 'Cuádriceps',      color: C.pink      },
+  isquiotibiales_gluteos:  { label: 'Isquios/Glúteos', color: C.teal      },
+  pantorrillas:            { label: 'Pantorrillas',    color: C.red       },
+  core:                    { label: 'Core',            color: C.muted     },
+};
+
+// ── Custom tooltip ────────────────────────────────────────────────────────────
+
 function makeTooltip(unit: string) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return function TooltipContent(props: any) {
+  return (props: any) => {
+    if (!props.active || !props.payload?.length) return null;
+    const val = props.payload[0]?.value;
+    return (
+      <div
+        style={{ background: C.tooltip }}
+        className="rounded-lg px-3 py-2 text-xs border border-white/10 shadow-xl"
+      >
+        <p className="text-muted-foreground mb-1">{props.label}</p>
+        <p className="font-mono font-bold text-white">
+          {typeof val === 'number' ? val.toLocaleString() : '—'} {unit}
+        </p>
+        {props.payload[0]?.payload?.sessions != null && (
+          <p className="text-muted-foreground">
+            {props.payload[0].payload.sessions} sesión{props.payload[0].payload.sessions !== 1 ? 'es' : ''}
+          </p>
+        )}
+      </div>
+    );
+  };
+}
+
+function makeMultiTooltip(unit: string) {
+  return (props: any) => {
     if (!props.active || !props.payload?.length) return null;
     return (
       <div
-        className="rounded-lg border border-border px-3 py-2 shadow-xl text-xs"
         style={{ background: C.tooltip }}
+        className="rounded-lg px-3 py-2 text-xs border border-white/10 shadow-xl space-y-1"
       >
         <p className="text-muted-foreground mb-1">{props.label}</p>
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {props.payload.map((p: any) => (
-          <p key={p.name} className="font-semibold" style={{ color: p.color }}>
-            {typeof p.value === 'number' ? p.value.toLocaleString() : p.value} {unit}
+          <p key={p.name} className="font-mono" style={{ color: p.color }}>
+            {p.name}: {p.value?.toLocaleString() ?? '—'} {unit}
           </p>
         ))}
       </div>
@@ -58,7 +126,63 @@ function makeTooltip(unit: string) {
   };
 }
 
-// ── Stat card ─────────────────────────────────────────────────────────────────
+// ── Shared small components ───────────────────────────────────────────────────
+
+function TimeRangeSelector({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (k: string) => void;
+}) {
+  return (
+    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none px-4">
+      {TIME_RANGES.map((r) => (
+        <button
+          key={r.key}
+          type="button"
+          onClick={() => onChange(r.key)}
+          className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+            value === r.key
+              ? 'bg-primary border-primary text-primary-foreground'
+              : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+          }`}
+        >
+          {r.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function MetricSelector({
+  value,
+  onChange,
+}: {
+  value: MetricType;
+  onChange: (m: MetricType) => void;
+}) {
+  const opts: MetricType[] = ['volume', 'maxWeight', 'reps'];
+  return (
+    <div className="flex gap-1.5 px-4">
+      {opts.map((m) => (
+        <button
+          key={m}
+          type="button"
+          onClick={() => onChange(m)}
+          className={`flex-1 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+            value === m
+              ? 'bg-primary/15 border-primary text-primary'
+              : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+          }`}
+        >
+          {METRIC_LABELS[m]}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function StatCard({
   label,
   value,
@@ -70,8 +194,7 @@ function StatCard({
   sub?: string;
   trend?: 'up' | 'down' | 'flat';
 }) {
-  const TrendIcon =
-    trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
+  const Icon = trend === 'up' ? TrendingUp : trend === 'down' ? TrendingDown : Minus;
   const trendColor =
     trend === 'up'
       ? 'text-success'
@@ -80,14 +203,14 @@ function StatCard({
       : 'text-muted-foreground';
 
   return (
-    <div className="rounded-xl border border-border bg-card p-3 space-y-1">
+    <div className="bg-card border border-border rounded-xl p-3 flex flex-col gap-1">
       <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
         {label}
       </p>
-      <p className="text-xl font-bold font-mono tabular-nums leading-none">{value}</p>
+      <p className="font-bold text-lg leading-none font-mono">{value}</p>
       {sub && (
-        <div className={`flex items-center gap-1 text-[10px] ${trendColor}`}>
-          {trend && <TrendIcon className="h-3 w-3 shrink-0" />}
+        <div className={`flex items-center gap-1 text-xs ${trendColor}`}>
+          {trend && <Icon className="h-3 w-3" />}
           <span>{sub}</span>
         </div>
       )}
@@ -95,399 +218,672 @@ function StatCard({
   );
 }
 
-// ── Empty state ───────────────────────────────────────────────────────────────
-function EmptyState({ message }: { message: string }) {
+function EmptyState({ text }: { text: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
-      <BarChart2 className="h-10 w-10 opacity-20" />
-      <p className="text-sm text-center">{message}</p>
+    <div className="flex flex-col items-center justify-center py-12 gap-3 text-muted-foreground">
+      <Dumbbell className="h-10 w-10 opacity-20" />
+      <p className="text-sm text-center">{text}</p>
+    </div>
+  );
+}
+
+function BarOrLineChart({
+  data,
+  metric,
+  color,
+  useLine = false,
+}: {
+  data: { period: string; value: number }[];
+  metric: MetricType;
+  color: string;
+  useLine?: boolean;
+}) {
+  const unit = METRIC_UNITS[metric];
+  const tooltip = makeTooltip(unit);
+  const hasData = data.some((d) => d.value > 0);
+
+  if (!hasData) {
+    return (
+      <div className="h-36 flex items-center justify-center text-xs text-muted-foreground">
+        Sin datos en este período
+      </div>
+    );
+  }
+
+  const common = {
+    data,
+    margin: { top: 4, right: 4, left: -18, bottom: 0 },
+  };
+
+  const axisProps = {
+    xAxis: (
+      <XAxis
+        dataKey="period"
+        tick={{ fill: C.muted, fontSize: 9 }}
+        axisLine={false}
+        tickLine={false}
+        interval="preserveStartEnd"
+      />
+    ),
+    yAxis: (
+      <YAxis
+        tick={{ fill: C.muted, fontSize: 9 }}
+        axisLine={false}
+        tickLine={false}
+        tickFormatter={(v: number) => (v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v))}
+      />
+    ),
+    grid: <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />,
+  };
+
+  if (useLine || metric === 'maxWeight') {
+    return (
+      <ResponsiveContainer width="100%" height={180}>
+        <LineChart {...common}>
+          {axisProps.grid}
+          {axisProps.xAxis}
+          {axisProps.yAxis}
+          <Tooltip content={tooltip} />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={color}
+            strokeWidth={2}
+            dot={{ fill: color, r: 3 }}
+            activeDot={{ r: 5 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    );
+  }
+
+  return (
+    <ResponsiveContainer width="100%" height={180}>
+      <BarChart {...common} barSize={Math.max(6, Math.floor(300 / data.length) - 4)}>
+        {axisProps.grid}
+        {axisProps.xAxis}
+        {axisProps.yAxis}
+        <Tooltip content={tooltip} />
+        <Bar dataKey="value" fill={color} radius={[3, 3, 0, 0]} />
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
+// ── Tab: Resumen ──────────────────────────────────────────────────────────────
+
+function ResumenTab({
+  sessions,
+  metric,
+  onMetricChange,
+  weeksBack,
+}: {
+  sessions: Parameters<typeof getChartData>[0];
+  metric: MetricType;
+  onMetricChange: (m: MetricType) => void;
+  weeksBack: number;
+}) {
+  const stats = useMemo(() => getSummaryStats(sessions), [sessions]);
+  const chartData = useMemo(
+    () => getChartData(sessions, metric, weeksBack),
+    [sessions, metric, weeksBack],
+  );
+  const prs = useMemo(() => getPersonalRecords(sessions), [sessions]);
+  const { getByCode } = useExerciseStore();
+
+  const weekDiff = stats.prevWeekVolume
+    ? Math.round(((stats.weekVolume - stats.prevWeekVolume) / stats.prevWeekVolume) * 100)
+    : null;
+  const weekTrend =
+    weekDiff === null ? undefined : weekDiff > 0 ? 'up' : weekDiff < 0 ? 'down' : 'flat';
+
+  return (
+    <div className="space-y-5">
+      {/* Stat cards */}
+      <div className="px-4 grid grid-cols-2 gap-2.5">
+        <StatCard
+          label="Sesiones totales"
+          value={String(stats.totalSessions)}
+          sub="completadas"
+        />
+        <StatCard
+          label="Volumen promedio"
+          value={
+            stats.avgSessionVolume > 0
+              ? `${(stats.avgSessionVolume / 1000).toFixed(1)}k kg`
+              : '—'
+          }
+          sub="por sesión"
+        />
+        <StatCard
+          label="Volumen esta semana"
+          value={
+            stats.weekVolume > 0
+              ? `${(stats.weekVolume / 1000).toFixed(1)}k kg`
+              : '—'
+          }
+          sub={weekDiff !== null ? `${weekDiff > 0 ? '+' : ''}${weekDiff}% vs sem. ant.` : undefined}
+          trend={weekTrend}
+        />
+        <StatCard
+          label="Ejercicios únicos"
+          value={String(stats.uniqueExercises)}
+          sub="en el historial"
+        />
+      </div>
+
+      {/* Metric + chart */}
+      <MetricSelector value={metric} onChange={onMetricChange} />
+      <div className="px-4">
+        <BarOrLineChart data={chartData} metric={metric} color={C.primary} />
+      </div>
+
+      {/* PRs */}
+      {prs.length > 0 && (
+        <div className="px-4 space-y-2">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-1.5">
+            <Trophy className="h-3.5 w-3.5 text-warning" />
+            Récords personales
+          </p>
+          <div className="space-y-1.5">
+            {prs.slice(0, 5).map((pr) => {
+              const ex = getByCode(pr.exerciseCode);
+              return (
+                <div
+                  key={pr.exerciseCode}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-card border border-border"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {ex?.nameEs ?? pr.exerciseCode}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {new Date(pr.date).toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: '2-digit',
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold font-mono text-primary">
+                      {pr.maxWeight} kg × {pr.repsAtMax}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      e1RM ~{pr.e1rm} kg
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Tab: Ejercicio ────────────────────────────────────────────────────────────
+
+function EjercicioTab({
+  sessions,
+  metric,
+  onMetricChange,
+  weeksBack,
+}: {
+  sessions: Parameters<typeof getChartData>[0];
+  metric: MetricType;
+  onMetricChange: (m: MetricType) => void;
+  weeksBack: number;
+}) {
+  const { getByCode } = useExerciseStore();
+  const loggedCodes = useMemo(() => getLoggedExerciseCodes(sessions), [sessions]);
+  const [selectedCode, setSelectedCode] = useState<string | null>(() => loggedCodes[0] ?? null);
+
+  const activeCode = selectedCode ?? loggedCodes[0] ?? null;
+
+  const points = useMemo(
+    () => (activeCode ? getExercisePoints(sessions, activeCode, weeksBack) : []),
+    [sessions, activeCode, weeksBack],
+  );
+
+  const chartData = points.map((p) => ({
+    period: p.date,
+    value:
+      metric === 'volume'
+        ? p.volume
+        : metric === 'maxWeight'
+        ? p.maxWeight
+        : p.totalReps,
+    sessions: 1,
+  }));
+
+  if (loggedCodes.length === 0) {
+    return <EmptyState text="Completa sesiones para ver el progreso por ejercicio." />;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Exercise picker chips */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none px-4">
+        {loggedCodes.map((code) => {
+          const ex = getByCode(code);
+          const isActive = code === activeCode;
+          return (
+            <button
+              key={code}
+              type="button"
+              onClick={() => setSelectedCode(code)}
+              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                isActive
+                  ? 'bg-primary border-primary text-primary-foreground'
+                  : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+              }`}
+            >
+              {ex?.nameEs ?? code}
+            </button>
+          );
+        })}
+      </div>
+
+      <MetricSelector value={metric} onChange={onMetricChange} />
+
+      <div className="px-4">
+        <BarOrLineChart data={chartData} metric={metric} color={C.secondary} useLine />
+      </div>
+
+      {/* History list */}
+      {points.length > 0 && (
+        <div className="px-4 space-y-2">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+            Historial
+          </p>
+          <div className="space-y-1.5">
+            {[...points].reverse().map((p, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg bg-card border border-border"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{p.date}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    Mejor: {p.bestSet} · Vol: {p.volume.toLocaleString()} kg
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-bold font-mono text-primary">
+                    {metric === 'volume'
+                      ? `${p.volume.toLocaleString()} kg`
+                      : metric === 'maxWeight'
+                      ? `${p.maxWeight} kg`
+                      : `${p.totalReps} reps`}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Tab: Grupo Muscular ───────────────────────────────────────────────────────
+
+function MuscularTab({
+  sessions,
+  metric,
+  onMetricChange,
+  weeksBack,
+}: {
+  sessions: Parameters<typeof getChartData>[0];
+  metric: MetricType;
+  onMetricChange: (m: MetricType) => void;
+  weeksBack: number;
+}) {
+  const { getAllExercises } = useExerciseStore();
+  const allExercises = getAllExercises();
+
+  // Only show muscle groups that appear in sessions
+  const loggedCodes = useMemo(() => new Set(getLoggedExerciseCodes(sessions)), [sessions]);
+  const activeGroups = useMemo((): MuscleGroup[] => {
+    const groups = new Set<MuscleGroup>();
+    allExercises.forEach((e) => {
+      if (loggedCodes.has(e.code)) groups.add(e.muscleGroup);
+    });
+    return (Object.keys(MG_CONFIG) as MuscleGroup[]).filter((g) => groups.has(g));
+  }, [allExercises, loggedCodes]);
+
+  const [selectedMG, setSelectedMG] = useState<MuscleGroup>(
+    () => activeGroups[0] ?? 'pecho',
+  );
+
+  const mgCodes = useMemo(
+    () => allExercises.filter((e) => e.muscleGroup === selectedMG).map((e) => e.code),
+    [allExercises, selectedMG],
+  );
+
+  const chartData = useMemo(
+    () => getChartData(sessions, metric, weeksBack, mgCodes),
+    [sessions, metric, weeksBack, mgCodes],
+  );
+
+  // Compare all groups
+  const compareData = useMemo(() => {
+    const barsByPeriod: Record<string, Record<string, number>> = {};
+    activeGroups.forEach((mg) => {
+      const codes = allExercises.filter((e) => e.muscleGroup === mg).map((e) => e.code);
+      getChartData(sessions, metric, weeksBack, codes).forEach((bar) => {
+        if (!barsByPeriod[bar.period]) barsByPeriod[bar.period] = {};
+        barsByPeriod[bar.period][MG_CONFIG[mg].label] = bar.value;
+      });
+    });
+    return Object.entries(barsByPeriod).map(([period, values]) => ({ period, ...values }));
+  }, [sessions, metric, weeksBack, activeGroups, allExercises]);
+
+  if (activeGroups.length === 0) {
+    return <EmptyState text="Completa sesiones para ver estadísticas por grupo muscular." />;
+  }
+
+  const color = MG_CONFIG[selectedMG]?.color ?? C.primary;
+
+  return (
+    <div className="space-y-4">
+      {/* Group chips */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none px-4">
+        {activeGroups.map((mg) => (
+          <button
+            key={mg}
+            type="button"
+            onClick={() => setSelectedMG(mg)}
+            className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+              mg === selectedMG
+                ? 'border-transparent text-primary-foreground'
+                : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+            }`}
+            style={mg === selectedMG ? { backgroundColor: color, borderColor: color } : {}}
+          >
+            {MG_CONFIG[mg].label}
+          </button>
+        ))}
+      </div>
+
+      <MetricSelector value={metric} onChange={onMetricChange} />
+
+      <div className="px-4">
+        <BarOrLineChart data={chartData} metric={metric} color={color} />
+      </div>
+
+      {/* Multi-group stacked comparison */}
+      {activeGroups.length > 1 && compareData.length > 0 && (
+        <div className="px-4 space-y-2">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+            Comparación por grupo
+          </p>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart
+              data={compareData}
+              margin={{ top: 4, right: 4, left: -18, bottom: 0 }}
+              barSize={Math.max(4, Math.floor(280 / compareData.length) - 2)}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+              <XAxis
+                dataKey="period"
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v: number) =>
+                  v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v)
+                }
+              />
+              <Tooltip content={makeMultiTooltip(METRIC_UNITS[metric])} />
+              <Legend
+                iconSize={8}
+                wrapperStyle={{ fontSize: 10, paddingTop: 8, color: C.muted }}
+              />
+              {activeGroups.map((mg) => (
+                <Bar
+                  key={mg}
+                  dataKey={MG_CONFIG[mg].label}
+                  stackId="mg"
+                  fill={MG_CONFIG[mg].color}
+                />
+              ))}
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Tab: PPL ──────────────────────────────────────────────────────────────────
+
+function PPLTab({
+  sessions,
+  metric,
+  onMetricChange,
+  weeksBack,
+}: {
+  sessions: Parameters<typeof getChartData>[0];
+  metric: MetricType;
+  onMetricChange: (m: MetricType) => void;
+  weeksBack: number;
+}) {
+  const { getAllExercises } = useExerciseStore();
+  const allExercises = getAllExercises();
+  const [selectedPPL, setSelectedPPL] = useState<PPLKey>('push');
+
+  const pplCodes = useMemo(
+    () =>
+      allExercises
+        .filter((e) => PPL_CONFIG[selectedPPL].muscleGroups.includes(e.muscleGroup))
+        .map((e) => e.code),
+    [allExercises, selectedPPL],
+  );
+
+  const chartData = useMemo(
+    () => getChartData(sessions, metric, weeksBack, pplCodes),
+    [sessions, metric, weeksBack, pplCodes],
+  );
+
+  // Comparison: push vs pull vs legs
+  const compareData = useMemo(() => {
+    const results: Record<string, { Push: number; Pull: number; Piernas: number }> = {};
+
+    (Object.entries(PPL_CONFIG) as [PPLKey, typeof PPL_CONFIG[PPLKey]][]).forEach(
+      ([_key, cfg]) => {
+        const codes = allExercises
+          .filter((e) => cfg.muscleGroups.includes(e.muscleGroup))
+          .map((e) => e.code);
+        getChartData(sessions, metric, weeksBack, codes).forEach((bar) => {
+          if (!results[bar.period]) results[bar.period] = { Push: 0, Pull: 0, Piernas: 0 };
+          const mapKey = cfg.label as 'Push' | 'Pull' | 'Piernas';
+          results[bar.period][mapKey] = bar.value;
+        });
+      },
+    );
+
+    return Object.entries(results).map(([period, vals]) => ({ period, ...vals }));
+  }, [sessions, metric, weeksBack, allExercises]);
+
+  const hasAnyData = compareData.some(
+    (d) => (d as any).Push > 0 || (d as any).Pull > 0 || (d as any).Piernas > 0,
+  );
+
+  if (!hasAnyData) {
+    return <EmptyState text="Completa sesiones para ver la distribución Push / Pull / Piernas." />;
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* PPL selector */}
+      <div className="flex gap-2 px-4">
+        {(Object.entries(PPL_CONFIG) as [PPLKey, typeof PPL_CONFIG[PPLKey]][]).map(
+          ([key, cfg]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setSelectedPPL(key)}
+              className={`flex-1 py-2 rounded-xl text-xs font-bold border-2 transition-all ${
+                key === selectedPPL
+                  ? 'text-white border-transparent'
+                  : 'text-muted-foreground border-border hover:border-primary/40'
+              }`}
+              style={key === selectedPPL ? { backgroundColor: cfg.color, borderColor: cfg.color } : {}}
+            >
+              {cfg.label}
+            </button>
+          ),
+        )}
+      </div>
+
+      <MetricSelector value={metric} onChange={onMetricChange} />
+
+      <div className="px-4">
+        <BarOrLineChart
+          data={chartData}
+          metric={metric}
+          color={PPL_CONFIG[selectedPPL].color}
+        />
+      </div>
+
+      {/* Push vs Pull vs Legs comparison */}
+      {compareData.length > 0 && (
+        <div className="px-4 space-y-2">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+            Comparación Push · Pull · Piernas
+          </p>
+          <ResponsiveContainer width="100%" height={180}>
+            <BarChart
+              data={compareData}
+              margin={{ top: 4, right: 4, left: -18, bottom: 0 }}
+              barSize={Math.max(6, Math.floor(280 / compareData.length / 3) - 2)}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+              <XAxis
+                dataKey="period"
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                tickFormatter={(v: number) =>
+                  v >= 1000 ? `${(v / 1000).toFixed(1)}k` : String(v)
+                }
+              />
+              <Tooltip content={makeMultiTooltip(METRIC_UNITS[metric])} />
+              <Legend
+                iconSize={8}
+                wrapperStyle={{ fontSize: 10, paddingTop: 8, color: C.muted }}
+              />
+              <Bar dataKey="Push"     fill={C.primary}   radius={[2, 2, 0, 0]} />
+              <Bar dataKey="Pull"     fill={C.secondary} radius={[2, 2, 0, 0]} />
+              <Bar dataKey="Piernas"  fill={C.success}   radius={[2, 2, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }
 
 // ── Main page ─────────────────────────────────────────────────────────────────
+
 export default function ProgressPage() {
   const { getUserSessions } = useSessionStore();
   const activeUserId = useUsersStore((s) => s.activeUserId);
   const isAdmin = useUsersStore((s) => s.getActiveUser()?.role === 'admin');
+  const activeUser = useUsersStore((s) => s.getActiveUser());
   const sessions = getUserSessions(activeUserId ?? '', isAdmin ?? false);
-  const { getByCode } = useExerciseStore();
-  const [selectedCode, setSelectedCode] = useState<string | null>(null);
 
-  const stats = useMemo(() => getSummaryStats(sessions), [sessions]);
-  const weeklyVolume = useMemo(() => getWeeklyVolume(sessions), [sessions]);
-  const prs = useMemo(() => getPersonalRecords(sessions), [sessions]);
-  const loggedCodes = useMemo(() => getLoggedExerciseCodes(sessions), [sessions]);
+  const [timeRangeKey, setTimeRangeKey] = useState('8w');
+  const [metric, setMetric] = useState<MetricType>('volume');
 
-  const activeCode = selectedCode ?? loggedCodes[0] ?? null;
-  const exerciseProgress = useMemo(
-    () => (activeCode ? getExerciseProgress(sessions, activeCode) : []),
-    [sessions, activeCode],
-  );
-
-  const noData = stats.totalSessions === 0;
-
-  const weekTrend: 'up' | 'down' | 'flat' =
-    stats.weekVolume > stats.prevWeekVolume
-      ? 'up'
-      : stats.weekVolume < stats.prevWeekVolume
-      ? 'down'
-      : 'flat';
-
-  const weekDiff =
-    stats.prevWeekVolume > 0
-      ? Math.round(
-          ((stats.weekVolume - stats.prevWeekVolume) / stats.prevWeekVolume) * 100,
-        )
-      : null;
+  const weeksBack = TIME_RANGES.find((r) => r.key === timeRangeKey)?.weeks ?? 8;
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3">
-        <h1 className="font-bold text-base">Progreso</h1>
-        {!noData && (
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {stats.totalSessions} sesiones · {stats.totalVolume.toLocaleString()} kg acumulados
-          </p>
+      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BarChart2 className="h-4 w-4 text-primary" />
+          <h1 className="font-bold text-base">Progreso</h1>
+        </div>
+        {activeUser && (
+          <div className="flex items-center gap-2">
+            <UserAvatar user={activeUser} size="sm" />
+            <span className="text-xs text-muted-foreground hidden sm:block">
+              {activeUser.profile.name || 'Usuario'}
+            </span>
+          </div>
         )}
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {noData ? (
-          <EmptyState message="Completa tu primera sesión para ver estadísticas aquí." />
-        ) : (
-          <Tabs defaultValue="resumen" className="flex flex-col h-full">
-            <TabsList className="mx-4 mt-4 grid grid-cols-3 shrink-0">
-              <TabsTrigger value="resumen">Resumen</TabsTrigger>
-              <TabsTrigger value="ejercicios">Ejercicios</TabsTrigger>
-              <TabsTrigger value="records">Récords</TabsTrigger>
+        <Tabs defaultValue="resumen" className="flex flex-col h-full">
+          {/* Time range */}
+          <div className="pt-3 pb-1 border-b border-border">
+            <TimeRangeSelector value={timeRangeKey} onChange={setTimeRangeKey} />
+          </div>
+
+          {/* Tab bar */}
+          <div className="px-4 pt-3">
+            <TabsList className="grid grid-cols-4 w-full h-8 text-[11px]">
+              <TabsTrigger value="resumen"   className="text-[11px]">Total</TabsTrigger>
+              <TabsTrigger value="ejercicio" className="text-[11px]">Ejercicio</TabsTrigger>
+              <TabsTrigger value="muscular"  className="text-[11px]">Muscular</TabsTrigger>
+              <TabsTrigger value="ppl"       className="text-[11px]">PPL</TabsTrigger>
             </TabsList>
+          </div>
 
-            {/* ── Tab 1: Resumen ──────────────────────────────────────── */}
-            <TabsContent value="resumen" className="flex-1 overflow-y-auto px-4 pb-6 space-y-5 mt-4">
-              {/* Stat grid */}
-              <div className="grid grid-cols-2 gap-2.5">
-                <StatCard
-                  label="Sesiones totales"
-                  value={stats.totalSessions.toString()}
-                  sub={`${stats.uniqueExercises} ejercicios distintos`}
-                />
-                <StatCard
-                  label="Volumen total"
-                  value={`${(stats.totalVolume / 1000).toFixed(1)} t`}
-                  sub={`Ø ${stats.avgSessionVolume.toLocaleString()} kg/sesión`}
-                />
-                <StatCard
-                  label="Esta semana"
-                  value={`${stats.weekVolume.toLocaleString()} kg`}
-                  sub={
-                    weekDiff !== null
-                      ? `${weekDiff > 0 ? '+' : ''}${weekDiff}% vs semana anterior`
-                      : 'Primera semana'
-                  }
-                  trend={weekTrend}
-                />
-                <StatCard
-                  label="Semana anterior"
-                  value={`${stats.prevWeekVolume.toLocaleString()} kg`}
-                />
-              </div>
+          {/* Tab contents */}
+          <TabsContent value="resumen" className="pt-4 pb-8 space-y-4">
+            <ResumenTab
+              sessions={sessions}
+              metric={metric}
+              onMetricChange={setMetric}
+              weeksBack={weeksBack}
+            />
+          </TabsContent>
 
-              {/* Weekly volume chart */}
-              <div>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium mb-3">
-                  Volumen semanal (últimas 8 semanas)
-                </p>
-                <div className="rounded-xl border border-border bg-card p-3">
-                  <ResponsiveContainer width="100%" height={200}>
-                    <BarChart
-                      data={weeklyVolume}
-                      margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-                    >
-                      <CartesianGrid vertical={false} stroke={C.grid} />
-                      <XAxis
-                        dataKey="week"
-                        tick={{ fill: C.muted, fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        tick={{ fill: C.muted, fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(v) => `${(v / 1000).toFixed(0)}t`}
-                      />
-                      <Tooltip
-                        content={makeTooltip("kg")}
-                        cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-                      />
-                      <Bar
-                        dataKey="volume"
-                        fill={C.primary}
-                        radius={[4, 4, 0, 0]}
-                        name="Volumen"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
+          <TabsContent value="ejercicio" className="pt-4 pb-8">
+            <EjercicioTab
+              sessions={sessions}
+              metric={metric}
+              onMetricChange={setMetric}
+              weeksBack={weeksBack}
+            />
+          </TabsContent>
 
-              {/* Sessions per week */}
-              <div>
-                <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium mb-3">
-                  Sesiones por semana
-                </p>
-                <div className="rounded-xl border border-border bg-card p-3">
-                  <ResponsiveContainer width="100%" height={120}>
-                    <BarChart
-                      data={weeklyVolume}
-                      margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-                    >
-                      <CartesianGrid vertical={false} stroke={C.grid} />
-                      <XAxis
-                        dataKey="week"
-                        tick={{ fill: C.muted, fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                      />
-                      <YAxis
-                        tick={{ fill: C.muted, fontSize: 10 }}
-                        axisLine={false}
-                        tickLine={false}
-                        allowDecimals={false}
-                      />
-                      <Tooltip
-                        content={makeTooltip("sesiones")}
-                        cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-                      />
-                      <Bar
-                        dataKey="sessions"
-                        fill={C.secondary}
-                        radius={[4, 4, 0, 0]}
-                        name="Sesiones"
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </TabsContent>
+          <TabsContent value="muscular" className="pt-4 pb-8">
+            <MuscularTab
+              sessions={sessions}
+              metric={metric}
+              onMetricChange={setMetric}
+              weeksBack={weeksBack}
+            />
+          </TabsContent>
 
-            {/* ── Tab 2: Ejercicios ───────────────────────────────────── */}
-            <TabsContent value="ejercicios" className="flex-1 overflow-y-auto px-4 pb-6 space-y-4 mt-4">
-              {loggedCodes.length === 0 ? (
-                <EmptyState message="Aún no hay ejercicios registrados." />
-              ) : (
-                <>
-                  {/* Exercise selector chips */}
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-4 px-4">
-                    {loggedCodes.map((code) => {
-                      const ex = getByCode(code);
-                      return (
-                        <button
-                          key={code}
-                          type="button"
-                          onClick={() => setSelectedCode(code)}
-                          className={`shrink-0 text-[11px] px-2.5 py-1.5 rounded-full border transition-colors ${
-                            activeCode === code
-                              ? 'bg-primary border-primary text-primary-foreground'
-                              : 'border-border text-muted-foreground hover:border-primary/50'
-                          }`}
-                        >
-                          <span className="font-mono mr-1">{code}</span>
-                          {ex?.nameEs ?? code}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {activeCode && (
-                    <>
-                      {exerciseProgress.length < 2 ? (
-                        <EmptyState message="Se necesitan al menos 2 sesiones con este ejercicio para mostrar progresión." />
-                      ) : (
-                        <>
-                          {/* Max weight progression */}
-                          <div>
-                            <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium mb-3">
-                              Peso máximo por sesión
-                            </p>
-                            <div className="rounded-xl border border-border bg-card p-3">
-                              <ResponsiveContainer width="100%" height={200}>
-                                <LineChart
-                                  data={exerciseProgress}
-                                  margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-                                >
-                                  <CartesianGrid stroke={C.grid} strokeDasharray="3 3" />
-                                  <XAxis
-                                    dataKey="date"
-                                    tick={{ fill: C.muted, fontSize: 10 }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                  />
-                                  <YAxis
-                                    tick={{ fill: C.muted, fontSize: 10 }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tickFormatter={(v) => `${v}kg`}
-                                    domain={['auto', 'auto']}
-                                  />
-                                  <Tooltip
-                                    content={makeTooltip("kg")}
-                                  />
-                                  <Line
-                                    type="monotone"
-                                    dataKey="maxWeight"
-                                    stroke={C.primary}
-                                    strokeWidth={2.5}
-                                    dot={{ r: 4, fill: C.primary, strokeWidth: 0 }}
-                                    activeDot={{ r: 6 }}
-                                    name="Peso máximo"
-                                  />
-                                </LineChart>
-                              </ResponsiveContainer>
-                            </div>
-                          </div>
-
-                          {/* Volume per session */}
-                          <div>
-                            <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium mb-3">
-                              Volumen por sesión
-                            </p>
-                            <div className="rounded-xl border border-border bg-card p-3">
-                              <ResponsiveContainer width="100%" height={160}>
-                                <BarChart
-                                  data={exerciseProgress}
-                                  margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-                                >
-                                  <CartesianGrid vertical={false} stroke={C.grid} />
-                                  <XAxis
-                                    dataKey="date"
-                                    tick={{ fill: C.muted, fontSize: 10 }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                  />
-                                  <YAxis
-                                    tick={{ fill: C.muted, fontSize: 10 }}
-                                    axisLine={false}
-                                    tickLine={false}
-                                  />
-                                  <Tooltip
-                                    content={makeTooltip("kg")}
-                                    cursor={{ fill: 'rgba(255,255,255,0.04)' }}
-                                  />
-                                  <Bar
-                                    dataKey="totalVolume"
-                                    fill={C.secondary}
-                                    radius={[4, 4, 0, 0]}
-                                    name="Volumen"
-                                  />
-                                </BarChart>
-                              </ResponsiveContainer>
-                            </div>
-                          </div>
-
-                          {/* Session log */}
-                          <div>
-                            <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium mb-2">
-                              Historial
-                            </p>
-                            <div className="space-y-1.5">
-                              {[...exerciseProgress].reverse().map((pt, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-muted/30 border border-border/50"
-                                >
-                                  <p className="text-xs text-muted-foreground w-16 shrink-0">
-                                    {pt.date}
-                                  </p>
-                                  <p className="flex-1 text-sm font-mono font-semibold">
-                                    {pt.bestSet}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground shrink-0">
-                                    {pt.totalVolume.toLocaleString()} kg vol.
-                                  </p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </>
-                  )}
-                </>
-              )}
-            </TabsContent>
-
-            {/* ── Tab 3: Récords ──────────────────────────────────────── */}
-            <TabsContent value="records" className="flex-1 overflow-y-auto px-4 pb-6 space-y-4 mt-4">
-              {prs.length === 0 ? (
-                <EmptyState message="Aún no hay récords registrados." />
-              ) : (
-                <>
-                  <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
-                    Mejor marca personal por ejercicio
-                  </p>
-                  <div className="space-y-2">
-                    {prs.map((pr, i) => {
-                      const exercise = getByCode(pr.exerciseCode);
-                      return (
-                        <div
-                          key={pr.exerciseCode}
-                          className="rounded-xl border border-border bg-card p-3.5 flex items-center gap-3"
-                        >
-                          {/* Rank */}
-                          <div
-                            className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${
-                              i === 0
-                                ? 'bg-yellow-500/20 text-yellow-400'
-                                : i === 1
-                                ? 'bg-slate-400/20 text-slate-300'
-                                : i === 2
-                                ? 'bg-orange-700/20 text-orange-400'
-                                : 'bg-muted text-muted-foreground'
-                            }`}
-                          >
-                            {i < 3 ? <Trophy className="h-3.5 w-3.5" /> : i + 1}
-                          </div>
-
-                          {/* Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <span className="font-mono text-[10px] text-primary shrink-0">
-                                {pr.exerciseCode}
-                              </span>
-                              <span className="text-sm font-medium truncate">
-                                {exercise?.nameEs ?? pr.exerciseCode}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-0.5">
-                              {pr.date.toLocaleDateString('es-ES', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                              })}
-                            </p>
-                          </div>
-
-                          {/* Weight + e1RM */}
-                          <div className="shrink-0 text-right">
-                            <p className="font-mono font-bold text-base tabular-nums">
-                              {pr.maxWeight} kg
-                            </p>
-                            <p className="text-[10px] text-muted-foreground">
-                              × {pr.repsAtMax} · 1RM ~{pr.e1rm} kg
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
-            </TabsContent>
-          </Tabs>
-        )}
+          <TabsContent value="ppl" className="pt-4 pb-8">
+            <PPLTab
+              sessions={sessions}
+              metric={metric}
+              onMetricChange={setMetric}
+              weeksBack={weeksBack}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
