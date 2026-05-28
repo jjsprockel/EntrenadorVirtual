@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useRoutineStore } from '@/stores/routineStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
+import { useUsersStore } from '@/stores/usersStore';
 import { suggestWeight } from '@/lib/overloadEngine';
 import { MUSCLE_GROUP_LABELS } from '@/components/exercise/MuscleGroupBadge';
 import ExerciseThumb from '@/components/exercise/ExerciseThumb';
@@ -18,8 +19,11 @@ const PREVIEW_LIMIT = 5;
 export default function TodayPage() {
   const navigate = useNavigate();
   const { getActiveRoutine } = useRoutineStore();
-  const { activeSession, startSession, sessions } = useSessionStore();
+  const { activeSession, startSession, getUserSessions } = useSessionStore();
   const { getByCode } = useExerciseStore();
+  const activeUserId = useUsersStore((s) => s.activeUserId);
+  const isAdmin = useUsersStore((s) => s.getActiveUser()?.role === 'admin');
+  const sessions = getUserSessions(activeUserId ?? '', isAdmin ?? false);
 
   const [editingDay, setEditingDay] = useState<RoutineDay | null>(null);
 
@@ -64,6 +68,7 @@ export default function TodayPage() {
 
     const session: Session = {
       id: crypto.randomUUID(),
+      userId: activeUserId ?? undefined,
       routineId: routine.id,
       dayId: day.id,
       dayName: day.dayName,

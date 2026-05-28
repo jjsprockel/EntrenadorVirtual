@@ -10,15 +10,27 @@ import ProgressPage from '@/pages/ProgressPage';
 import ProfilePage from '@/pages/ProfilePage';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { useUserStore } from '@/stores/userStore';
+import { useUsersStore } from '@/stores/usersStore';
 import { getExercises } from '@/data/knowledgeBase';
 
 function AppBootstrap() {
   const setExercises = useExerciseStore((s) => s.setExercises);
-  const theme = useUserStore((s) => s.profile.theme);
+  const legacyProfile = useUserStore((s) => s.profile);
+  const { initialized, initAdmin } = useUsersStore();
+
+  // Migrate legacy single-user profile to multi-user store on first load
+  useEffect(() => {
+    if (!initialized) {
+      initAdmin(legacyProfile);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setExercises(getExercises());
   }, [setExercises]);
+
+  const activeUser = useUsersStore((s) => s.getActiveUser());
+  const theme = activeUser?.profile.theme ?? legacyProfile.theme;
 
   useEffect(() => {
     const root = document.documentElement;

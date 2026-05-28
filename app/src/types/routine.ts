@@ -38,6 +38,7 @@ export interface PeriodizationBlock {
 
 export interface Routine {
   id: string;
+  userId?: string;
   name: string;
   objective: Objective;
   level: Level;

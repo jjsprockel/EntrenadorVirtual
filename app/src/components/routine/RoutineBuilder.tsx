@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import DayEditor from './DayEditor';
 import { ROUTINE_TEMPLATES } from '@/lib/routineTemplates';
 import { useRoutineStore } from '@/stores/routineStore';
+import { useUsersStore } from '@/stores/usersStore';
 import type { Routine, RoutineDay, PeriodizationType } from '@/types/routine';
 import type { Level } from '@/types/exercise';
 
@@ -510,6 +511,7 @@ interface Props {
 export default function RoutineBuilder({ editRoutine }: Props) {
   const navigate = useNavigate();
   const { addRoutine, updateRoutine, setActiveRoutine } = useRoutineStore();
+  const activeUserId = useUsersStore((s) => s.activeUserId);
 
   const [step, setStep] = useState(0);
   const [state, setState] = useState<WizardState>(() => {
@@ -552,6 +554,7 @@ export default function RoutineBuilder({ editRoutine }: Props) {
   function handleActivate() {
     const routine: Routine = {
       id: editRoutine?.id ?? crypto.randomUUID(),
+      userId: editRoutine?.userId ?? (activeUserId ?? undefined),
       name: state.name,
       objective: state.objective,
       level: state.level,

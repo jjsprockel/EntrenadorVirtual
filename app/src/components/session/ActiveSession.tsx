@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
-import { useUserStore } from '@/stores/userStore';
+import { useUsersStore } from '@/stores/usersStore';
 import { suggestWeight } from '@/lib/overloadEngine';
 import ExerciseThumb from '@/components/exercise/ExerciseThumb';
 import ExercisePicker from '@/components/routine/ExercisePicker';
@@ -39,7 +39,7 @@ export default function ActiveSession() {
     useSessionStore();
   const sessions = useSessionStore((s) => s.sessions);
   const { getByCode } = useExerciseStore();
-  const preferRestTimer = useUserStore((s) => s.profile.preferRestTimer);
+  const preferRestTimer = useUsersStore((s) => s.getActiveUser()?.profile.preferRestTimer ?? true);
 
   // Which exercise card is expanded (free navigation)
   const [expandedIdx, setExpandedIdx] = useState<number>(() => {

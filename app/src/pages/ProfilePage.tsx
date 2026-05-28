@@ -3,7 +3,6 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-  User,
   Download,
   Upload,
   Trash2,
@@ -11,6 +10,10 @@ import {
   ChevronDown,
   ChevronUp,
   Dumbbell,
+  Shield,
+  Users,
+  Edit,
+  UserPlus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,12 +31,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useUserStore } from '@/stores/userStore';
-import { useRoutineStore } from '@/stores/routineStore';
+import { useUsersStore } from '@/stores/usersStore';
 import { useSessionStore } from '@/stores/sessionStore';
+import { useRoutineStore } from '@/stores/routineStore';
 import { exportAllData, importAllData, clearAllData } from '@/lib/db';
+import UserAvatar from '@/components/admin/UserAvatar';
+import UserFormModal from '@/components/admin/UserFormModal';
+import UserSwitcherModal from '@/components/admin/UserSwitcherModal';
 import type { Level } from '@/types/exercise';
 import type { Objective } from '@/types/routine';
+import type { AppUser } from '@/types/user';
 
 // ── Schema ────────────────────────────────────────────────────────────────────
 
@@ -96,12 +103,15 @@ const MAIN_EXERCISES: { code: string; label: string }[] = [
 ];
 
 function OneRMEditor() {
-  const { profile, updateProfile } = useUserStore();
+  const activeUserId = useUsersStore((s) => s.activeUserId);
+  const activeUser = useUsersStore((s) => s.getActiveUser());
+  const { updateUserProfile } = useUsersStore();
   const [open, setOpen] = useState(false);
 
-  const estimates = profile.oneRMEstimates;
+  const estimates = activeUser?.profile.oneRMEstimates ?? {};
 
   function handleChange(code: string, value: string) {
+    if (!activeUserId) return;
     const num = parseFloat(value);
     const updated = { ...estimates };
     if (!value || isNaN(num)) {
@@ -109,7 +119,7 @@ function OneRMEditor() {
     } else {
       updated[code] = num;
     }
-    updateProfile({ oneRMEstimates: updated });
+    updateUserProfile(activeUserId, { oneRMEstimates: updated });
   }
 
   return (
@@ -195,7 +205,6 @@ function DataManagement() {
       setImportStatus('error');
       setTimeout(() => setImportStatus('idle'), 3000);
     }
-    // Reset input
     e.target.value = '';
   }
 
@@ -206,7 +215,6 @@ function DataManagement() {
 
   return (
     <div className="space-y-3">
-      {/* Export */}
       <Button
         type="button"
         variant="outline"
@@ -217,7 +225,6 @@ function DataManagement() {
         Exportar todos los datos (JSON)
       </Button>
 
-      {/* Import */}
       <div>
         <input
           ref={fileInputRef}
@@ -243,7 +250,6 @@ function DataManagement() {
         )}
       </div>
 
-      {/* Reset */}
       <AlertDialog>
         <AlertDialogTrigger className="flex w-full items-center justify-start gap-2 rounded-lg border border-destructive/50 bg-transparent px-4 text-sm font-medium text-destructive h-11 hover:bg-destructive/10 transition-colors">
           <Trash2 className="h-4 w-4" />
@@ -253,7 +259,7 @@ function DataManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Resetear la app?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se borrarán todos tus datos: perfil, rutinas, historial de sesiones y configuración.
+              Se borrarán todos tus datos: perfiles, rutinas, historial de sesiones y configuración.
               Esta acción no se puede deshacer.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -272,13 +278,120 @@ function DataManagement() {
   );
 }
 
+// ── Admin: user list ──────────────────────────────────────────────────────────
+
+function AdminUserList() {
+  const { users, activeUserId, deleteUser } = useUsersStore();
+  const [editUser, setEditUser] = useState<AppUser | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Shield className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold">Gestión de usuarios</span>
+        </div>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="h-8 gap-1.5 text-xs"
+          onClick={() => setShowAdd(true)}
+        >
+          <UserPlus className="h-3.5 w-3.5" />
+          Agregar
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        {users.map((user) => (
+          <div
+            key={user.id}
+            className={`flex items-center gap-3 p-3 rounded-xl border ${
+              user.id === activeUserId ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'
+            }`}
+          >
+            <UserAvatar user={user} size="md" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-semibold truncate">
+                  {user.profile.name || 'Sin nombre'}
+                </p>
+                {user.role === 'admin' && (
+                  <Shield className="h-3 w-3 text-primary shrink-0" />
+                )}
+              </div>
+              <p className="text-[11px] text-muted-foreground capitalize">{user.role}</p>
+            </div>
+            <div className="flex gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setEditUser(user)}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+                aria-label="Editar"
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </button>
+              {user.role !== 'admin' && (
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                    aria-label="Eliminar"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>¿Eliminar usuario?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Se eliminará a "{user.profile.name}" del sistema. Sus rutinas y sesiones no se borrarán automáticamente.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteUser(user.id)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Eliminar
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <UserFormModal open={showAdd} onClose={() => setShowAdd(false)} />
+      {editUser && (
+        <UserFormModal
+          open={!!editUser}
+          onClose={() => setEditUser(null)}
+          editUser={editUser}
+        />
+      )}
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
-  const { profile, setProfile } = useUserStore();
-  const { sessions } = useSessionStore();
-  const { routines } = useRoutineStore();
+  const { activeUserId, getActiveUser, updateUserProfile } = useUsersStore();
+  const activeUser = getActiveUser();
+  const profile = activeUser?.profile;
+
+  const { getUserSessions } = useSessionStore();
+  const { getUserRoutines } = useRoutineStore();
+  const isAdmin = activeUser?.role === 'admin';
+  const sessions = getUserSessions(activeUserId ?? '', isAdmin);
+  const routines = getUserRoutines(activeUserId ?? '', isAdmin);
+
   const [saved, setSaved] = useState(false);
+  const [showSwitcher, setShowSwitcher] = useState(false);
 
   const {
     register,
@@ -288,23 +401,23 @@ export default function ProfilePage() {
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
-      name: profile.name,
-      age: profile.age != null ? String(profile.age) : '',
-      bodyWeightKg: profile.bodyWeightKg != null ? String(profile.bodyWeightKg) : '',
-      level: profile.level,
-      primaryObjective: profile.primaryObjective,
-      units: profile.units,
-      minWeightIncrement: profile.minWeightIncrement,
-      preferRestTimer: profile.preferRestTimer,
-      theme: profile.theme,
+      name: profile?.name ?? '',
+      age: profile?.age != null ? String(profile.age) : '',
+      bodyWeightKg: profile?.bodyWeightKg != null ? String(profile.bodyWeightKg) : '',
+      level: profile?.level ?? 'principiante',
+      primaryObjective: profile?.primaryObjective ?? 'hipertrofia',
+      units: profile?.units ?? 'kg',
+      minWeightIncrement: profile?.minWeightIncrement ?? 2.5,
+      preferRestTimer: profile?.preferRestTimer ?? true,
+      theme: profile?.theme ?? 'dark',
     },
   });
 
   function onSubmit(data: ProfileFormData) {
+    if (!activeUserId) return;
     const age = data.age ? parseFloat(data.age) : undefined;
     const bodyWeightKg = data.bodyWeightKg ? parseFloat(data.bodyWeightKg) : undefined;
-    setProfile({
-      ...profile,
+    updateUserProfile(activeUserId, {
       name: data.name,
       age: age && !isNaN(age) ? age : undefined,
       bodyWeightKg: bodyWeightKg && !isNaN(bodyWeightKg) ? bodyWeightKg : undefined,
@@ -319,18 +432,44 @@ export default function ProfilePage() {
     setTimeout(() => setSaved(false), 2000);
   }
 
+  if (!activeUser || !profile) {
+    return (
+      <div className="flex items-center justify-center h-full p-6 text-muted-foreground text-sm">
+        Cargando perfil…
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col max-w-lg mx-auto w-full">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-primary" />
-          <h1 className="font-bold text-base">Perfil</h1>
+        <div className="flex items-center gap-3">
+          <UserAvatar user={activeUser} size="md" />
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h1 className="font-bold text-base leading-tight">
+                {profile.name || 'Mi perfil'}
+              </h1>
+              {isAdmin && <Shield className="h-3.5 w-3.5 text-primary" />}
+            </div>
+            <p className="text-[11px] text-muted-foreground capitalize">{activeUser.role}</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            {sessions.length} sesiones · {routines.length} rutinas
+          <span className="text-xs text-muted-foreground hidden sm:block">
+            {sessions.length} ses · {routines.length} rut
           </span>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs"
+            onClick={() => setShowSwitcher(true)}
+          >
+            <Users className="h-3.5 w-3.5" />
+            Cambiar
+          </Button>
         </div>
       </div>
 
@@ -500,11 +639,21 @@ export default function ProfilePage() {
 
         <Separator />
 
+        {/* Admin: user management */}
+        {isAdmin && (
+          <>
+            <AdminUserList />
+            <Separator />
+          </>
+        )}
+
         {/* Data management */}
         <Section title="Gestión de datos">
           <DataManagement />
         </Section>
       </div>
+
+      <UserSwitcherModal open={showSwitcher} onClose={() => setShowSwitcher(false)} />
     </div>
   );
 }

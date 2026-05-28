@@ -13,6 +13,7 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useRoutineStore } from '@/stores/routineStore';
+import { useUsersStore } from '@/stores/usersStore';
 import type { Routine } from '@/types/routine';
 
 const OBJECTIVE_LABELS: Record<Routine['objective'], string> = {
@@ -151,7 +152,10 @@ function RoutineCard({ routine }: { routine: Routine }) {
 
 export default function RoutinesPage() {
   const navigate = useNavigate();
-  const { routines } = useRoutineStore();
+  const { getUserRoutines } = useRoutineStore();
+  const activeUserId = useUsersStore((s) => s.activeUserId);
+  const isAdmin = useUsersStore((s) => s.getActiveUser()?.role === 'admin');
+  const routines = getUserRoutines(activeUserId ?? '', isAdmin ?? false);
 
   return (
     <div className="flex flex-col h-full">

@@ -12,6 +12,7 @@ interface SessionState {
   updateExercise: (exerciseCode: string, partial: Partial<SessionExercise>) => void;
   completeSession: () => void;
   cancelSession: () => void;
+  getUserSessions: (userId: string, isAdmin: boolean) => Session[];
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -73,6 +74,11 @@ export const useSessionStore = create<SessionState>()(
       },
 
       cancelSession: () => set({ activeSession: null }),
+
+      getUserSessions: (userId, isAdmin) => {
+        const { sessions } = get();
+        return sessions.filter((s) => s.userId === userId || (isAdmin && !s.userId));
+      },
     }),
     {
       name: 'sessions',

@@ -14,6 +14,7 @@ import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2 } from 'lucide-react
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
+import { useUsersStore } from '@/stores/usersStore';
 import {
   getWeeklyVolume,
   getExerciseProgress,
@@ -106,7 +107,10 @@ function EmptyState({ message }: { message: string }) {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function ProgressPage() {
-  const sessions = useSessionStore((s) => s.sessions);
+  const { getUserSessions } = useSessionStore();
+  const activeUserId = useUsersStore((s) => s.activeUserId);
+  const isAdmin = useUsersStore((s) => s.getActiveUser()?.role === 'admin');
+  const sessions = getUserSessions(activeUserId ?? '', isAdmin ?? false);
   const { getByCode } = useExerciseStore();
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
 

@@ -23,6 +23,7 @@ export interface SessionExercise {
 
 export interface Session {
   id: string;
+  userId?: string;
   routineId: string;
   dayId: string;
   dayName?: string;
