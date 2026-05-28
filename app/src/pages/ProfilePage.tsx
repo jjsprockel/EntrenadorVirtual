@@ -14,6 +14,7 @@ import {
   Users,
   Edit,
   UserPlus,
+  FlaskConical,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +36,7 @@ import { useUsersStore } from '@/stores/usersStore';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useRoutineStore } from '@/stores/routineStore';
 import { exportAllData, importAllData, clearAllData } from '@/lib/db';
+import { seedDemoData, isDemoDataLoaded } from '@/lib/seedData';
 import UserAvatar from '@/components/admin/UserAvatar';
 import UserFormModal from '@/components/admin/UserFormModal';
 import UserSwitcherModal from '@/components/admin/UserSwitcherModal';
@@ -284,6 +286,12 @@ function AdminUserList() {
   const { users, activeUserId, deleteUser } = useUsersStore();
   const [editUser, setEditUser] = useState<AppUser | null>(null);
   const [showAdd, setShowAdd] = useState(false);
+  const [demoLoaded, setDemoLoaded] = useState(isDemoDataLoaded);
+
+  function handleLoadDemo() {
+    seedDemoData();
+    setDemoLoaded(true);
+  }
 
   return (
     <div className="space-y-3">
@@ -363,6 +371,28 @@ function AdminUserList() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Demo data loader */}
+      <div className="pt-1">
+        <button
+          type="button"
+          disabled={demoLoaded}
+          onClick={handleLoadDemo}
+          className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-lg border text-sm font-medium transition-colors ${
+            demoLoaded
+              ? 'border-border text-muted-foreground bg-muted/30 cursor-not-allowed'
+              : 'border-dashed border-primary/50 text-primary hover:bg-primary/5'
+          }`}
+        >
+          <FlaskConical className="h-4 w-4" />
+          {demoLoaded ? 'Datos demo ya cargados' : 'Cargar 4 usuarios demo (3–6 meses de historial)'}
+        </button>
+        {!demoLoaded && (
+          <p className="text-[10px] text-muted-foreground text-center mt-1">
+            Carlos · María · Lucas · Sofía — datos simulados para demostración
+          </p>
+        )}
       </div>
 
       <UserFormModal open={showAdd} onClose={() => setShowAdd(false)} />

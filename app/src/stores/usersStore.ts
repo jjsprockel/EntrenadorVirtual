@@ -16,6 +16,7 @@ interface UsersState {
   deleteUser: (id: string) => void;
   setActiveUser: (id: string) => void;
   getActiveUser: () => AppUser | undefined;
+  bulkAddUsers: (newUsers: AppUser[]) => void;
 }
 
 export const useUsersStore = create<UsersState>()(
@@ -76,6 +77,9 @@ export const useUsersStore = create<UsersState>()(
         const { users, activeUserId } = get();
         return users.find((u) => u.id === activeUserId);
       },
+
+      bulkAddUsers: (newUsers) =>
+        set((state) => ({ users: [...state.users, ...newUsers] })),
     }),
     {
       name: 'app-users',

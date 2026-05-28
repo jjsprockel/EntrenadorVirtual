@@ -12,6 +12,7 @@ interface RoutineState {
   setActiveRoutine: (id: string | null) => void;
   getActiveRoutine: () => Routine | undefined;
   getUserRoutines: (userId: string, isAdmin: boolean) => Routine[];
+  bulkAddRoutines: (newRoutines: Routine[]) => void;
 }
 
 export const useRoutineStore = create<RoutineState>()(
@@ -49,6 +50,9 @@ export const useRoutineStore = create<RoutineState>()(
         const { routines } = get();
         return routines.filter((r) => r.userId === userId || (isAdmin && !r.userId));
       },
+
+      bulkAddRoutines: (newRoutines) =>
+        set((state) => ({ routines: [...state.routines, ...newRoutines] })),
     }),
     {
       name: 'routines',

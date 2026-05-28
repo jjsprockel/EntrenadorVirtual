@@ -13,6 +13,9 @@ interface SessionState {
   completeSession: () => void;
   cancelSession: () => void;
   getUserSessions: (userId: string, isAdmin: boolean) => Session[];
+  getSessionsByUser: (userId: string) => Session[];
+  getAllSessions: () => Session[];
+  bulkAddSessions: (newSessions: Session[]) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -79,6 +82,13 @@ export const useSessionStore = create<SessionState>()(
         const { sessions } = get();
         return sessions.filter((s) => s.userId === userId || (isAdmin && !s.userId));
       },
+
+      getSessionsByUser: (userId) => get().sessions.filter((s) => s.userId === userId),
+
+      getAllSessions: () => get().sessions,
+
+      bulkAddSessions: (newSessions) =>
+        set((state) => ({ sessions: [...state.sessions, ...newSessions] })),
     }),
     {
       name: 'sessions',

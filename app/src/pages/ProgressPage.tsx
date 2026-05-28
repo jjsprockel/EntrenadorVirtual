@@ -11,12 +11,13 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2, Dumbbell } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2, Dumbbell, ChevronDown } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { useUsersStore } from '@/stores/usersStore';
 import UserAvatar from '@/components/admin/UserAvatar';
+import type { AppUser } from '@/types/user';
 import {
   getChartData,
   getExercisePoints,
@@ -798,14 +799,107 @@ function PPLTab({
   );
 }
 
+// ── Admin user picker ─────────────────────────────────────────────────────────
+
+const ALL_USERS_KEY = '__all__';
+
+function AdminUserPicker({
+  users,
+  viewingId,
+  onChange,
+}: {
+  users: AppUser[];
+  viewingId: string;
+  onChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected =
+    viewingId === ALL_USERS_KEY
+      ? null
+      : users.find((u) => u.id === viewingId) ?? null;
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-card hover:border-primary/40 transition-colors text-sm"
+      >
+        {selected ? (
+          <>
+            <UserAvatar user={selected} size="sm" />
+            <span className="font-medium max-w-[80px] truncate">{selected.profile.name}</span>
+          </>
+        ) : (
+          <span className="text-muted-foreground font-medium">Todos</span>
+        )}
+        <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+      </button>
+
+      {open && (
+        <>
+          <div
+            className="fixed inset-0 z-10"
+            onClick={() => setOpen(false)}
+          />
+          <div className="absolute right-0 top-full mt-1 z-20 bg-popover border border-border rounded-xl shadow-xl overflow-hidden min-w-[160px]">
+            <button
+              type="button"
+              onClick={() => { onChange(ALL_USERS_KEY); setOpen(false); }}
+              className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-muted/50 transition-colors ${
+                viewingId === ALL_USERS_KEY ? 'text-primary font-semibold' : 'text-foreground'
+              }`}
+            >
+              <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-xs text-muted-foreground font-bold shrink-0">
+                ∑
+              </div>
+              Todos
+            </button>
+            {users.map((u) => (
+              <button
+                key={u.id}
+                type="button"
+                onClick={() => { onChange(u.id); setOpen(false); }}
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-muted/50 transition-colors ${
+                  viewingId === u.id ? 'text-primary font-semibold' : 'text-foreground'
+                }`}
+              >
+                <UserAvatar user={u} size="sm" />
+                <div className="text-left min-w-0">
+                  <p className="truncate">{u.profile.name || 'Sin nombre'}</p>
+                  <p className="text-[10px] text-muted-foreground capitalize">{u.role}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function ProgressPage() {
-  const { getUserSessions } = useSessionStore();
+  const { getSessionsByUser, getAllSessions, getUserSessions } = useSessionStore();
   const activeUserId = useUsersStore((s) => s.activeUserId);
   const isAdmin = useUsersStore((s) => s.getActiveUser()?.role === 'admin');
   const activeUser = useUsersStore((s) => s.getActiveUser());
-  const sessions = getUserSessions(activeUserId ?? '', isAdmin ?? false);
+  const allUsers = useUsersStore((s) => s.users);
+
+  // Admin can pick whose progress to view; default = own data
+  const [viewingId, setViewingId] = useState<string>(activeUserId ?? ALL_USERS_KEY);
+
+  const sessions = useMemo(() => {
+    if (!isAdmin) return getUserSessions(activeUserId ?? '', false);
+    if (viewingId === ALL_USERS_KEY) return getAllSessions();
+    return getSessionsByUser(viewingId);
+  }, [isAdmin, viewingId, activeUserId, getSessionsByUser, getAllSessions, getUserSessions]);
+
+  const viewingUser = useMemo(
+    () => (viewingId === ALL_USERS_KEY ? null : allUsers.find((u) => u.id === viewingId) ?? null),
+    [viewingId, allUsers],
+  );
 
   const [timeRangeKey, setTimeRangeKey] = useState('8w');
   const [metric, setMetric] = useState<MetricType>('volume');
@@ -820,15 +914,55 @@ export default function ProgressPage() {
           <BarChart2 className="h-4 w-4 text-primary" />
           <h1 className="font-bold text-base">Progreso</h1>
         </div>
-        {activeUser && (
-          <div className="flex items-center gap-2">
-            <UserAvatar user={activeUser} size="sm" />
-            <span className="text-xs text-muted-foreground hidden sm:block">
-              {activeUser.profile.name || 'Usuario'}
-            </span>
-          </div>
+
+        {isAdmin ? (
+          <AdminUserPicker
+            users={allUsers}
+            viewingId={viewingId}
+            onChange={setViewingId}
+          />
+        ) : (
+          activeUser && (
+            <div className="flex items-center gap-2">
+              <UserAvatar user={activeUser} size="sm" />
+              <span className="text-xs text-muted-foreground hidden sm:block">
+                {activeUser.profile.name}
+              </span>
+            </div>
+          )
         )}
       </div>
+
+      {/* Admin: who we're viewing */}
+      {isAdmin && viewingUser && (
+        <div className="flex items-center gap-3 px-4 py-2.5 bg-primary/5 border-b border-primary/20">
+          <UserAvatar user={viewingUser} size="sm" />
+          <div>
+            <p className="text-xs font-semibold leading-none">{viewingUser.profile.name}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">
+              {viewingUser.profile.level} · {viewingUser.profile.primaryObjective}
+            </p>
+          </div>
+          <div className="ml-auto text-right">
+            <p className="text-[10px] text-muted-foreground">
+              {sessions.length} sesiones registradas
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isAdmin && viewingId === ALL_USERS_KEY && (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/30 border-b border-border">
+          <div className="flex -space-x-1.5">
+            {allUsers.slice(0, 5).map((u) => (
+              <UserAvatar key={u.id} user={u} size="sm" className="ring-2 ring-background" />
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Vista global · {allUsers.length} usuarios · {sessions.length} sesiones
+          </p>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto">
         <Tabs defaultValue="resumen" className="flex flex-col h-full">
