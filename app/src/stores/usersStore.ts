@@ -1,22 +1,31 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { idbStorage } from '@/lib/db';
+import { hashPassword, verifyPassword } from '@/lib/auth';
 import type { AppUser, UserProfile } from '@/types/user';
 import { AVATAR_COLORS } from '@/types/user';
 
 interface UsersState {
   users: AppUser[];
   activeUserId: string | null;
+  sessionUserId: string | null;
   initialized: boolean;
+  hydrated: boolean;
 
-  initAdmin: (profile: UserProfile) => void;
-  addUser: (profile: UserProfile) => void;
-  updateUser: (id: string, partial: Partial<Pick<AppUser, 'role' | 'avatarColor'>>) => void;
+  initAdmin: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string) => void;
+  addUser: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string) => void;
+  updateUser: (id: string, partial: Partial<Pick<AppUser, 'role' | 'avatarColor' | 'email'>>) => void;
   updateUserProfile: (id: string, profilePartial: Partial<UserProfile>) => void;
   deleteUser: (id: string) => void;
   setActiveUser: (id: string) => void;
   getActiveUser: () => AppUser | undefined;
   bulkAddUsers: (newUsers: AppUser[]) => void;
+
+  // Auth actions
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
+  changePassword: (userId: string, currentPassword: string, newPassword: string) => Promise<boolean>;
+  resetUserPassword: (userId: string, newPassword: string) => Promise<void>;
 }
 
 export const useUsersStore = create<UsersState>()(
@@ -24,20 +33,25 @@ export const useUsersStore = create<UsersState>()(
     (set, get) => ({
       users: [],
       activeUserId: null,
+      sessionUserId: null,
       initialized: false,
+      hydrated: false,
 
-      initAdmin: (profile) => {
+      initAdmin: (profile, email, passwordHash, tempPassword) => {
         const admin: AppUser = {
           id: crypto.randomUUID(),
           role: 'admin',
           avatarColor: AVATAR_COLORS[0],
           createdAt: new Date(),
           profile,
+          email,
+          passwordHash,
+          tempPassword,
         };
-        set({ users: [admin], activeUserId: admin.id, initialized: true });
+        set({ users: [admin], activeUserId: admin.id, sessionUserId: admin.id, initialized: true });
       },
 
-      addUser: (profile) => {
+      addUser: (profile, email, passwordHash, tempPassword) => {
         const { users } = get();
         const colorIdx = users.length % AVATAR_COLORS.length;
         const user: AppUser = {
@@ -46,6 +60,9 @@ export const useUsersStore = create<UsersState>()(
           avatarColor: AVATAR_COLORS[colorIdx],
           createdAt: new Date(),
           profile,
+          email,
+          passwordHash,
+          tempPassword,
         };
         set((state) => ({ users: [...state.users, user] }));
       },
@@ -80,10 +97,64 @@ export const useUsersStore = create<UsersState>()(
 
       bulkAddUsers: (newUsers) =>
         set((state) => ({ users: [...state.users, ...newUsers] })),
+
+      login: async (email, password) => {
+        const { users } = get();
+        const user = users.find((u) => u.email?.toLowerCase() === email.trim().toLowerCase());
+        if (!user || !user.passwordHash) return false;
+        const valid = await verifyPassword(password, user.passwordHash);
+        if (!valid) return false;
+        set({ sessionUserId: user.id, activeUserId: user.id });
+        return true;
+      },
+
+      logout: () => set({ sessionUserId: null }),
+
+      changePassword: async (userId, currentPassword, newPassword) => {
+        const { users } = get();
+        const user = users.find((u) => u.id === userId);
+        if (!user || !user.passwordHash) return false;
+        const valid = await verifyPassword(currentPassword, user.passwordHash);
+        if (!valid) return false;
+        const newHash = await hashPassword(newPassword);
+        set((state) => ({
+          users: state.users.map((u) =>
+            u.id === userId ? { ...u, passwordHash: newHash, tempPassword: undefined } : u,
+          ),
+        }));
+        return true;
+      },
+
+      resetUserPassword: async (userId, newPassword) => {
+        const newHash = await hashPassword(newPassword);
+        set((state) => ({
+          users: state.users.map((u) =>
+            u.id === userId ? { ...u, passwordHash: newHash, tempPassword: newPassword } : u,
+          ),
+        }));
+      },
     }),
     {
       name: 'app-users',
       storage: createJSONStorage(() => idbStorage),
+      partialize: (state) => ({
+        users: state.users,
+        activeUserId: state.activeUserId,
+        sessionUserId: state.sessionUserId,
+        initialized: state.initialized,
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        state.hydrated = true;
+        // Migration: auto-login admin if coming from a pre-auth version
+        if (state.initialized && !state.sessionUserId && state.users.length > 0) {
+          const admin = state.users.find((u) => u.role === 'admin');
+          if (admin) {
+            state.sessionUserId = admin.id;
+            state.activeUserId = admin.id;
+          }
+        }
+      },
     },
   ),
 );

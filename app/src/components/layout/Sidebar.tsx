@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
-import { Dumbbell, CalendarDays, BarChart2, User, Home } from 'lucide-react';
+import { Dumbbell, CalendarDays, BarChart2, User, Home, Shield } from 'lucide-react';
+import { useUsersStore } from '@/stores/usersStore';
 
-const navItems = [
+const baseNavItems = [
   { to: '/', label: 'Hoy', icon: Home, exact: true },
   { to: '/rutinas', label: 'Rutinas', icon: CalendarDays, exact: false },
   { to: '/ejercicios', label: 'Ejercicios', icon: Dumbbell, exact: false },
@@ -9,7 +10,13 @@ const navItems = [
   { to: '/perfil', label: 'Perfil', icon: User, exact: false },
 ];
 
+const adminNavItem = { to: '/admin', label: 'Admin', icon: Shield, exact: false };
+
 export default function Sidebar() {
+  const activeUser = useUsersStore((s) => s.getActiveUser());
+  const isAdmin = activeUser?.role === 'admin';
+  const navItems = isAdmin ? [...baseNavItems, adminNavItem] : baseNavItems;
+
   return (
     <aside className="hidden md:flex flex-col w-56 shrink-0 border-r border-border bg-sidebar h-dvh sticky top-0">
       <div className="flex items-center gap-2 px-5 h-16 border-b border-sidebar-border">

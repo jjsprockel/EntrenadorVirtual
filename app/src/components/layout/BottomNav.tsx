@@ -1,7 +1,8 @@
 import { NavLink } from 'react-router-dom';
-import { Dumbbell, CalendarDays, BarChart2, User, Home } from 'lucide-react';
+import { Dumbbell, CalendarDays, BarChart2, User, Home, Shield } from 'lucide-react';
+import { useUsersStore } from '@/stores/usersStore';
 
-const navItems = [
+const baseNavItems = [
   { to: '/', label: 'Hoy', icon: Home, exact: true },
   { to: '/rutinas', label: 'Rutinas', icon: CalendarDays, exact: false },
   { to: '/ejercicios', label: 'Ejercicios', icon: Dumbbell, exact: false },
@@ -9,7 +10,13 @@ const navItems = [
   { to: '/perfil', label: 'Perfil', icon: User, exact: false },
 ];
 
+const adminNavItem = { to: '/admin', label: 'Admin', icon: Shield, exact: false };
+
 export default function BottomNav() {
+  const activeUser = useUsersStore((s) => s.getActiveUser());
+  const isAdmin = activeUser?.role === 'admin';
+  const navItems = isAdmin ? [...baseNavItems, adminNavItem] : baseNavItems;
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-sm md:hidden">
       <div className="flex h-16 items-stretch">

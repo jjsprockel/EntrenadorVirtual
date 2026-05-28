@@ -26,4 +26,7 @@ export interface AppUser {
   avatarColor: string;
   createdAt: Date;
   profile: UserProfile;
+  email?: string;
+  passwordHash?: string;
+  tempPassword?: string; // initial/reset password visible to admin until user changes it
 }

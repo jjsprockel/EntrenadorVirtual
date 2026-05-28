@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Save } from 'lucide-react';
+import { Save, Eye, EyeOff } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -14,11 +14,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useUsersStore } from '@/stores/usersStore';
+import { hashPassword } from '@/lib/auth';
 import { AVATAR_COLORS } from '@/types/user';
 import type { AppUser, UserProfile } from '@/types/user';
 
 const schema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
+  email: z.string().email('Correo inválido'),
+  password: z.string(),
   level: z.enum(['principiante', 'intermedio', 'avanzado']),
   primaryObjective: z.enum(['hipertrofia', 'fuerza', 'mixto', 'resistencia']),
   units: z.enum(['kg', 'lb']),
@@ -76,13 +79,25 @@ const DEFAULT_PROFILE: UserProfile = {
   oneRMEstimates: {},
 };
 
+const DEFAULT_PASSWORD = 'Entrena123';
+
 export default function UserFormModal({ open, onClose, editUser }: Props) {
   const { addUser, updateUser, updateUserProfile } = useUsersStore();
+  const [showPw, setShowPw] = useState(false);
 
-  const { register, handleSubmit, control, reset, formState: { errors } } = useForm<FormData>({
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    setError,
+    formState: { errors },
+  } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: editUser?.profile.name ?? '',
+      email: editUser?.email ?? '',
+      password: DEFAULT_PASSWORD,
       level: editUser?.profile.level ?? 'principiante',
       primaryObjective: editUser?.profile.primaryObjective ?? 'hipertrofia',
       units: editUser?.profile.units ?? 'kg',
@@ -95,18 +110,21 @@ export default function UserFormModal({ open, onClose, editUser }: Props) {
     if (open) {
       reset({
         name: editUser?.profile.name ?? '',
+        email: editUser?.email ?? '',
+        password: DEFAULT_PASSWORD,
         level: editUser?.profile.level ?? 'principiante',
         primaryObjective: editUser?.profile.primaryObjective ?? 'hipertrofia',
         units: editUser?.profile.units ?? 'kg',
         preferRestTimer: editUser?.profile.preferRestTimer ?? true,
         avatarColor: editUser?.avatarColor ?? AVATAR_COLORS[0],
       });
+      setShowPw(false);
     }
   }, [open, editUser, reset]);
 
-  function onSubmit(data: FormData) {
+  async function onSubmit(data: FormData) {
     if (editUser) {
-      updateUser(editUser.id, { avatarColor: data.avatarColor });
+      updateUser(editUser.id, { avatarColor: data.avatarColor, email: data.email });
       updateUserProfile(editUser.id, {
         name: data.name,
         level: data.level,
@@ -115,21 +133,24 @@ export default function UserFormModal({ open, onClose, editUser }: Props) {
         preferRestTimer: data.preferRestTimer,
       });
     } else {
-      addUser({
-        ...DEFAULT_PROFILE,
-        name: data.name,
-        level: data.level,
-        primaryObjective: data.primaryObjective,
-        units: data.units,
-        preferRestTimer: data.preferRestTimer,
-      });
+      if (data.password.length < 6) {
+        setError('password', { message: 'Mínimo 6 caracteres' });
+        return;
+      }
+      const hash = await hashPassword(data.password);
+      addUser(
+        { ...DEFAULT_PROFILE, name: data.name, level: data.level, primaryObjective: data.primaryObjective, units: data.units, preferRestTimer: data.preferRestTimer },
+        data.email,
+        hash,
+        data.password,
+      );
     }
     onClose();
   }
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-sm mx-auto">
+      <DialogContent className="max-w-sm mx-auto max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editUser ? 'Editar usuario' : 'Nuevo usuario'}</DialogTitle>
         </DialogHeader>
@@ -141,6 +162,40 @@ export default function UserFormModal({ open, onClose, editUser }: Props) {
             <Input {...register('name')} placeholder="Nombre del usuario" className="h-11" />
             {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
           </div>
+
+          {/* Email */}
+          <div className="space-y-1.5">
+            <Label>Correo electrónico</Label>
+            <Input {...register('email')} type="email" placeholder="usuario@ejemplo.com" className="h-11" />
+            {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+          </div>
+
+          {/* Password — only for new users */}
+          {!editUser && (
+            <div className="space-y-1.5">
+              <Label>Contraseña inicial</Label>
+              <div className="relative">
+                <Input
+                  {...register('password')}
+                  type={showPw ? 'text' : 'password'}
+                  placeholder="Mínimo 6 caracteres"
+                  className="h-11 pr-10"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPw((v) => !v)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                >
+                  {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+              <p className="text-[10px] text-muted-foreground">
+                El usuario puede cambiarla desde su perfil.
+              </p>
+            </div>
+          )}
 
           {/* Avatar color */}
           <div className="space-y-1.5">

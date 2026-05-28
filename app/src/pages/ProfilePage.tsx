@@ -15,6 +15,11 @@ import {
   Edit,
   UserPlus,
   FlaskConical,
+  LogOut,
+  KeyRound,
+  Eye,
+  EyeOff,
+  CheckCircle2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -288,8 +293,8 @@ function AdminUserList() {
   const [showAdd, setShowAdd] = useState(false);
   const [demoLoaded, setDemoLoaded] = useState(isDemoDataLoaded);
 
-  function handleLoadDemo() {
-    seedDemoData();
+  async function handleLoadDemo() {
+    await seedDemoData();
     setDemoLoaded(true);
   }
 
@@ -407,10 +412,72 @@ function AdminUserList() {
   );
 }
 
+// ── Change password ───────────────────────────────────────────────────────────
+
+function ChangePassword() {
+  const { sessionUserId, changePassword } = useUsersStore();
+  const [curPw, setCurPw] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
+  const [showCur, setShowCur] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'mismatch' | 'loading'>('idle');
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPw !== confirmPw) { setStatus('mismatch'); return; }
+    if (newPw.length < 6) { setStatus('error'); return; }
+    setStatus('loading');
+    const ok = await changePassword(sessionUserId!, curPw, newPw);
+    if (ok) {
+      setStatus('success');
+      setCurPw(''); setNewPw(''); setConfirmPw('');
+      setTimeout(() => setStatus('idle'), 3000);
+    } else {
+      setStatus('error');
+      setTimeout(() => setStatus('idle'), 3000);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="space-y-1.5">
+        <Label className="text-sm">Contraseña actual</Label>
+        <div className="relative">
+          <Input type={showCur ? 'text' : 'password'} value={curPw} onChange={e => setCurPw(e.target.value)} className="h-10 pr-10" placeholder="••••••••" />
+          <button type="button" tabIndex={-1} onClick={() => setShowCur(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            {showCur ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-sm">Nueva contraseña</Label>
+        <div className="relative">
+          <Input type={showNew ? 'text' : 'password'} value={newPw} onChange={e => setNewPw(e.target.value)} className="h-10 pr-10" placeholder="Mínimo 6 caracteres" />
+          <button type="button" tabIndex={-1} onClick={() => setShowNew(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            {showNew ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label className="text-sm">Confirmar contraseña</Label>
+        <Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="h-10" placeholder="Repetir nueva contraseña" />
+      </div>
+      {status === 'mismatch' && <p className="text-xs text-destructive">Las contraseñas no coinciden.</p>}
+      {status === 'error' && <p className="text-xs text-destructive">Contraseña actual incorrecta o nueva muy corta.</p>}
+      {status === 'success' && <p className="text-xs text-green-500 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Contraseña actualizada.</p>}
+      <Button type="submit" variant="outline" className="w-full h-10 gap-2" disabled={!curPw || !newPw || !confirmPw || status === 'loading'}>
+        <KeyRound className="h-4 w-4" />
+        {status === 'loading' ? 'Actualizando…' : 'Cambiar contraseña'}
+      </Button>
+    </form>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ProfilePage() {
-  const { activeUserId, getActiveUser, updateUserProfile } = useUsersStore();
+  const { activeUserId, getActiveUser, updateUserProfile, logout } = useUsersStore();
   const activeUser = getActiveUser();
   const profile = activeUser?.profile;
 
@@ -499,6 +566,16 @@ export default function ProfilePage() {
           >
             <Users className="h-3.5 w-3.5" />
             Cambiar
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-destructive"
+            onClick={logout}
+            title="Cerrar sesión"
+          >
+            <LogOut className="h-3.5 w-3.5" />
           </Button>
         </div>
       </div>
@@ -649,6 +726,13 @@ export default function ProfilePage() {
               )}
             />
           </FormField>
+        </Section>
+
+        <Separator />
+
+        {/* Security */}
+        <Section title="Seguridad">
+          <ChangePassword />
         </Section>
 
         {/* Save button */}

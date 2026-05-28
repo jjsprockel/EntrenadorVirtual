@@ -8,20 +8,24 @@ import ExercisesPage from '@/pages/ExercisesPage';
 import ExerciseDetailPage from '@/pages/ExerciseDetailPage';
 import ProgressPage from '@/pages/ProgressPage';
 import ProfilePage from '@/pages/ProfilePage';
+import AdminPage from '@/pages/AdminPage';
+import LoginPage from '@/pages/LoginPage';
 import { useExerciseStore } from '@/stores/exerciseStore';
 import { useUserStore } from '@/stores/userStore';
 import { useUsersStore } from '@/stores/usersStore';
 import { getExercises } from '@/data/knowledgeBase';
+import { hashPassword } from '@/lib/auth';
 
 function AppBootstrap() {
   const setExercises = useExerciseStore((s) => s.setExercises);
   const legacyProfile = useUserStore((s) => s.profile);
-  const { initialized, initAdmin } = useUsersStore();
+  const { initialized, initAdmin, sessionUserId, hydrated } = useUsersStore();
 
-  // Migrate legacy single-user profile to multi-user store on first load
   useEffect(() => {
     if (!initialized) {
-      initAdmin(legacyProfile);
+      hashPassword('Admin1234').then((hash) => {
+        initAdmin(legacyProfile, 'admin@entrenador.app', hash, 'Admin1234');
+      });
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -44,6 +48,19 @@ function AppBootstrap() {
     }
   }, [theme]);
 
+  // Wait for IDB rehydration before deciding on auth
+  if (!hydrated) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background">
+        <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+
+  if (!sessionUserId) {
+    return <LoginPage />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
@@ -56,6 +73,7 @@ function AppBootstrap() {
           <Route path="ejercicios/:code" element={<ExerciseDetailPage />} />
           <Route path="progreso" element={<ProgressPage />} />
           <Route path="perfil" element={<ProfilePage />} />
+          <Route path="admin" element={<AdminPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -7,6 +7,7 @@
 import { useUsersStore } from '@/stores/usersStore';
 import { useRoutineStore } from '@/stores/routineStore';
 import { useSessionStore } from '@/stores/sessionStore';
+import { hashPassword } from '@/lib/auth';
 import { AVATAR_COLORS } from '@/types/user';
 import type { AppUser, UserProfile } from '@/types/user';
 import type { Routine, RoutineDay, ExerciseSlot } from '@/types/routine';
@@ -27,12 +28,12 @@ function round25(v: number) {
 
 interface ExSeed {
   code: string;
-  startWeight: number;   // kg at week 0 for this user
-  incPerWeek: number;    // kg progression/week
+  startWeight: number;
+  incPerWeek: number;
   sets: number;
   repMin: number;
   repMax: number;
-  rest: number;          // seconds
+  rest: number;
 }
 
 // ── User seed definitions ─────────────────────────────────────────────────────
@@ -46,6 +47,8 @@ interface DayDef {
 interface UserSeed {
   profile: Omit<UserProfile, 'oneRMEstimates'>;
   avatarColor: string;
+  email: string;
+  password: string;
   weeksBack: number;
   sessionsPerWeek: number;
   days: DayDef[];
@@ -72,7 +75,9 @@ const USER_SEEDS: UserSeed[] = [
       preferRestTimer: true,
       theme: 'dark',
     },
-    avatarColor: AVATAR_COLORS[1],  // blue
+    avatarColor: AVATAR_COLORS[1],
+    email: 'carlos@demo.com',
+    password: 'Entrena123',
     weeksBack: 22,
     sessionsPerWeek: 5,
     days: [
@@ -125,7 +130,9 @@ const USER_SEEDS: UserSeed[] = [
       preferRestTimer: true,
       theme: 'dark',
     },
-    avatarColor: AVATAR_COLORS[4],  // pink
+    avatarColor: AVATAR_COLORS[4],
+    email: 'maria@demo.com',
+    password: 'Entrena123',
     weeksBack: 13,
     sessionsPerWeek: 3,
     days: [
@@ -167,7 +174,9 @@ const USER_SEEDS: UserSeed[] = [
       preferRestTimer: true,
       theme: 'dark',
     },
-    avatarColor: AVATAR_COLORS[2],  // green
+    avatarColor: AVATAR_COLORS[2],
+    email: 'lucas@demo.com',
+    password: 'Entrena123',
     weeksBack: 26,
     sessionsPerWeek: 4,
     days: [
@@ -217,7 +226,9 @@ const USER_SEEDS: UserSeed[] = [
       preferRestTimer: false,
       theme: 'dark',
     },
-    avatarColor: AVATAR_COLORS[3],  // yellow
+    avatarColor: AVATAR_COLORS[3],
+    email: 'sofia@demo.com',
+    password: 'Entrena123',
     weeksBack: 17,
     sessionsPerWeek: 4,
     days: [
@@ -278,7 +289,6 @@ function generateSessions(
 ): Session[] {
   const sessions: Session[] = [];
 
-  // Training day patterns (Mon=0 … Sun=6) per sessions-per-week target
   const DAY_PATTERNS: Record<number, number[][]> = {
     3: [[0, 2, 4], [1, 3, 5], [0, 2, 5]],
     4: [[0, 1, 3, 4], [0, 2, 3, 5], [1, 2, 4, 5]],
@@ -286,23 +296,19 @@ function generateSessions(
   };
   const patterns = DAY_PATTERNS[sessionsPerWeek] ?? DAY_PATTERNS[4];
 
-  let daySeqIdx = 0; // cycles through routine days
+  let daySeqIdx = 0;
 
   for (let w = 0; w < weeksBack; w++) {
-    // Week start (Monday)
     const weekStartMs =
       TODAY.getTime() - (weeksBack - w) * 7 * 86_400_000;
 
-    // Skip ~12% of weeks entirely (vacation / sick)
     if (drand(userId.charCodeAt(0) + w * 31) < 0.12) continue;
 
-    // Deload every 7 weeks: reduce session count to 3, lighter weights handled below
     const isDeloadWeek = w % 7 === 6;
 
     const pattern = patterns[w % patterns.length];
     const sessionDays = isDeloadWeek ? pattern.slice(0, Math.min(3, pattern.length)) : pattern;
 
-    // Occasionally skip one session (fatigue/busy)
     const skipIdx =
       drand(w * 17 + userId.charCodeAt(1)) < 0.2
         ? Math.floor(drand(w * 13) * sessionDays.length)
@@ -311,10 +317,9 @@ function generateSessions(
     for (let sd = 0; sd < sessionDays.length; sd++) {
       if (sd === skipIdx) continue;
 
-      const dayOffset = sessionDays[sd]; // 0=Mon
+      const dayOffset = sessionDays[sd];
       const sessionDate = new Date(weekStartMs + dayOffset * 86_400_000);
 
-      // Don't generate sessions in the future
       if (sessionDate > TODAY) continue;
 
       const routineDay = days[daySeqIdx % days.length];
@@ -352,7 +357,6 @@ function generateSessions(
 }
 
 function buildExercise(ex: ExSeed, weekIdx: number, isDeload: boolean, sessionSlot: number): SessionExercise {
-  // Deload: 85% of progressive weight; normal: linear + small variance
   const rawWeight = ex.startWeight + weekIdx * ex.incPerWeek;
   const deloadFactor = isDeload ? 0.85 : 1;
   const variance = (drand(weekIdx * 11 + sessionSlot * 7 + ex.code.charCodeAt(0)) - 0.5) * 2.5;
@@ -360,7 +364,6 @@ function buildExercise(ex: ExSeed, weekIdx: number, isDeload: boolean, sessionSl
 
   const completedSets: CompletedSet[] = [];
   for (let s = 0; s < ex.sets; s++) {
-    // Last set tends to have slightly fewer reps (fatigue)
     const fatiguePenalty = s === ex.sets - 1 ? Math.floor(drand(weekIdx + s) * 2) : 0;
     const reps = Math.max(
       ex.repMin,
@@ -388,8 +391,6 @@ function buildExercise(ex: ExSeed, weekIdx: number, isDeload: boolean, sessionSl
     completedSets,
   };
 }
-
-// ── Routine builder ───────────────────────────────────────────────────────────
 
 function buildRoutine(userId: string, seed: UserSeed): Routine {
   const dayObjs: RoutineDay[] = seed.days.map((d) => ({
@@ -434,7 +435,7 @@ export function isDemoDataLoaded(): boolean {
   return users.some((u) => ['Carlos', 'María', 'Lucas', 'Sofía'].includes(u.profile.name));
 }
 
-export function seedDemoData(): void {
+export async function seedDemoData(): Promise<void> {
   if (isDemoDataLoaded()) return;
 
   const { bulkAddUsers } = useUsersStore.getState();
@@ -445,8 +446,9 @@ export function seedDemoData(): void {
   const newRoutines: Routine[] = [];
   const newSessions: Session[] = [];
 
-  USER_SEEDS.forEach((seed, i) => {
+  for (const seed of USER_SEEDS) {
     const userId = crypto.randomUUID();
+    const passwordHash = await hashPassword(seed.password);
 
     const user: AppUser = {
       id: userId,
@@ -454,6 +456,9 @@ export function seedDemoData(): void {
       avatarColor: seed.avatarColor,
       createdAt: daysAgo(seed.weeksBack * 7 + 5),
       profile: { ...seed.profile, oneRMEstimates: {} },
+      email: seed.email,
+      passwordHash,
+      tempPassword: seed.password,
     };
     newUsers.push(user);
 
@@ -474,10 +479,7 @@ export function seedDemoData(): void {
       seed.sessionsPerWeek,
     );
     newSessions.push(...userSessions);
-
-    // Suppress unused variable warning for `i`
-    void i;
-  });
+  }
 
   bulkAddUsers(newUsers);
   bulkAddRoutines(newRoutines);
