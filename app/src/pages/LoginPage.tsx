@@ -1,4 +1,4 @@
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Dumbbell, Eye, EyeOff, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,42 +19,44 @@ const DEMO_ACCOUNTS = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function LoginPage() {
-  const checkCredentials = useUsersStore((s) => s.checkCredentials);
-  const setSession = useUsersStore((s) => s.setSession);
+  const login = useUsersStore((s) => s.login);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showDemo, setShowDemo] = useState(false);
-  // startTransition defers the large React tree mount (LoginPage → full app)
-  // so it doesn't block the main thread for 200+ ms
-  const [, startTransition] = useTransition();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email.trim() || !password) return;
     setLoading(true);
     setError('');
-    const userId = await checkCredentials(email, password);
-    setLoading(false);
-    if (userId) {
-      startTransition(() => setSession(userId));
-    } else {
-      setError('Correo o contraseña incorrectos.');
+    try {
+      const ok = await login(email.trim(), password);
+      if (!ok) setError('Correo o contraseña incorrectos.');
+    } catch (err) {
+      console.error('[Login]', err);
+      setError('Error al iniciar sesión. Inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
     }
   }
 
   async function handleQuickLogin(acc: typeof DEMO_ACCOUNTS[number]) {
     setLoading(true);
     setError('');
-    const userId = await checkCredentials(acc.email, acc.password);
-    setLoading(false);
-    if (userId) {
-      startTransition(() => setSession(userId));
-    } else {
-      setError(`"${acc.label}" no existe aún. Carga los datos demo desde el Panel Admin primero.`);
-      setShowDemo(true);
+    try {
+      const ok = await login(acc.email, acc.password);
+      if (!ok) {
+        setError(`"${acc.label}" no existe aún. Carga los datos demo desde el Panel Admin primero.`);
+        setShowDemo(true);
+      }
+    } catch (err) {
+      console.error('[QuickLogin]', err);
+      setError('Error al iniciar sesión.');
+    } finally {
+      setLoading(false);
     }
   }
 
