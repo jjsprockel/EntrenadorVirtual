@@ -38,6 +38,8 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { useUsersStore } from '@/stores/usersStore';
+import { useAuthStore } from '@/stores/authStore';
+import { isSupabaseConfigured } from '@/lib/supabase';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useRoutineStore } from '@/stores/routineStore';
 import { exportAllData, importAllData, clearAllData } from '@/lib/db';
@@ -416,6 +418,8 @@ function AdminUserList() {
 
 function ChangePassword() {
   const { sessionUserId, changePassword } = useUsersStore();
+  const updatePassword = useAuthStore((s) => s.updatePassword);
+
   const [curPw, setCurPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -428,28 +432,46 @@ function ChangePassword() {
     if (newPw !== confirmPw) { setStatus('mismatch'); return; }
     if (newPw.length < 6) { setStatus('error'); return; }
     setStatus('loading');
-    const ok = await changePassword(sessionUserId!, curPw, newPw);
-    if (ok) {
-      setStatus('success');
-      setCurPw(''); setNewPw(''); setConfirmPw('');
-      setTimeout(() => setStatus('idle'), 3000);
+
+    if (isSupabaseConfigured) {
+      // Supabase mode: session is the auth proof — no current password needed
+      const { error: err } = await updatePassword(newPw);
+      if (err) {
+        setStatus('error');
+        setTimeout(() => setStatus('idle'), 3000);
+      } else {
+        setStatus('success');
+        setNewPw(''); setConfirmPw('');
+        setTimeout(() => setStatus('idle'), 3000);
+      }
     } else {
-      setStatus('error');
-      setTimeout(() => setStatus('idle'), 3000);
+      // Local mode: verify current password against stored hash
+      const ok = await changePassword(sessionUserId!, curPw, newPw);
+      if (ok) {
+        setStatus('success');
+        setCurPw(''); setNewPw(''); setConfirmPw('');
+        setTimeout(() => setStatus('idle'), 3000);
+      } else {
+        setStatus('error');
+        setTimeout(() => setStatus('idle'), 3000);
+      }
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="space-y-1.5">
-        <Label className="text-sm">Contraseña actual</Label>
-        <div className="relative">
-          <Input type={showCur ? 'text' : 'password'} value={curPw} onChange={e => setCurPw(e.target.value)} className="h-10 pr-10" placeholder="••••••••" />
-          <button type="button" tabIndex={-1} onClick={() => setShowCur(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-            {showCur ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-          </button>
+      {/* Current password only needed in local mode */}
+      {!isSupabaseConfigured && (
+        <div className="space-y-1.5">
+          <Label className="text-sm">Contraseña actual</Label>
+          <div className="relative">
+            <Input type={showCur ? 'text' : 'password'} value={curPw} onChange={e => setCurPw(e.target.value)} className="h-10 pr-10" placeholder="••••••••" />
+            <button type="button" tabIndex={-1} onClick={() => setShowCur(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+              {showCur ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+            </button>
+          </div>
         </div>
-      </div>
+      )}
       <div className="space-y-1.5">
         <Label className="text-sm">Nueva contraseña</Label>
         <div className="relative">
@@ -464,9 +486,14 @@ function ChangePassword() {
         <Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="h-10" placeholder="Repetir nueva contraseña" />
       </div>
       {status === 'mismatch' && <p className="text-xs text-destructive">Las contraseñas no coinciden.</p>}
-      {status === 'error' && <p className="text-xs text-destructive">Contraseña actual incorrecta o nueva muy corta.</p>}
+      {status === 'error' && <p className="text-xs text-destructive">{isSupabaseConfigured ? 'Error al actualizar. Intenta cerrar sesión y volver a entrar.' : 'Contraseña actual incorrecta o nueva muy corta.'}</p>}
       {status === 'success' && <p className="text-xs text-green-500 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Contraseña actualizada.</p>}
-      <Button type="submit" variant="outline" className="w-full h-10 gap-2" disabled={!curPw || !newPw || !confirmPw || status === 'loading'}>
+      <Button
+        type="submit"
+        variant="outline"
+        className="w-full h-10 gap-2"
+        disabled={(!isSupabaseConfigured && !curPw) || !newPw || !confirmPw || status === 'loading'}
+      >
         <KeyRound className="h-4 w-4" />
         {status === 'loading' ? 'Actualizando…' : 'Cambiar contraseña'}
       </Button>
@@ -478,7 +505,16 @@ function ChangePassword() {
 
 export default function ProfilePage() {
   const { activeUserId, getActiveUser, updateUserProfile, logout } = useUsersStore();
+  const signOut = useAuthStore((s) => s.signOut);
   const activeUser = getActiveUser();
+
+  async function handleLogout() {
+    if (isSupabaseConfigured) {
+      await signOut();
+    } else {
+      logout();
+    }
+  }
   const profile = activeUser?.profile;
 
   const { getUserSessions } = useSessionStore();
@@ -572,7 +608,7 @@ export default function ProfilePage() {
             variant="ghost"
             size="sm"
             className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-destructive"
-            onClick={logout}
+            onClick={handleLogout}
             title="Cerrar sesión"
           >
             <LogOut className="h-3.5 w-3.5" />

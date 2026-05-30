@@ -6,11 +6,22 @@ Desplegada en Vercel · Datos persistidos en IndexedDB (sin backend propio)
 
 ---
 
-## Acceso rápido — credenciales de prueba
+## Modos de autenticación
+
+La app soporta dos modos que se activan automáticamente:
+
+| Modo | Cuándo | Auth |
+|------|--------|------|
+| **Local (IndexedDB)** | Sin variables Supabase | `usersStore.login()` — credenciales en IDB |
+| **Supabase (nube)** | Con `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` | `supabase.auth.signInWithPassword()` |
+
+En ambos modos el login y el logout usan el mismo path — no existe estado intermedio donde el formulario autentique en un sistema y `App.tsx` espere sesión del otro.
+
+## Acceso rápido — credenciales modo local
 
 | Usuario | Correo | Contraseña | Rol |
 |---------|--------|-----------|-----|
-| Administrador | `admin@entrenador.app` | `Admin1234` | admin |
+| Administrador | `jjsprockel@hotmail.com` | `Admin1234` | admin |
 | Carlos | `carlos@demo.com` | `Entrena123` | user |
 | María | `maria@demo.com` | `Entrena123` | user |
 | Lucas | `lucas@demo.com` | `Entrena123` | user |
@@ -18,6 +29,7 @@ Desplegada en Vercel · Datos persistidos en IndexedDB (sin backend propio)
 
 > Las cuentas de Carlos, María, Lucas y Sofía sólo están disponibles después de pulsar **"Cargar datos demo"** desde el Panel de Administración (`/admin`).
 > La pantalla de login incluye un panel **"Acceso rápido — modo demo"** que permite iniciar sesión con un clic.
+> En modo Supabase las cuentas demo deben existir también en Supabase (créalas desde el Panel Admin).
 
 ---
 
@@ -97,9 +109,9 @@ cd EntrenadorVirtual/app
 # 2. Instalar dependencias
 npm install
 
-# 3. Variables de entorno (opcional — sólo para email)
-cp .env.example .env.local
-# Editar .env.local con tus claves de EmailJS
+# 3. Variables de entorno (opcional)
+cp .env.local.example .env.local
+# Editar .env.local con tus claves (Supabase y/o EmailJS)
 
 # 4. Desarrollo
 npm run dev
@@ -112,16 +124,21 @@ npm run build
 
 ## Configuración de variables de entorno
 
-Copia `.env.example` a `.env.local` y completa los valores:
+Copia `.env.local.example` a `.env.local` y completa los valores:
 
 ```env
+# Supabase — activa auth en la nube + sync (opcional; sin esto la app usa IndexedDB local)
+VITE_SUPABASE_URL=https://xxxxxxxxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
+
+# EmailJS — envío de correos de bienvenida (opcional)
 VITE_EMAILJS_SERVICE_ID=service_xxxxxxx
 VITE_EMAILJS_TEMPLATE_ID=template_xxxxxxx
 VITE_EMAILJS_PUBLIC_KEY=xxxxxxxxxxxxxxx
 VITE_APP_URL=https://tu-app.vercel.app
 ```
 
-La app funciona completamente sin estas variables — el envío de correos simplemente quedará deshabilitado.
+La app funciona completamente sin estas variables — usa autenticación local por IndexedDB y el envío de correos quedará deshabilitado.
 
 ---
 
@@ -143,6 +160,8 @@ En el dashboard del proyecto: **Settings → Environment Variables**
 
 | Variable | Valor | Descripción |
 |----------|-------|-------------|
+| `VITE_SUPABASE_URL` | `https://xxx.supabase.co` | URL del proyecto Supabase (activa auth en la nube) |
+| `VITE_SUPABASE_ANON_KEY` | `eyJhbGci...` | Anon key de Supabase (Settings → API) |
 | `VITE_EMAILJS_SERVICE_ID` | `service_...` | ID del servicio EmailJS |
 | `VITE_EMAILJS_TEMPLATE_ID` | `template_...` | ID de la plantilla de email |
 | `VITE_EMAILJS_PUBLIC_KEY` | `...` | Clave pública de EmailJS |

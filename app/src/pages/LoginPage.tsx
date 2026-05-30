@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUsersStore } from '@/stores/usersStore';
+import { useAuthStore } from '@/stores/authStore';
+import { isSupabaseConfigured } from '@/lib/supabase';
 
 // ── Demo credentials for quick testing ───────────────────────────────────────
 
@@ -20,6 +22,8 @@ const DEMO_ACCOUNTS = [
 
 export default function LoginPage() {
   const login = useUsersStore((s) => s.login);
+  const signIn = useAuthStore((s) => s.signIn);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPw, setShowPw] = useState(false);
@@ -27,7 +31,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [showDemo, setShowDemo] = useState(false);
 
-  // Core login logic — called from both button onClick and form onSubmit (Enter key)
+  // Core login logic — branches on auth mode; called from onClick and form onSubmit
   async function handleLogin() {
     if (!email.trim() || !password) {
       setError('Completa el correo y la contraseña.');
@@ -36,8 +40,15 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      const ok = await login(email.trim(), password);
-      if (!ok) setError('Correo o contraseña incorrectos.');
+      if (isSupabaseConfigured) {
+        // Supabase mode: onAuthStateChange fires on success → supabaseSession updates → App.tsx gate opens
+        const { error: err } = await signIn(email.trim(), password);
+        if (err) setError('Correo o contraseña incorrectos.');
+      } else {
+        // Local mode: sets sessionUserId in usersStore → App.tsx gate opens
+        const ok = await login(email.trim(), password);
+        if (!ok) setError('Correo o contraseña incorrectos.');
+      }
     } catch (err) {
       console.error('[Login]', err);
       setError('Error al iniciar sesión. Inténtalo de nuevo.');
@@ -56,10 +67,18 @@ export default function LoginPage() {
     setLoading(true);
     setError('');
     try {
-      const ok = await login(acc.email, acc.password);
-      if (!ok) {
-        setError(`"${acc.label}" no existe aún. Carga los datos demo desde el Panel Admin primero.`);
-        setShowDemo(true);
+      if (isSupabaseConfigured) {
+        const { error: err } = await signIn(acc.email, acc.password);
+        if (err) {
+          setError(`"${acc.label}" no existe en Supabase aún. Créala desde el Panel Admin primero.`);
+          setShowDemo(true);
+        }
+      } else {
+        const ok = await login(acc.email, acc.password);
+        if (!ok) {
+          setError(`"${acc.label}" no existe aún. Carga los datos demo desde el Panel Admin primero.`);
+          setShowDemo(true);
+        }
       }
     } catch (err) {
       console.error('[QuickLogin]', err);
@@ -175,7 +194,9 @@ export default function LoginPage() {
           {showDemo && (
             <div className="px-4 pb-4 space-y-2">
               <p className="text-[11px] text-muted-foreground">
-                Carga los datos demo desde el Panel Admin (cuenta de admin) antes de usar las cuentas de usuario.
+                {isSupabaseConfigured
+                  ? 'Las cuentas demo deben existir en Supabase. Créalas desde el Panel Admin.'
+                  : 'Carga los datos demo desde el Panel Admin (cuenta de admin) antes de usar las cuentas de usuario.'}
               </p>
               <div className="grid grid-cols-1 gap-2">
                 {DEMO_ACCOUNTS.map((acc) => (
