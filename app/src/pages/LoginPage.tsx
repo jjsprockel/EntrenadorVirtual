@@ -27,9 +27,12 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [showDemo, setShowDemo] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!email.trim() || !password) return;
+  // Core login logic — called from both button onClick and form onSubmit (Enter key)
+  async function handleLogin() {
+    if (!email.trim() || !password) {
+      setError('Completa el correo y la contraseña.');
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -41,6 +44,12 @@ export default function LoginPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Form onSubmit handles Enter key in inputs
+  function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+    e.preventDefault();
+    handleLogin();
   }
 
   async function handleQuickLogin(acc: typeof DEMO_ACCOUNTS[number]) {
@@ -120,10 +129,12 @@ export default function LoginPage() {
             <p className="text-sm text-destructive text-center leading-snug">{error}</p>
           )}
 
+          {/* Base UI Button forces type="button" internally, so onClick is required for click support.
+              The form's onSubmit still handles the Enter-key path. */}
           <Button
-            type="submit"
             className="w-full h-11 text-base font-semibold"
             disabled={loading}
+            onClick={handleLogin}
           >
             {loading ? (
               <span className="flex items-center gap-2">
