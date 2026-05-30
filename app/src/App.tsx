@@ -37,27 +37,28 @@ function AppRoutes() {
 
     const state = useUsersStore.getState();
 
+    const ADMIN_EMAIL = 'jjsprockel@hotmail.com';
+    const ADMIN_PASS  = 'Admin1234';
+
     if (!state.initialized || state.users.length === 0) {
       // Fresh install: create the first admin
-      hashPassword('Admin1234').then((hash) => {
+      hashPassword(ADMIN_PASS).then((hash) => {
         if (!useUsersStore.getState().initialized) {
-          initAdmin(legacyProfile, 'admin@entrenador.app', hash, 'Admin1234');
+          initAdmin(legacyProfile, ADMIN_EMAIL, hash, ADMIN_PASS);
         }
       });
       return;
     }
 
-    // Migration: admin exists but was created before the auth system (no email / passwordHash)
-    const adminWithoutCreds = state.users.find(
-      (u) => u.role === 'admin' && (!u.email || !u.passwordHash),
-    );
-    if (adminWithoutCreds) {
+    // Migration: patch existing admin that has no creds or still has the old default email
+    const admin = state.users.find((u) => u.role === 'admin');
+    if (admin) {
       const store = useUsersStore.getState();
-      if (!adminWithoutCreds.email) {
-        store.updateUser(adminWithoutCreds.id, { email: 'admin@entrenador.app' });
+      if (!admin.email || admin.email === 'admin@entrenador.app') {
+        store.updateUser(admin.id, { email: ADMIN_EMAIL });
       }
-      if (!adminWithoutCreds.passwordHash) {
-        store.resetUserPassword(adminWithoutCreds.id, 'Admin1234');
+      if (!admin.passwordHash) {
+        store.resetUserPassword(admin.id, ADMIN_PASS);
       }
     }
   }, [hydrated]); // eslint-disable-line react-hooks/exhaustive-deps

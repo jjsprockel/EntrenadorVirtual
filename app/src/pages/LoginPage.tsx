@@ -9,11 +9,11 @@ import { useUsersStore } from '@/stores/usersStore';
 // ── Demo credentials for quick testing ───────────────────────────────────────
 
 const DEMO_ACCOUNTS = [
-  { label: 'Admin',  email: 'admin@entrenador.app', password: 'Admin1234', color: '#FF6B35' },
-  { label: 'Carlos', email: 'carlos@demo.com',       password: 'Entrena123', color: '#3B82F6' },
-  { label: 'María',  email: 'maria@demo.com',         password: 'Entrena123', color: '#EC4899' },
-  { label: 'Lucas',  email: 'lucas@demo.com',         password: 'Entrena123', color: '#10B981' },
-  { label: 'Sofía',  email: 'sofia@demo.com',         password: 'Entrena123', color: '#F59E0B' },
+  { label: 'Admin',  email: 'jjsprockel@hotmail.com', password: 'Admin1234',  color: '#FF6B35' },
+  { label: 'Carlos', email: 'carlos@demo.com',         password: 'Entrena123', color: '#3B82F6' },
+  { label: 'María',  email: 'maria@demo.com',           password: 'Entrena123', color: '#EC4899' },
+  { label: 'Lucas',  email: 'lucas@demo.com',           password: 'Entrena123', color: '#10B981' },
+  { label: 'Sofía',  email: 'sofia@demo.com',           password: 'Entrena123', color: '#F59E0B' },
 ];
 
 // ── Component ─────────────────────────────────────────────────────────────────
