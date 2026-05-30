@@ -25,19 +25,42 @@ import { isSupabaseConfigured } from '@/lib/supabase';
 function AppRoutes() {
   const location = useLocation();
   const legacyProfile = useUserStore((s) => s.profile);
-  const { initialized, initAdmin, sessionUserId, hydrated } = useUsersStore();
+  const { initAdmin, sessionUserId, hydrated } = useUsersStore();
   const { session: supabaseSession, loading: supabaseLoading, initialize: initAuth } = useAuthStore();
   const setExercises = useExerciseStore((s) => s.setExercises);
   const [, startTransition] = useTransition();
 
-  // One-time admin bootstrap (local auth mode)
+  // Admin bootstrap — runs AFTER IDB hydrates to avoid stale-closure overwriting real data.
+  // Also patches existing admins that pre-date the auth system (no email / passwordHash).
   useEffect(() => {
-    if (!initialized) {
+    if (!hydrated) return; // IDB not ready yet; effect re-runs when hydrated flips to true
+
+    const state = useUsersStore.getState();
+
+    if (!state.initialized || state.users.length === 0) {
+      // Fresh install: create the first admin
       hashPassword('Admin1234').then((hash) => {
-        initAdmin(legacyProfile, 'admin@entrenador.app', hash, 'Admin1234');
+        if (!useUsersStore.getState().initialized) {
+          initAdmin(legacyProfile, 'admin@entrenador.app', hash, 'Admin1234');
+        }
       });
+      return;
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Migration: admin exists but was created before the auth system (no email / passwordHash)
+    const adminWithoutCreds = state.users.find(
+      (u) => u.role === 'admin' && (!u.email || !u.passwordHash),
+    );
+    if (adminWithoutCreds) {
+      const store = useUsersStore.getState();
+      if (!adminWithoutCreds.email) {
+        store.updateUser(adminWithoutCreds.id, { email: 'admin@entrenador.app' });
+      }
+      if (!adminWithoutCreds.passwordHash) {
+        store.resetUserPassword(adminWithoutCreds.id, 'Admin1234');
+      }
+    }
+  }, [hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize Supabase auth listener (no-op when not configured)
   useEffect(() => {
