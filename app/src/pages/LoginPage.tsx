@@ -1,4 +1,5 @@
 import { useState, useTransition } from 'react';
+import { Link } from 'react-router-dom';
 import { Dumbbell, Eye, EyeOff, ChevronDown, ChevronUp, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +31,7 @@ export default function LoginPage() {
   // so it doesn't block the main thread for 200+ ms
   const [, startTransition] = useTransition();
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!email.trim() || !password) return;
     setLoading(true);
@@ -131,6 +132,15 @@ export default function LoginPage() {
               'Iniciar sesión'
             )}
           </Button>
+
+          <div className="text-center">
+            <Link
+              to="/auth/forgot-password"
+              className="text-sm text-muted-foreground hover:text-foreground underline underline-offset-4 transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
+          </div>
         </form>
 
         {/* Quick-access demo panel */}

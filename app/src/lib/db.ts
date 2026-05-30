@@ -10,17 +10,24 @@ import type { StateStorage } from 'zustand/middleware';
 // Future: If sessions grow large, add a dedicated indexed store.
 
 const DB_NAME = 'entrenador-virtual';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const KV_STORE = 'kv';
+const SYNC_QUEUE_STORE = 'sync_queue';
+const SYNC_DEAD_LETTER_STORE = 'sync_dead_letter';
 
 let _db: IDBPDatabase | null = null;
 
 async function getDB(): Promise<IDBPDatabase> {
   if (_db) return _db;
   _db = await openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains(KV_STORE)) {
+    upgrade(db, oldVersion) {
+      if (oldVersion < 1) {
         db.createObjectStore(KV_STORE);
+      }
+      if (oldVersion < 2) {
+        // Sync queue for offline-first cloud sync
+        db.createObjectStore(SYNC_QUEUE_STORE, { keyPath: 'id' });
+        db.createObjectStore(SYNC_DEAD_LETTER_STORE, { keyPath: 'id' });
       }
     },
   });
@@ -89,4 +96,53 @@ export async function importAllData(data: Record<string, unknown>): Promise<void
 export async function clearAllData(): Promise<void> {
   const db = await getDB();
   await db.clear(KV_STORE);
+}
+
+// ── Sync Queue helpers (used by syncEngine) ──────────────────────────────────
+
+export interface SyncQueueItem {
+  id: string;
+  table: 'sessions' | 'session_sets' | 'routines' | 'routine_days' | 'profiles';
+  operation: 'insert' | 'update' | 'delete';
+  payload: Record<string, unknown>;
+  createdAt: number;
+  attempts: number;
+}
+
+export async function enqueueSyncItem(
+  item: Omit<SyncQueueItem, 'id' | 'createdAt' | 'attempts'>,
+): Promise<void> {
+  const db = await getDB();
+  await db.put(SYNC_QUEUE_STORE, {
+    ...item,
+    id: crypto.randomUUID(),
+    createdAt: Date.now(),
+    attempts: 0,
+  } satisfies SyncQueueItem);
+}
+
+export async function getAllSyncQueueItems(): Promise<SyncQueueItem[]> {
+  const db = await getDB();
+  return db.getAll(SYNC_QUEUE_STORE);
+}
+
+export async function deleteSyncQueueItem(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete(SYNC_QUEUE_STORE, id);
+}
+
+export async function updateSyncQueueItem(item: SyncQueueItem): Promise<void> {
+  const db = await getDB();
+  await db.put(SYNC_QUEUE_STORE, item);
+}
+
+export async function archiveToDeadLetter(item: SyncQueueItem): Promise<void> {
+  const db = await getDB();
+  await db.put(SYNC_DEAD_LETTER_STORE, item);
+  await db.delete(SYNC_QUEUE_STORE, item.id);
+}
+
+export async function getSyncQueueCount(): Promise<number> {
+  const db = await getDB();
+  return db.count(SYNC_QUEUE_STORE);
 }
