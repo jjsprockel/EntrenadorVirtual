@@ -8,16 +8,22 @@ Desplegada en Vercel · Datos persistidos en IndexedDB (sin backend propio)
 
 ## Modos de autenticación
 
-La app soporta dos modos que se activan automáticamente:
+La app detecta automáticamente qué modo usar según las variables de entorno:
 
-| Modo | Cuándo | Auth |
-|------|--------|------|
-| **Local (IndexedDB)** | Sin variables Supabase | `usersStore.login()` — credenciales en IDB |
-| **Supabase (nube)** | Con `VITE_SUPABASE_URL` + `VITE_SUPABASE_ANON_KEY` | `supabase.auth.signInWithPassword()` |
+| Modo | Cuándo activo | Sistema |
+|------|---------------|---------|
+| **Local (IndexedDB)** | Sin `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | `usersStore.login()` — credenciales en IDB local |
+| **Supabase (nube)** | Con ambas variables Supabase configuradas | `supabase.auth.signInWithPassword()` |
 
-En ambos modos el login y el logout usan el mismo path — no existe estado intermedio donde el formulario autentique en un sistema y `App.tsx` espere sesión del otro.
+La pantalla de login muestra una insignia en tiempo real: **"Modo: Supabase"** o **"Modo: Local"**, para que siempre sepas contra qué sistema estás autenticando.
 
-## Acceso rápido — credenciales modo local
+> **Regla de oro:** las credenciales del modo local NO sirven automáticamente en modo Supabase, ni viceversa. Son dos sistemas de auth independientes.
+
+---
+
+## Credenciales — Modo Local (IndexedDB)
+
+Funcionan sin ninguna variable de entorno adicional. El admin se crea automáticamente en el primer arranque.
 
 | Usuario | Correo | Contraseña | Rol |
 |---------|--------|-----------|-----|
@@ -27,9 +33,25 @@ En ambos modos el login y el logout usan el mismo path — no existe estado inte
 | Lucas | `lucas@demo.com` | `Entrena123` | user |
 | Sofía | `sofia@demo.com` | `Entrena123` | user |
 
-> Las cuentas de Carlos, María, Lucas y Sofía sólo están disponibles después de pulsar **"Cargar datos demo"** desde el Panel de Administración (`/admin`).
-> La pantalla de login incluye un panel **"Acceso rápido — modo demo"** que permite iniciar sesión con un clic.
-> En modo Supabase las cuentas demo deben existir también en Supabase (créalas desde el Panel Admin).
+> Las cuentas Carlos, María, Lucas y Sofía solo existen después de pulsar **"Cargar datos demo"** en el Panel Admin.
+> El panel "Acceso rápido — modo demo" en la pantalla de login solo está activo en modo Local.
+
+---
+
+## Credenciales — Modo Supabase
+
+Las credenciales de IndexedDB **no** se sincronizan con Supabase. Al activar el modo Supabase por primera vez debes crear el usuario administrador manualmente:
+
+1. Ve a tu proyecto en [supabase.com](https://supabase.com) → **Authentication → Users → Add user**
+2. Crea el usuario con el correo y contraseña que uses como admin (por ejemplo `jjsprockel@hotmail.com` / `Admin1234`)
+3. Asigna el rol `admin` ejecutando en el **SQL Editor** de Supabase:
+   ```sql
+   update public.users set role = 'admin'
+   where email = 'jjsprockel@hotmail.com';
+   ```
+4. Para los usuarios demo, créalos desde el Panel Admin de la app (ya autenticado como admin).
+
+> En modo Supabase, el panel "Acceso rápido — modo demo" queda deshabilitado. Las cuentas deben existir en Supabase Auth antes de poder usarlas.
 
 ---
 
