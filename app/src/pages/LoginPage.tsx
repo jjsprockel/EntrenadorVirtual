@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Dumbbell, Eye, EyeOff, ChevronDown, ChevronUp, Zap, Cloud, HardDrive } from 'lucide-react';
+import { Dumbbell, Eye, EyeOff, ChevronDown, ChevronUp, Zap, Cloud, HardDrive, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUsersStore } from '@/stores/usersStore';
 import { useAuthStore } from '@/stores/authStore';
 import { isSupabaseConfigured } from '@/lib/supabase';
+import { clearAllData } from '@/lib/db';
 
 // ── Demo credentials (local mode only) ───────────────────────────────────────
 
@@ -168,7 +169,25 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-destructive text-center leading-snug">{error}</p>
+            <div className="space-y-1.5">
+              <p className="text-sm text-destructive text-center leading-snug">{error}</p>
+              {/* Recovery option — only in local mode, lets the user wipe stale IDB state */}
+              {!isSupabaseConfigured && (
+                <p className="text-center">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await clearAllData();
+                      window.location.reload();
+                    }}
+                    className="text-[11px] text-muted-foreground hover:text-destructive underline underline-offset-2 transition-colors inline-flex items-center gap-1"
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                    Reiniciar datos locales y empezar desde cero
+                  </button>
+                </p>
+              )}
+            </div>
           )}
 
           {/* Base UI Button forces type="button" internally — onClick handles click; form onSubmit handles Enter */}

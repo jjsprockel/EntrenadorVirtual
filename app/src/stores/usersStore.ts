@@ -159,13 +159,15 @@ export const useUsersStore = create<UsersState>()(
       }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        state.hydrated = true;
-        // Migration: auto-login admin if coming from a pre-auth version
+        // hydrated is not in partialize so we must set it imperatively after hydration
+        useUsersStore.setState({ hydrated: true });
+
+        // Pre-auth migration: if users exist but no active session, restore the admin session.
+        // This ensures users who existed before the auth system was added are not locked out.
         if (state.initialized && !state.sessionUserId && state.users.length > 0) {
           const admin = state.users.find((u) => u.role === 'admin');
           if (admin) {
-            state.sessionUserId = admin.id;
-            state.activeUserId = admin.id;
+            useUsersStore.setState({ sessionUserId: admin.id, activeUserId: admin.id });
           }
         }
       },
