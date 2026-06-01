@@ -13,7 +13,7 @@ interface UsersState {
   hydrated: boolean;
 
   initAdmin: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string) => void;
-  addUser: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string) => void;
+  addUser: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string, avatarColor?: string) => void;
   updateUser: (id: string, partial: Partial<Pick<AppUser, 'role' | 'avatarColor' | 'email'>>) => void;
   updateUserProfile: (id: string, profilePartial: Partial<UserProfile>) => void;
   deleteUser: (id: string) => void;
@@ -53,13 +53,13 @@ export const useUsersStore = create<UsersState>()(
         set({ users: [admin], activeUserId: admin.id, sessionUserId: admin.id, initialized: true });
       },
 
-      addUser: (profile, email, passwordHash, tempPassword) => {
+      addUser: (profile, email, passwordHash, tempPassword, avatarColor) => {
         const { users } = get();
         const colorIdx = users.length % AVATAR_COLORS.length;
         const user: AppUser = {
           id: crypto.randomUUID(),
           role: 'user',
-          avatarColor: AVATAR_COLORS[colorIdx],
+          avatarColor: avatarColor ?? AVATAR_COLORS[colorIdx],
           createdAt: new Date(),
           profile,
           email,
@@ -162,11 +162,12 @@ export const useUsersStore = create<UsersState>()(
         // hydrated is not in partialize so we must set it imperatively after hydration
         useUsersStore.setState({ hydrated: true });
 
-        // Pre-auth migration: if users exist but no active session, restore the admin session.
-        // This ensures users who existed before the auth system was added are not locked out.
+        // Pre-auth migration: restore admin session only when the admin has no passwordHash.
+        // This covers installs that pre-date the auth system. Any other null sessionUserId
+        // means the user intentionally logged out — don't override it.
         if (state.initialized && !state.sessionUserId && state.users.length > 0) {
           const admin = state.users.find((u) => u.role === 'admin');
-          if (admin) {
+          if (admin && !admin.passwordHash) {
             useUsersStore.setState({ sessionUserId: admin.id, activeUserId: admin.id });
           }
         }

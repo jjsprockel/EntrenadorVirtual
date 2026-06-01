@@ -143,6 +143,7 @@ export default function UserFormModal({ open, onClose, editUser }: Props) {
         data.email,
         hash,
         data.password,
+        data.avatarColor,
       );
     }
     onClose();
