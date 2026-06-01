@@ -34,6 +34,8 @@ const STRUCTURE_LABELS: Record<Routine['structure'], string> = {
   ppl: 'PPL',
   weider: 'Weider',
   custom: 'Personalizada',
+  ppl_3dias: 'PPL 3 días',
+  antagonista_3dias: 'Antagonista 3 días',
 };
 
 function RoutineCard({ routine }: { routine: Routine }) {

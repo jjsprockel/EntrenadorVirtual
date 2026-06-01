@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import DayEditor from './DayEditor';
 import { ROUTINE_TEMPLATES } from '@/lib/routineTemplates';
+import { isLowFrequencyDays } from '@/lib/periodization';
+import { getDeloadInterval } from '@/lib/overloadEngine';
 import { useRoutineStore } from '@/stores/routineStore';
 import { useUsersStore } from '@/stores/usersStore';
 import type { Routine, RoutineDay, PeriodizationType } from '@/types/routine';
@@ -207,6 +209,8 @@ function Step2({
       structure: tpl.structure,
       days: tpl.days(),
       daysPerWeek: tpl.daysPerWeek,
+      ...(tpl.periodizationType !== undefined && { periodizationType: tpl.periodizationType }),
+      ...(tpl.weeklyIncrementKg !== undefined && { weeklyIncrementKg: tpl.weeklyIncrementKg }),
     });
   }
 
@@ -332,6 +336,23 @@ function Step4({
 }) {
   const INCREMENT_OPTIONS = [0.5, 1, 1.25, 2.5, 5] as const;
 
+  const isLowFreq = isLowFrequencyDays(state.days);
+  const deload = getDeloadInterval(isLowFreq);
+
+  type BadgeVariant = 'green' | 'yellow';
+  const BADGES: Partial<Record<PeriodizationType, { text: string; variant: BadgeVariant }>> = isLowFreq
+    ? {
+        lineal:    { text: 'Recomendada',          variant: 'green'  },
+        ondulante: { text: 'No ideal para 3 días', variant: 'yellow' },
+        bloques:   { text: 'Recomendada',          variant: 'green'  },
+      }
+    : {};
+
+  const badgeClass: Record<BadgeVariant, string> = {
+    green:  'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/30',
+    yellow: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30',
+  };
+
   return (
     <div className="space-y-5">
       <div className="space-y-2">
@@ -339,39 +360,54 @@ function Step4({
         <div className="space-y-2">
           {(
             [
-              { id: 'ninguna', label: 'Sin periodización', desc: 'Subir peso cuando puedas, sin estructura fija.' },
-              { id: 'lineal', label: 'Lineal', desc: 'Incremento fijo de peso cada semana o cuando se alcanza el rango de reps.' },
-              { id: 'ondulante', label: 'Ondulante (DUP)', desc: 'Variar rep range entre sesiones (fuerza / hipertrofia / resistencia).' },
-              { id: 'bloques', label: 'Por bloques', desc: 'Macrociclo en bloques: acumulación → intensificación → realización.' },
+              { id: 'ninguna',   label: 'Sin periodización', desc: 'Subir peso cuando puedas, sin estructura fija.' },
+              { id: 'lineal',    label: 'Lineal',             desc: 'Incremento fijo de peso cada semana o cuando se alcanza el rango de reps.' },
+              { id: 'ondulante', label: 'Ondulante (DUP)',    desc: 'Variar rep range entre sesiones (fuerza / hipertrofia / resistencia).' },
+              { id: 'bloques',   label: 'Por bloques',        desc: 'Macrociclo en bloques: acumulación → intensificación → realización.' },
             ] as { id: PeriodizationType; label: string; desc: string }[]
-          ).map(({ id, label, desc }) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onChange({ periodizationType: id })}
-              className={`w-full text-left rounded-xl border p-3.5 transition-all ${
-                state.periodizationType === id
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border bg-card hover:border-primary/40'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`w-4 h-4 rounded-full border-2 mt-0.5 shrink-0 ${
-                    state.periodizationType === id
-                      ? 'border-primary bg-primary'
-                      : 'border-border'
-                  }`}
-                />
-                <div>
-                  <p className={`text-sm font-medium ${state.periodizationType === id ? 'text-primary' : 'text-foreground'}`}>
-                    {label}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+          ).map(({ id, label, desc }) => {
+            const badge = BADGES[id];
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onChange({ periodizationType: id })}
+                className={`w-full text-left rounded-xl border p-3.5 transition-all ${
+                  state.periodizationType === id
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border bg-card hover:border-primary/40'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`w-4 h-4 rounded-full border-2 mt-0.5 shrink-0 ${
+                      state.periodizationType === id
+                        ? 'border-primary bg-primary'
+                        : 'border-border'
+                    }`}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className={`text-sm font-medium ${state.periodizationType === id ? 'text-primary' : 'text-foreground'}`}>
+                        {label}
+                      </p>
+                      {badge && (
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${badgeClass[badge.variant]}`}>
+                          {badge.text}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5">{desc}</p>
+                    {id === 'ondulante' && badge?.variant === 'yellow' && (
+                      <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1 leading-snug">
+                        DUP funciona mejor con 2+ sesiones por grupo muscular. Para rutinas de 3 días considera Ondulante Semanal.
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -414,6 +450,17 @@ function Step4({
           </div>
         </div>
       )}
+
+      <div className="rounded-xl border border-border bg-muted/30 p-3.5 space-y-1">
+        <p className="text-xs font-semibold text-foreground">Deload sugerido</p>
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          Programa un descanso activo cada{' '}
+          <span className="font-semibold text-foreground">{deload.min}–{deload.max} semanas</span>.
+          {isLowFreq
+            ? ' Con 1 sesión por músculo/semana, la fatiga se acumula más lento — puedes alargar el ciclo.'
+            : ' Con alta frecuencia de entrenamiento, los ciclos cortos previenen la fatiga acumulada.'}
+        </p>
+      </div>
     </div>
   );
 }

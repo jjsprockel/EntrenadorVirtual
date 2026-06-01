@@ -2,7 +2,7 @@ import type { MuscleGroup, Level } from './exercise';
 export type { Level } from './exercise';
 
 export type Objective = 'hipertrofia' | 'fuerza' | 'mixto' | 'resistencia';
-export type Structure = 'fullbody' | 'torso_pierna' | 'ppl' | 'weider' | 'custom';
+export type Structure = 'fullbody' | 'torso_pierna' | 'ppl' | 'weider' | 'custom' | 'ppl_3dias' | 'antagonista_3dias';
 export type PeriodizationType = 'ninguna' | 'lineal' | 'ondulante' | 'bloques';
 export type SetType = 'normal' | 'piramide' | 'dropset' | 'superset';
 

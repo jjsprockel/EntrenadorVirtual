@@ -79,9 +79,10 @@ Las credenciales de IndexedDB **no** se sincronizan con Supabase. Al activar el 
 
 ### Constructor de rutinas (wizard 5 pasos)
 - Nombre, objetivo, nivel, días/semana, duración
-- Selección de plantilla: Fullbody, Torso/Pierna, PPL, Weider, personalizada
+- Selección de plantilla: Fullbody, Torso/Pierna, PPL 6 días, PPL 3 días (Sinergista), Antagonista 3 días, personalizada
 - Editor por día: ExercisePicker, series/reps/RIR/descanso por ejercicio
-- Periodización: ninguna, lineal, ondulante, por bloques
+- Periodización: ninguna, lineal, ondulante, por bloques; badges contextuales según frecuencia de la rutina
+- Sugerencia de deload adaptada: 4–6 sem (alta frecuencia) · 6–8 sem (splits de 3 días)
 
 ### Sesión activa
 - Sugerencia automática del día a entrenar

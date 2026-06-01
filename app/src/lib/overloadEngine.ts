@@ -1,6 +1,15 @@
 import type { Session } from '@/types/session';
 import type { ExerciseSlot } from '@/types/routine';
 
+/**
+ * Returns the recommended deload interval range in weeks.
+ * Low-frequency routines (1×/week per muscle) accumulate fatigue more slowly
+ * and can run longer cycles before needing a deload.
+ */
+export function getDeloadInterval(isLowFrequency: boolean): { min: number; max: number } {
+  return isLowFrequency ? { min: 6, max: 8 } : { min: 4, max: 6 };
+}
+
 /** Suggests next-session weight based on last performance for an exercise. */
 export function suggestWeight(
   exerciseCode: string,

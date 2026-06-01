@@ -333,7 +333,76 @@ Domingo:   Descanso
 
 ---
 
-### 3.5 Híbridos y Personalizados
+### 3.5 Splits de 3 días: PPL Sinergista y Antagonista
+
+#### 3.5.1 PPL 3 días (Sinergista)
+
+**¿Qué es?** La versión de 3 días del Push/Pull/Legs clásico: un día de tracción (Pull), un día de empuje (Push), un día de piernas. Cada sesión agrupa músculos sinérgicos — los que se ayudan entre sí — para maximizar el estímulo con la fatiga ya acumulada.
+
+**Frecuencia semanal:** 3 días. **Frecuencia por músculo:** 1x/semana.
+
+**Distribución:**
+```
+Día 1 — Pull:  Espalda + Bíceps
+Día 2 — Push:  Pecho + Hombro + Tríceps
+Día 3 — Legs:  Piernas (cuádriceps, isquiotibiales, pantorrillas)
+```
+
+**¿Para quién?**
+- Principiantes e intermedios con 3 días/semana disponibles.
+- Personas que quieren la opción más eficiente, simple y respaldada por la ciencia.
+- Transición natural desde Fullbody antes de saltar a PPL 6 días.
+
+**Ventajas:**
+- La distribución sinérgica (bíceps fatigados ya por la tracción, tríceps por el empuje) maximiza el estímulo de los músculos de aislamiento.
+- Sesiones enfocadas y eficientes: sin cambios de patrón muscular dentro de la sesión.
+- Fácil de aprender y adaptar.
+
+**Desventajas:**
+- Frecuencia 1x/semana por grupo muscular: subóptima para maximizar hipertrofia comparada con 2x.
+- Perder un día desordena el ciclo.
+
+**Ajuste de periodización:** Para esta estructura, la **Periodización Lineal** y la **Ondulante Semanal** son las más adecuadas. La DUP (Ondulante Diaria) está diseñada para 2+ sesiones por grupo muscular y no encaja bien con 1x/semana. El deload puede espaciarse cada 6–8 semanas (vs 4–6 en splits de alta frecuencia) porque la fatiga semanal acumulada es menor.
+
+---
+
+#### 3.5.2 Antagonista 3 días
+
+**¿Qué es?** Un split que agrupa músculos antagonistas (los que se oponen entre sí) en la misma sesión. La lógica fisiológica es que mientras un músculo trabaja, su antagonista descansa activamente, permitiendo recuperación intra-sesión y la posibilidad de usar superseries antagonistas sin pérdida de rendimiento.
+
+**Frecuencia semanal:** 3 días. **Frecuencia por músculo:** 1x/semana.
+
+**Distribución:**
+```
+Día 1:  Espalda + Tríceps      (tracción + empuje de brazo)
+Día 2:  Pecho + Hombro + Bíceps (empuje + tracción de brazo)
+Día 3:  Piernas
+```
+
+**Lógica antagonista:**
+- **Espalda + Tríceps:** La espalda (tracción) y el tríceps (empuje) son antagonistas del codo/hombro. Mientras haces remos, el tríceps descansa; mientras haces extensiones de tríceps, la espalda descansa.
+- **Pecho + Bíceps:** El pecho empuja y el bíceps tira. Bíceps + Pecho también permite que los bíceps, ya pre-fatigados por los jalones de espalda del día anterior, descansen.
+
+**¿Para quién?**
+- Intermedios y avanzados que quieren variar el estímulo del PPL clásico.
+- Personas que disfrutan de superseries antagonistas (remo + press, jalón + press francés) para ganar densidad de entrenamiento.
+- Quienes tienen articulaciones sensibles y prefieren no fatigar los mismos patrones de movimiento en una sesión.
+
+**Ventajas:**
+- Superseries antagonistas sin pérdida de rendimiento: ideal para acortar la duración de la sesión.
+- Estímulo muscular variado que puede romper estancamientos de rutinas sinérgicas.
+- La alternancia de patrones reduce la fatiga nerviosa de un patrón específico.
+
+**Desventajas:**
+- Menos intuitiva que el PPL clásico: requiere conocer los pares antagonistas.
+- La sesión de Día 2 (Pecho + Hombro + Bíceps) puede ser larga si no se controla el volumen.
+- Frecuencia 1x/semana por grupo, igual que el PPL de 3 días.
+
+**Ajuste de periodización:** Igual que en PPL 3 días — Lineal y Ondulante Semanal son las opciones más adecuadas. Deload cada 6–8 semanas.
+
+---
+
+### 3.6 Híbridos y Personalizados
 
 **Torso-Pierna con PPL:** Semana de 5 días. Por ejemplo:
 ```
