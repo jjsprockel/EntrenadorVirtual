@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useUsersStore } from '@/stores/usersStore';
 import { hashPassword } from '@/lib/auth';
+import { sendWelcomeEmail, isEmailConfigured } from '@/lib/emailService';
 import { AVATAR_COLORS } from '@/types/user';
 import type { AppUser, UserProfile } from '@/types/user';
 
@@ -145,6 +146,10 @@ export default function UserFormModal({ open, onClose, editUser }: Props) {
         data.password,
         data.avatarColor,
       );
+      if (isEmailConfigured()) {
+        sendWelcomeEmail({ toName: data.name, toEmail: data.email, initialPassword: data.password })
+          .catch((e) => console.warn('[Email] Welcome email failed:', e));
+      }
     }
     onClose();
   }

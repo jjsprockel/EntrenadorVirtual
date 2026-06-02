@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { idbStorage } from '@/lib/db';
+import { syncEngine } from '@/lib/syncEngine';
 import type { Session, SessionExercise, CompletedSet } from '@/types/session';
 
 interface SessionState {
@@ -67,13 +68,9 @@ export const useSessionStore = create<SessionState>()(
             total + ex.completedSets.reduce((s, set) => s + set.weight * set.reps, 0),
           0,
         );
-        set({
-          activeSession: null,
-          sessions: [
-            ...sessions,
-            { ...activeSession, completedAt: new Date(), totalVolume: volume },
-          ],
-        });
+        const completed = { ...activeSession, completedAt: new Date(), totalVolume: volume };
+        set({ activeSession: null, sessions: [...sessions, completed] });
+        syncEngine.enqueueSession(completed).catch(console.error);
       },
 
       cancelSession: () => set({ activeSession: null }),

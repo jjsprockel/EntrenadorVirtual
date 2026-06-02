@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { idbStorage } from '@/lib/db';
+import { syncEngine } from '@/lib/syncEngine';
 import type { Routine } from '@/types/routine';
 
 interface RoutineState {
@@ -21,19 +22,27 @@ export const useRoutineStore = create<RoutineState>()(
       routines: [],
       activeRoutineId: null,
 
-      addRoutine: (routine) =>
-        set((state) => ({ routines: [...state.routines, routine] })),
+      addRoutine: (routine) => {
+        set((state) => ({ routines: [...state.routines, routine] }));
+        syncEngine.enqueueRoutine(routine).catch(console.error);
+      },
 
-      updateRoutine: (id, partial) =>
+      updateRoutine: (id, partial) => {
         set((state) => ({
           routines: state.routines.map((r) => (r.id === id ? { ...r, ...partial } : r)),
-        })),
+        }));
+        const updated = get().routines.find((r) => r.id === id);
+        if (updated) syncEngine.enqueueRoutine(updated).catch(console.error);
+      },
 
-      deleteRoutine: (id) =>
+      deleteRoutine: (id) => {
+        const toDelete = get().routines.find((r) => r.id === id);
         set((state) => ({
           routines: state.routines.filter((r) => r.id !== id),
           activeRoutineId: state.activeRoutineId === id ? null : state.activeRoutineId,
-        })),
+        }));
+        if (toDelete) syncEngine.enqueueDeleteRoutine(toDelete).catch(console.error);
+      },
 
       setActiveRoutine: (id) =>
         set((state) => ({

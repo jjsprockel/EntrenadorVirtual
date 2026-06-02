@@ -20,6 +20,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { getExercises } from '@/data/knowledgeBase';
 import { hashPassword } from '@/lib/auth';
 import { syncEngine } from '@/lib/syncEngine';
+import { restoreForUser } from '@/lib/cloudSync';
 import { isSupabaseConfigured } from '@/lib/supabase';
 
 const ADMIN_EMAIL = 'jjsprockel@hotmail.com';
@@ -28,7 +29,8 @@ const ADMIN_PASS  = 'Admin1234';
 function AppRoutes() {
   const location = useLocation();
   const legacyProfile = useUserStore((s) => s.profile);
-  const { initAdmin, sessionUserId, hydrated } = useUsersStore();
+  const { initAdmin, sessionUserId, setSession } = useUsersStore();
+  const { hydrated } = useUsersStore();
   const { session: supabaseSession, loading: supabaseLoading, initialize: initAuth } = useAuthStore();
   const setExercises = useExerciseStore((s) => s.setExercises);
   // Tracks whether the admin bootstrap + migration are complete.
@@ -76,6 +78,14 @@ function AppRoutes() {
   useEffect(() => {
     initAuth();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Bridge Supabase session → local activeUserId so getUserRoutines() works,
+  // then pull any cloud data the current device doesn't have yet.
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabaseSession?.user?.id) return;
+    setSession(supabaseSession.user.id);
+    restoreForUser(supabaseSession.user.id).catch(console.error);
+  }, [supabaseSession]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Parse exercises from knowledge base — call directly, startTransition conflicts with
   // Zustand's useSyncExternalStore and can cause subscribers to read stale state.

@@ -7,6 +7,79 @@ import {
   archiveToDeadLetter,
   type SyncQueueItem,
 } from './db';
+import type { Routine, RoutineDay } from '@/types/routine';
+import type { Session, CompletedSet } from '@/types/session';
+
+// ── Type mappers (local → DB row) ─────────────────────────────────────────────
+
+function toDbRoutine(r: Routine) {
+  return {
+    id: r.id,
+    user_id: r.userId!,
+    name: r.name,
+    objective: r.objective,
+    level: r.level,
+    structure: r.structure,
+    days_per_week: r.daysPerWeek,
+    duration_weeks: r.durationWeeks ?? null,
+    periodization: r.periodization as unknown,
+    active: r.active,
+    started_at: r.startedAt?.toISOString() ?? null,
+    archived_at: null,
+  };
+}
+
+function toDbRoutineDay(day: RoutineDay, routineId: string) {
+  return {
+    id: day.id,
+    routine_id: routineId,
+    day_name: day.dayName,
+    day_order: day.dayOfWeek ?? 0,
+    muscle_groups: day.muscleGroups,
+    exercises: day.exercises as unknown,
+  };
+}
+
+function toDbSession(s: Session) {
+  const iso = (d: Date | string | undefined) =>
+    d instanceof Date ? d.toISOString() : d ? String(d) : null;
+  return {
+    id: s.id,
+    user_id: s.userId!,
+    routine_id: s.routineId || null,
+    routine_day_id: s.dayId || null,
+    session_date: iso(s.date)!,
+    started_at: iso(s.startedAt)!,
+    completed_at: iso(s.completedAt),
+    total_volume_kg: s.totalVolume ?? null,
+    notes: s.notes ?? null,
+  };
+}
+
+function toDbSessionSet(
+  set: CompletedSet,
+  sessionId: string,
+  userId: string,
+  exerciseCode: string,
+  originalCode: string,
+) {
+  const ts = set.timestamp instanceof Date ? set.timestamp.toISOString() : String(set.timestamp);
+  return {
+    id: crypto.randomUUID(),
+    session_id: sessionId,
+    user_id: userId,
+    exercise_code: exerciseCode,
+    original_exercise_code: originalCode !== exerciseCode ? originalCode : null,
+    set_number: set.setNumber,
+    weight_kg: set.weight,
+    reps: set.reps,
+    rir: set.rir ?? null,
+    status: set.status,
+    completed_at: ts,
+  };
+}
+
+// ── SyncEngine ────────────────────────────────────────────────────────────────
 
 export type SyncStatus = 'idle' | 'syncing' | 'offline' | 'error';
 
@@ -35,18 +108,50 @@ class SyncEngine {
     this.statusListeners.forEach((l) => l(status, pendingCount));
   }
 
-  // Enqueue a write operation for later sync to Supabase.
-  // Returns immediately — write to IndexedDB first, then call this.
+  // Low-level: enqueue a single table operation.
   async enqueue(item: Omit<SyncQueueItem, 'id' | 'createdAt' | 'attempts'>) {
     if (!isSupabaseConfigured) return;
     await enqueueSyncItem(item);
     this.pendingCount++;
     this.emit(navigator.onLine ? 'idle' : 'offline', this.pendingCount);
     if (navigator.onLine) {
-      // Process async without awaiting so callers aren't blocked
       this.processSyncQueue().catch(console.error);
     }
   }
+
+  // High-level helpers called from stores ─────────────────────────────────────
+
+  async enqueueRoutine(routine: Routine) {
+    if (!isSupabaseConfigured || !routine.userId) return;
+    await this.enqueue({ table: 'routines', operation: 'update', payload: toDbRoutine(routine) as Record<string, unknown> });
+    for (const day of routine.days) {
+      await this.enqueue({ table: 'routine_days', operation: 'update', payload: toDbRoutineDay(day, routine.id) as Record<string, unknown> });
+    }
+  }
+
+  async enqueueDeleteRoutine(routine: Routine) {
+    if (!isSupabaseConfigured || !routine.userId) return;
+    for (const day of routine.days) {
+      await this.enqueue({ table: 'routine_days', operation: 'delete', payload: { id: day.id } });
+    }
+    await this.enqueue({ table: 'routines', operation: 'delete', payload: { id: routine.id } });
+  }
+
+  async enqueueSession(session: Session) {
+    if (!isSupabaseConfigured || !session.userId) return;
+    await this.enqueue({ table: 'sessions', operation: 'insert', payload: toDbSession(session) as Record<string, unknown> });
+    for (const ex of session.exercises) {
+      for (const set of ex.completedSets) {
+        await this.enqueue({
+          table: 'session_sets',
+          operation: 'insert',
+          payload: toDbSessionSet(set, session.id, session.userId, ex.exerciseCode, ex.originalCode) as Record<string, unknown>,
+        });
+      }
+    }
+  }
+
+  // ── Queue processing ─────────────────────────────────────────────────────────
 
   async processSyncQueue() {
     if (!isSupabaseConfigured || !supabase || this.syncing || !navigator.onLine) return;
@@ -75,7 +180,7 @@ class SyncEngine {
         }
       }
 
-      this.emit(this.pendingCount > 0 ? 'idle' : 'idle', this.pendingCount);
+      this.emit('idle', this.pendingCount);
     } catch (err) {
       console.error('[Sync] processSyncQueue error:', err);
       this.emit('error', this.pendingCount);
@@ -100,7 +205,7 @@ class SyncEngine {
 
   start() {
     if (!isSupabaseConfigured) return;
-    if (this.onlineListener) return; // Already started
+    if (this.onlineListener) return;
 
     this.onlineListener = () => {
       this.emit('idle', this.pendingCount);
@@ -109,12 +214,10 @@ class SyncEngine {
     window.addEventListener('online', this.onlineListener);
     window.addEventListener('offline', () => this.emit('offline', this.pendingCount));
 
-    // Periodic sync every 60 s when online
     this.intervalHandle = setInterval(() => {
       if (navigator.onLine) this.processSyncQueue().catch(console.error);
     }, 60_000);
 
-    // Initial attempt
     if (navigator.onLine) this.processSyncQueue().catch(console.error);
   }
 

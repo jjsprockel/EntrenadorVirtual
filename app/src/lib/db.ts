@@ -41,25 +41,33 @@ export const idbStorage: StateStorage = {
     try {
       const db = await getDB();
       const value = await db.get(KV_STORE, name);
-      return value ?? null;
+      if (value !== undefined) return value;
+      // IDB returned nothing — try localStorage (Safari private mode fallback)
+      return localStorage.getItem(name);
     } catch {
-      return null;
+      // IDB unavailable (Safari private mode) — fall back to localStorage
+      try { return localStorage.getItem(name); } catch { return null; }
     }
   },
   setItem: async (name: string, value: string): Promise<void> => {
+    let idbOk = false;
     try {
       const db = await getDB();
       await db.put(KV_STORE, value, name);
+      idbOk = true;
     } catch (e) {
-      console.error('[IDB] setItem failed:', e);
+      console.error('[IDB] setItem failed, using localStorage:', e);
+    }
+    if (!idbOk) {
+      try { localStorage.setItem(name, value); } catch { /* quota exceeded */ }
     }
   },
   removeItem: async (name: string): Promise<void> => {
     try {
       const db = await getDB();
       await db.delete(KV_STORE, name);
-    } catch (e) {
-      console.error('[IDB] removeItem failed:', e);
+    } catch {
+      try { localStorage.removeItem(name); } catch { /* ignore */ }
     }
   },
 };
