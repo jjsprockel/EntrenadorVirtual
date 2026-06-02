@@ -1,4 +1,4 @@
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import AppShell from '@/components/layout/AppShell';
 import TodayPage from '@/pages/TodayPage';
@@ -31,8 +31,6 @@ function AppRoutes() {
   const { initAdmin, sessionUserId, hydrated } = useUsersStore();
   const { session: supabaseSession, loading: supabaseLoading, initialize: initAuth } = useAuthStore();
   const setExercises = useExerciseStore((s) => s.setExercises);
-  const [, startTransition] = useTransition();
-
   // Tracks whether the admin bootstrap + migration are complete.
   // Prevents showing the login page before the admin user exists in the store.
   const [adminReady, setAdminReady] = useState(false);
@@ -79,9 +77,10 @@ function AppRoutes() {
     initAuth();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Parse exercises from knowledge base (deferred so it doesn't block first paint)
+  // Parse exercises from knowledge base — call directly, startTransition conflicts with
+  // Zustand's useSyncExternalStore and can cause subscribers to read stale state.
   useEffect(() => {
-    startTransition(() => setExercises(getExercises()));
+    setExercises(getExercises());
   }, [setExercises]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Start sync engine (no-op when Supabase not configured)

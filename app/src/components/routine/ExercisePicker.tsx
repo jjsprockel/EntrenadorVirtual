@@ -8,6 +8,9 @@ import { useExerciseStore } from '@/stores/exerciseStore';
 import type { MuscleGroup } from '@/types/exercise';
 
 const ALL_GROUPS = Object.keys(MUSCLE_GROUP_LABELS) as MuscleGroup[];
+const GROUP_ORDER: Record<MuscleGroup, number> = Object.fromEntries(
+  ALL_GROUPS.map((g, i) => [g, i]),
+) as Record<MuscleGroup, number>;
 
 interface Props {
   open: boolean;
@@ -23,14 +26,23 @@ export default function ExercisePicker({ open, onClose, onSelect, selectedCodes 
 
   const filtered = useMemo(() => {
     let result = exercises;
-    if (filterGroup) result = result.filter((e) => e.muscleGroup === filterGroup);
+    if (filterGroup) {
+      result = result.filter((e) => e.muscleGroup === filterGroup);
+    } else {
+      // Sort by canonical muscle group order so exercises from the same group
+      // appear together regardless of the order they were parsed from the markdown.
+      result = [...result].sort(
+        (a, b) => GROUP_ORDER[a.muscleGroup] - GROUP_ORDER[b.muscleGroup] || a.code.localeCompare(b.code),
+      );
+    }
     if (query.trim()) {
       const q = query.toLowerCase();
       result = result.filter(
         (e) =>
           e.nameEs.toLowerCase().includes(q) ||
           e.code.toLowerCase().includes(q) ||
-          e.nameEn.some((n) => n.toLowerCase().includes(q)),
+          e.nameEn.some((n) => n.toLowerCase().includes(q)) ||
+          MUSCLE_GROUP_LABELS[e.muscleGroup].toLowerCase().includes(q),
       );
     }
     return result;
