@@ -7,7 +7,9 @@ export type MuscleGroup =
   | 'cuadriceps'
   | 'isquiotibiales_gluteos'
   | 'pantorrillas'
-  | 'core';
+  | 'core'
+  | 'trapecio'
+  | 'antebrazos';
 
 export type MovementPattern =
   | 'empuje_horizontal'

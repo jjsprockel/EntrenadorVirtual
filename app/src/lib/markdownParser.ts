@@ -26,6 +26,8 @@ function mapMuscleGroup(header: string): MuscleGroup {
   if (n.includes('isquio') || n.includes('gluteo')) return 'isquiotibiales_gluteos';
   if (n.includes('pantorrilla')) return 'pantorrillas';
   if (n.includes('core') || n.includes('abdomen')) return 'core';
+  if (n.includes('trapecio')) return 'trapecio';
+  if (n.includes('antebrazo')) return 'antebrazos';
   return 'core';
 }
 

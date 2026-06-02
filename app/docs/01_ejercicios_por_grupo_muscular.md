@@ -16,6 +16,8 @@
 7. [Isquiotibiales y Glúteos](#isquiotibiales-y-glúteos)
 8. [Pantorrillas](#pantorrillas)
 9. [Core y Abdomen](#core-y-abdomen)
+10. [Trapecio](#trapecio)
+11. [Antebrazos](#antebrazos)
 
 ---
 
@@ -1684,8 +1686,644 @@ Cada ejercicio incluye:
 | Extensión tríceps | Press francés | Pushdown, Extensión overhead |
 | Aislamiento deltoides lat. | Elevaciones laterales | Polea lateral, Máquina lateral |
 | Elevación plantar | Calf raise de pie | Calf raise sentado, Calf press |
+| Elevación escapular | Encogimientos barra | TR-02, TR-03, TR-04 |
+| Tracción vertical alta | Remo al mentón | TR-06, E-09 (Face pull) |
+| Carga isométrica (agarre) | Farmer's walk | AN-05 (Dead hang) |
+| Flexión de muñeca | Curl muñeca | AN-03, AN-06 |
+| Extensión de muñeca | Curl muñeca inverso | AN-04 (Reverse curl) |
+| Agarre isométrico | Dead hang | AN-07 (Plate pinch), TR-07 |
+| Sentadilla en máquina | Prensa | Q-08 (Leverage), Q-09 (Hack vertical) |
+| Flexión rodilla cadera-flex. | Curl femoral sentado | I-02 (Tumbado), I-08 (De pie) |
+| Abducción cadera | Abducción sentado | I-11 (De pie), polea lateral |
+| Aducción cadera | Aducción sentado | I-12 (De pie) |
+
+---
+
+---
+
+# CUÁDRICEPS (extensión)
+
+*Extensión de los ejercicios Q-01 a Q-07*
+
+---
+
+### Q-08 · Leverage Squat
+**EN:** Leverage Squat | Plate-Loaded Squat Machine | Pendulum Squat
+**Patrón:** Sentadilla | **Equipamiento:** Máquina (leverage squat) | **Nivel:** Principiante
+
+**Músculos primarios:** Cuádriceps, glúteos
+**Músculos secundarios:** Isquiotibiales, aductores, core
+
+**Ejecución:**
+1. Cargar la máquina con los discos deseados. Posicionarse en la plataforma con los pies al ancho de los hombros, ligeramente hacia adelante.
+2. Hombros y espalda alta apoyados firmemente en las almohadillas. Manos en las manijas de seguridad.
+3. Soltar los seguros. Bajar de forma controlada doblando rodillas y caderas, hasta que los muslos queden por debajo de paralelo (o donde la movilidad permita).
+4. Empujar a través de los pies para regresar a la posición inicial. NO bloquear completamente las rodillas arriba.
+
+**Tips prácticos:**
+- Excelente para personas con limitaciones de espalda baja (la columna está apoyada y no soporta carga axial directa).
+- Permite mayor estiramiento y rango de movimiento que muchas variantes de sentadilla con barra.
+- Variar posición de pies: más adelante = más glúteo/isquio. Más atrás = más cuádriceps.
+- Pausa de 1 segundo en el fondo para eliminar el rebote.
+
+**Pitfalls:**
+- ❌ Bloquear las rodillas arriba: aumenta estrés articular sin estímulo muscular extra.
+- ❌ Levantar los talones: pies deben permanecer planos.
+- ❌ Rodillas que colapsan hacia adentro (valgo).
+- ❌ Empujar con la cabeza o cuello contra la almohadilla.
+
+**Alternativas equivalentes:** Q-01 (Sentadilla barra), Q-02 (Prensa), Q-09 (Hack squat vertical), Q-03 (Sentadilla frontal)
+
+---
+
+### Q-09 · Hack Squat Vertical
+**EN:** Vertical Hack Squat | V-Squat Machine | Power Squat Machine
+**Patrón:** Sentadilla | **Equipamiento:** Máquina (hack squat vertical) | **Nivel:** Intermedio
+
+**Músculos primarios:** Cuádriceps, glúteos
+**Músculos secundarios:** Isquiotibiales, aductores
+
+**Ejecución:**
+1. Posicionarse en la plataforma con los pies al ancho de los hombros, hombros bajo las almohadillas. Espalda contra el respaldo.
+2. Soltar seguros. Bajar de forma controlada flexionando rodillas y caderas. La trayectoria es vertical, no inclinada.
+3. Bajar hasta que los muslos queden paralelos o más abajo.
+4. Empujar para regresar. No bloquear rodillas arriba.
+
+**Tips prácticos:**
+- Trabajo extremadamente enfocado en cuádriceps por la trayectoria vertical.
+- Posición de pies bajos en la plataforma = más cuádriceps. Posición alta = más glúteo.
+- A diferencia del leverage squat (Q-08), el movimiento es completamente vertical.
+- Ideal cuando se busca desarrollo de cuádriceps específicamente y hay molestias con sentadilla libre.
+
+**Pitfalls:**
+- ❌ Confundirlo con el leverage squat (Q-08): la trayectoria es DIFERENTE — vertical aquí, angular en Q-08.
+- ❌ Rango parcial: el valor del ejercicio está en el ROM completo.
+- ❌ Levantar talones.
+
+**Alternativas equivalentes:** Q-08 (Leverage squat), Q-02 (Prensa), Q-03 (Sentadilla frontal)
+
+---
+
+---
+
+# ISQUIOTIBIALES Y GLÚTEOS (extensión)
+
+*Extensión de los ejercicios I-01 a I-06*
+
+---
+
+### I-07 · Curl Femoral Sentado
+**EN:** Seated Leg Curl | Seated Hamstring Curl
+**Patrón:** Aislamiento | **Equipamiento:** Máquina (curl femoral sentado) | **Nivel:** Principiante
+
+**Músculos primarios:** Isquiotibiales (bíceps femoral cabeza larga)
+**Músculos secundarios:** Gastrocnemio
+
+**Ejecución:**
+1. Sentarse en la máquina con la espalda apoyada en el respaldo. Caderas y rodillas en flexión.
+2. Pasar los tobillos por encima del rodillo inferior y situar los muslos bajo el rodillo superior.
+3. Ajustar el respaldo para que el eje de la rodilla quede alineado con el eje de la máquina.
+4. Flexionar las rodillas tirando del rodillo hacia los glúteos. Pausa 1 segundo en la contracción máxima.
+5. Extender de forma controlada (fase excéntrica: 2–3 segundos).
+
+**Tips prácticos:**
+- La cadera en flexión estira los isquiotibiales antes de la contracción: mayor activación de la cabeza larga del bíceps femoral comparado con el curl tumbado (I-02).
+- Evidencia reciente sugiere que el curl sentado puede ser superior al curl tumbado para hipertrofia de isquiotibiales por mayor trabajo en estiramiento.
+- Apuntar los dedos hacia las espinillas (dorsiflexión) durante el movimiento maximiza la activación.
+- La fase excéntrica controlada es especialmente valiosa en este ejercicio.
+
+**Pitfalls:**
+- ❌ No alinear el eje de la rodilla con el eje de la máquina: estrés articular en la rodilla.
+- ❌ Levantar los muslos del soporte al curvar.
+- ❌ Velocidad excesiva en el descenso: pierde el estímulo excéntrico.
+
+**Alternativas equivalentes:** I-02 (Curl femoral tumbado), I-08 (Curl femoral de pie), I-01 (RDL)
+
+---
+
+### I-08 · Curl Femoral de Pie en Máquina
+**EN:** Standing Leg Curl | Single-Leg Standing Leg Curl
+**Patrón:** Aislamiento | **Equipamiento:** Máquina (standing leg curl) | **Nivel:** Principiante
+
+**Músculos primarios:** Isquiotibiales
+**Músculos secundarios:** Glúteo mayor (estabilizador), gastrocnemio
+
+**Ejecución:**
+1. De pie en la máquina, sujetar las manijas frontales. Apoyar la pierna de apoyo en la plataforma fija.
+2. Pasar el tobillo de la pierna que trabaja por encima del rodillo (posicionado sobre el tendón de Aquiles).
+3. Flexionar la rodilla curvando el rodillo hacia el glúteo. Pausa en contracción máxima.
+4. Extender de forma controlada. Completar todas las reps antes de cambiar.
+
+**Tips prácticos:**
+- Unilateral: permite detectar y corregir asimetrías entre piernas.
+- Apuntar los dedos del pie hacia la espinilla aumenta la activación isquiotibial.
+- Ideal como ejercicio accesorio después de un compuesto como RDL o peso muerto.
+- La posición de pie trabaja los isquiotibiales con cadera en extensión (diferente ángulo que I-07).
+
+**Pitfalls:**
+- ❌ Mover toda la pelvis al curvar la pierna: indica peso excesivo.
+- ❌ Hiperextender la rodilla en la posición inicial.
+- ❌ Velocidad excesiva en el descenso.
+
+**Alternativas equivalentes:** I-02 (Curl femoral tumbado), I-07 (Curl femoral sentado)
+
+---
+
+### I-09 · Abducción de Cadera Sentado en Máquina
+**EN:** Seated Hip Abduction | Outer Thigh Machine
+**Patrón:** Aislamiento | **Equipamiento:** Máquina (abducción de cadera) | **Nivel:** Principiante
+
+**Músculos primarios:** Glúteo medio, glúteo menor
+**Músculos secundarios:** Tensor de la fascia lata, glúteo mayor (porción superior)
+
+**Ejecución:**
+1. Sentarse con la espalda apoyada. Pies en las plataformas. Almohadillas en la cara externa de los muslos.
+2. Empujar las piernas hacia afuera, abriendo las rodillas en arco. Pausa 1 segundo al final del recorrido (máxima abducción).
+3. Regresar lentamente al centro (fase excéntrica: 2 segundos).
+
+**Tips prácticos:**
+- Inclinarse ligeramente hacia adelante (torso más erguido) aumenta la activación del glúteo medio profundo y reduce la del tensor de la fascia lata.
+- Ideal para mejorar la estabilidad lateral de cadera (previene la caída pélvica en carrera).
+- Repeticiones altas (15–25) con peso moderado.
+
+**Pitfalls:**
+- ❌ Cerrar las piernas con demasiado impulso: la fase excéntrica debe ser controlada (2+ segundos).
+- ❌ Arquear la zona lumbar al ejecutar.
+- ❌ Usar impulso de la cadera.
+
+**Alternativas equivalentes:** I-11 (Abducción de pie), I-06 (Patada glúteo cable lateral)
+
+---
+
+### I-10 · Aducción de Cadera Sentado en Máquina
+**EN:** Seated Hip Adduction | Inner Thigh Machine
+**Patrón:** Aislamiento | **Equipamiento:** Máquina (aducción de cadera) | **Nivel:** Principiante
+
+**Músculos primarios:** Aductores (aductor mayor, mediano y menor, grácil, pectíneo)
+**Músculos secundarios:** —
+
+**Ejecución:**
+1. Sentarse con la espalda contra el respaldo. Almohadillas en la cara interna de los muslos. Piernas separadas en posición inicial.
+2. Cerrar las piernas presionando las almohadillas hacia la línea media. Pausa.
+3. Abrir las piernas lentamente regresando a la posición inicial estirada.
+
+**Tips prácticos:**
+- Los aductores son frecuentemente subentrenados y son importantes para la estabilidad pélvica y la fuerza en sentadillas anchas.
+- ROM completo: dejar que las piernas se abran al máximo cómodo en la posición inicial.
+- Repeticiones moderadas (10–15) con peso progresivo.
+
+**Pitfalls:**
+- ❌ Rebotar el peso cuando las piernas están más abiertas: posición de mayor vulnerabilidad — usar peso controlable.
+- ❌ Apretar los dedos del pie: indica peso excesivo.
+- ❌ Levantar las caderas del asiento al cerrar las piernas.
+
+**Alternativas equivalentes:** I-12 (Aducción de pie), Q-06 (Goblet squat con piernas anchas)
+
+---
+
+### I-11 · Abducción de Cadera de Pie en Máquina
+**EN:** Standing Hip Abduction Machine | Cable Standing Abduction
+**Patrón:** Aislamiento | **Equipamiento:** Máquina (de pie) o polea baja | **Nivel:** Principiante
+
+**Músculos primarios:** Glúteo medio, glúteo menor
+**Músculos secundarios:** Tensor de la fascia lata, glúteo mayor (porción superior)
+
+**Ejecución:**
+1. De pie en la máquina, almohadilla en la cara externa del muslo (por encima de la rodilla). Sujetar manijas frontales.
+2. Empujar la pierna lateralmente hacia afuera, abducción pura, sin rotar el torso.
+3. Pausa al final del rango. Regresar de forma controlada al centro.
+4. Completar todas las reps antes de cambiar.
+
+**Tips prácticos:**
+- Con polea baja: enganchar el cable al tobillo y abducir lateralmente. Tensión constante muy efectiva.
+- La posición de pie puede generar mayor trabajo concéntrico total comparado con la versión tumbada.
+- Mantener la rodilla ligeramente flexionada para reducir estrés articular.
+
+**Pitfalls:**
+- ❌ Inclinar el torso hacia el lado contrario para ayudar a subir la pierna.
+- ❌ Rotar la cadera hacia afuera (flexión + abducción combinada): pierde el aislamiento del glúteo medio.
+- ❌ ROM excesivo (más de 30–45°): activa otros estabilizadores.
+
+**Alternativas equivalentes:** I-09 (Abducción sentado), I-06 (Patada de glúteo en polea)
+
+---
+
+### I-12 · Aducción de Cadera de Pie en Máquina
+**EN:** Standing Hip Adduction Machine | Cable Standing Adduction
+**Patrón:** Aislamiento | **Equipamiento:** Máquina (de pie) o polea baja | **Nivel:** Principiante
+
+**Músculos primarios:** Aductores (aductor mayor, mediano y menor, grácil, pectíneo)
+**Músculos secundarios:** —
+
+**Ejecución:**
+1. De pie en la máquina, almohadilla en la cara interna del muslo. Pierna en abducción en posición inicial.
+2. Empujar la pierna hacia la línea media del cuerpo, cruzando ligeramente por delante si es posible.
+3. Pausa en la contracción. Regresar de forma controlada al punto de estiramiento.
+4. Completar todas las reps antes de cambiar.
+
+**Tips prácticos:**
+- El cruce ligero por delante del cuerpo extiende el rango de movimiento y aumenta la activación.
+- Versión con polea baja: enganchar cable al tobillo del lado contrario. Muy efectiva con tensión constante.
+- Mantener la rodilla ligeramente flexionada.
+
+**Pitfalls:**
+- ❌ Inclinar el torso hacia el lado de trabajo para compensar.
+- ❌ Movimiento de péndulo (balanceo): debe ser un movimiento controlado de cadera.
+
+**Alternativas equivalentes:** I-10 (Aducción sentado), Q-06 (Goblet squat con pies anchos)
+
+---
+
+---
+
+# TRAPECIO
+
+*Músculos principales: Trapecio (porciones superior, medio e inferior)*
+*Función: Elevación, retracción, depresión y rotación escapular*
+
+> El trapecio superior se trabaja con encogimientos; la porción media con remos horizontales (E-03, E-04, E-05, E-07); la porción inferior con jalones por debajo del hombro. Para porción media e inferior ver también Face Pull (E-09).
+
+---
+
+### TR-01 · Encogimientos con Barra
+**EN:** Barbell Shrugs | Standing Barbell Shrugs
+**Patrón:** Aislamiento | **Equipamiento:** Barra | **Nivel:** Principiante
+
+**Músculos primarios:** Trapecio superior
+**Músculos secundarios:** Elevador de la escápula
+
+**Ejecución:**
+1. De pie, agarre prono con la barra, manos al ancho de los hombros. La barra cuelga frente a los muslos con los brazos completamente extendidos.
+2. Core activo. Pecho ligeramente arriba.
+3. Elevar los hombros hacia las orejas en línea vertical. Pausa 1–2 segundos en el punto alto.
+4. Bajar de forma controlada hasta el punto inicial (estiramiento del trapecio).
+5. Los brazos permanecen completamente rectos durante todo el movimiento.
+
+**Tips prácticos:**
+- Usar straps cuando el agarre sea el factor limitante.
+- Movimiento vertical puro: subir los hombros hacia el techo. NO rotarlos.
+- Permite cargas altas: 60–80% del peso del deadlift es habitual para trabajar el trapecio.
+- La pausa en el punto alto es clave: el trapecio superior responde bien a contracciones isométricas breves.
+
+**Pitfalls:**
+- ❌ Rotar los hombros (movimiento circular): ineficaz y articulariamente arriesgado.
+- ❌ Doblar los codos durante el movimiento.
+- ❌ Inclinar la cabeza hacia atrás.
+- ❌ Rango parcial (no estirar abajo): pierde la mitad del estímulo.
+
+**Alternativas equivalentes:** TR-02 (Encogimientos mancuernas), TR-03 (Encogimientos máquina), TR-04 (Encogimientos polea)
+
+---
+
+### TR-02 · Encogimientos con Mancuernas
+**EN:** Dumbbell Shrugs | DB Shrugs
+**Patrón:** Aislamiento | **Equipamiento:** Mancuernas | **Nivel:** Principiante
+
+**Músculos primarios:** Trapecio superior
+**Músculos secundarios:** Elevador de la escápula
+
+**Ejecución:**
+1. De pie con una mancuerna en cada mano, brazos a los lados del cuerpo, palmas mirando al cuerpo (agarre neutro).
+2. Elevar ambos hombros hacia las orejas. Mantener brazos rectos.
+3. Pausa 1–2 segundos arriba. Bajar de forma controlada.
+
+**Tips prácticos:**
+- El rango de movimiento es ligeramente mayor que con barra (las mancuernas pueden bajar más al lado del cuerpo).
+- Permite trabajar un lado a la vez si hay asimetría notable.
+- Más cómodo para los hombros que la barra para muchas personas.
+
+**Pitfalls:**
+- ❌ No rotar los hombros, no doblar codos.
+- ❌ Dejar caer las mancuernas en lugar de controlar el descenso.
+
+**Alternativas equivalentes:** TR-01 (Encogimientos barra), TR-03 (Encogimientos máquina)
+
+---
+
+### TR-03 · Encogimientos en Máquina
+**EN:** Machine Shrugs | Hammer Strength Shrugs
+**Patrón:** Aislamiento | **Equipamiento:** Máquina | **Nivel:** Principiante
+
+**Músculos primarios:** Trapecio superior
+**Músculos secundarios:** Elevador de la escápula
+
+**Ejecución:**
+1. Ajustar el asiento o la altura de la máquina para que las manijas queden a la altura de los muslos en posición inicial.
+2. Agarre prono o neutro según el diseño de la máquina.
+3. Elevar los hombros hacia arriba, contrayendo el trapecio. Pausa.
+4. Bajar de forma controlada.
+
+**Tips prácticos:**
+- Útil para trabajar al fallo de forma segura sin riesgo de que la carga se descontrole.
+- La trayectoria fija permite enfocarse 100% en el trapecio.
+- En Smith machine también funciona: usar igual que con barra libre.
+
+**Pitfalls:**
+- ❌ No ajustar la altura: si las manijas quedan muy altas o muy bajas el ROM se reduce.
+
+**Alternativas equivalentes:** TR-01 (Barra), TR-02 (Mancuernas)
+
+---
+
+### TR-04 · Encogimientos en Polea
+**EN:** Cable Shrugs | Low Cable Shrugs
+**Patrón:** Aislamiento | **Equipamiento:** Polea | **Nivel:** Principiante
+
+**Músculos primarios:** Trapecio superior
+**Músculos secundarios:** Elevador de la escápula
+
+**Ejecución:**
+1. De pie frente a una polea baja, agarrar la barra o cuerda. Dar un pequeño paso atrás para crear tensión.
+2. Brazos extendidos colgando, barra frente a los muslos.
+3. Elevar los hombros hacia las orejas. Pausa.
+4. Bajar de forma controlada.
+
+**Tips prácticos:**
+- Ventaja clave: tensión constante durante todo el rango — el trapecio recibe estímulo incluso en la posición baja.
+- Excelente como finisher al final del entrenamiento de espalda u hombros.
+- Con polea cruzada (dos poleas bajas) se imita el agarre de mancuernas con tensión constante.
+
+**Pitfalls:**
+- ❌ Inclinarse hacia adelante durante el movimiento: cambia el ángulo de tirón.
+- ❌ Doblar codos.
+
+**Alternativas equivalentes:** TR-01, TR-02
+
+---
+
+### TR-05 · Remo al Mentón
+**EN:** Upright Row | Barbell Upright Row
+**Patrón:** Tracción vertical | **Equipamiento:** Barra, mancuernas o polea | **Nivel:** Intermedio
+
+**Músculos primarios:** Trapecio superior, deltoides lateral
+**Músculos secundarios:** Bíceps, deltoides anterior
+
+**Ejecución:**
+1. De pie, agarre prono con la barra, manos al ancho de los hombros (NO más estrecho).
+2. Brazos extendidos, barra frente a los muslos.
+3. Tirar la barra hacia arriba pegada al cuerpo, llevando los codos hacia los lados y arriba.
+4. Detener cuando los codos lleguen a la altura de los hombros (NO más arriba). La barra queda a la altura del esternón superior.
+5. Bajar de forma controlada.
+
+**Tips prácticos:**
+- Agarre amplio (ancho de hombros o más) reduce el riesgo de pinzamiento subacromial.
+- Para más énfasis en deltoides lateral: agarre amplio. Para más trapecio: agarre estrecho (más arriesgado).
+- Con mancuernas se reduce el riesgo articular por la libertad de las muñecas.
+
+**Pitfalls:**
+- ❌ Agarre demasiado estrecho: aumenta riesgo de pinzamiento subacromial.
+- ❌ Subir los codos por encima de los hombros: posición de hombro vulnerable.
+- ❌ Usar impulso del cuerpo.
+
+**Alternativas equivalentes:** TR-06 (Prone trap raise), E-09 (Face pull)
+
+---
+
+### TR-06 · Encogimientos Inclinado (Prone Trap Raise)
+**EN:** Prone Trap Raise | Y-Raise | Incline Bench Shrug
+**Patrón:** Aislamiento | **Equipamiento:** Mancuernas, banco inclinado | **Nivel:** Intermedio
+
+**Músculos primarios:** Trapecio inferior, romboides
+**Músculos secundarios:** Trapecio medio, deltoides posterior
+
+**Ejecución:**
+1. Tumbarse boca abajo en un banco inclinado a 30–45°. Mancuernas ligeras en cada mano (5–10 kg).
+2. Brazos extendidos formando una Y (45° respecto al cuerpo), pulgares hacia arriba.
+3. Elevar las mancuernas hacia el techo manteniendo los brazos rectos, llevando las escápulas hacia atrás y abajo.
+4. Apretar el trapecio inferior en la posición alta. Bajar controlado.
+
+**Tips prácticos:**
+- Excelente para corregir desequilibrios posturales causados por exceso de empujes (postura redondeada de hombros).
+- Pesos muy ligeros: el trapecio inferior es débil en la mayoría de personas. Comenzar sin peso si es necesario.
+- Cue: llevar las escápulas hacia los bolsillos traseros del pantalón.
+
+**Pitfalls:**
+- ❌ Usar peso excesivo: convierte el ejercicio en un pájaro y pierde el énfasis en trapecio inferior.
+- ❌ Encoger los hombros hacia las orejas: eso activa el trapecio superior, no el inferior.
+- ❌ Doblar los codos.
+
+**Alternativas equivalentes:** E-09 (Face pull), H-05 (Pájaros)
+
+---
+
+### TR-07 · Paseo del Granjero
+**EN:** Farmer's Walk | Farmer's Carry
+**Patrón:** Aislamiento | **Equipamiento:** Mancuernas, kettlebells o farmer's handles | **Nivel:** Intermedio
+
+**Músculos primarios:** Trapecio (todas las porciones), antebrazos
+**Músculos secundarios:** Core, glúteos, gastrocnemio
+
+**Ejecución:**
+1. Tomar una mancuerna o kettlebell pesada en cada mano (objetivo: ~50–75% del deadlift dividido entre dos).
+2. Posición erguida, hombros hacia atrás y abajo, pecho arriba, core activo.
+3. Caminar en línea recta 20–40 metros o por tiempo (30–60 segundos).
+4. Al regresar, dar la vuelta sin soltar los pesos. Repetir.
+
+**Tips prácticos:**
+- Uno de los ejercicios más completos: trabaja trapecio, antebrazos, core y producción de fuerza unilateral.
+- Progresión simple: más peso, más distancia o más tiempo.
+- Excelente cierre de sesión: alta demanda metabólica y cardiovascular.
+
+**Pitfalls:**
+- ❌ Postura encorvada (hombros adelantados): anula el trabajo del trapecio.
+- ❌ Pasos demasiado largos o rápidos: pierde control.
+- ❌ Brazos doblados: deben colgar extendidos.
+
+**Alternativas equivalentes:** TR-01 (Encogimientos), AN-05 (Dead hang)
+
+---
+
+---
+
+# ANTEBRAZOS
+
+*Músculos principales: Flexores del antebrazo, extensores del antebrazo, braquiorradial*
+*Función: Flexión y extensión de muñeca, prensión (agarre), pronación y supinación*
+
+> Los antebrazos reciben mucho trabajo indirecto en todos los ejercicios de tracción. Estos ejercicios de aislamiento son útiles para: corregir antebrazos subdesarrollados, fortalecer el agarre como factor limitante en deadlifts/dominadas, y prevenir epicondilitis. El curl martillo (B-03) ya trabaja fuertemente el braquiorradial.
+
+---
+
+### AN-01 · Curl de Muñeca
+**EN:** Wrist Curl | Barbell Wrist Curl | Seated Wrist Curl
+**Patrón:** Aislamiento | **Equipamiento:** Barra, mancuernas, banco | **Nivel:** Principiante
+
+**Músculos primarios:** Flexores del antebrazo (flexor radial y cubital del carpo, palmar largo)
+**Músculos secundarios:** Flexores de los dedos
+
+**Ejecución:**
+1. Sentado, antebrazos apoyados en el banco o muslos con las muñecas por fuera del borde.
+2. Agarre supino (palmas hacia arriba). Usar barra o mancuernas.
+3. Dejar que la muñeca se extienda completamente (peso baja hacia el suelo), permitiendo que la barra ruede ligeramente hacia los dedos para mayor ROM.
+4. Cerrar el agarre y curvar las muñecas hacia arriba contrayendo los flexores. Pausa.
+5. Bajar de forma controlada.
+
+**Tips prácticos:**
+- Permitir que la barra ruede a los dedos en la posición baja añade trabajo a los flexores de los dedos (mejora el agarre).
+- Pesos ligeros: 10–20 kg con barra es habitual. Repeticiones altas (12–20) con descansos cortos.
+- Los antebrazos responden bien al volumen — sentir bombeo intenso es normal y deseable.
+
+**Pitfalls:**
+- ❌ Mover los antebrazos del apoyo: convierte el ejercicio en un curl de bíceps parcial.
+- ❌ Rango parcial: no extender la muñeca al inicio.
+- ❌ Peso excesivo: la muñeca no es articulación de carga.
+
+**Alternativas equivalentes:** AN-03 (Curl muñeca trasero), AN-06 (Curl muñeca polea)
+
+---
+
+### AN-02 · Curl de Muñeca Inverso
+**EN:** Reverse Wrist Curl | Wrist Extension
+**Patrón:** Aislamiento | **Equipamiento:** Barra, mancuernas | **Nivel:** Principiante
+
+**Músculos primarios:** Extensores del antebrazo (extensor radial corto y largo del carpo)
+**Músculos secundarios:** Braquiorradial
+
+**Ejecución:**
+1. Sentado, antebrazos apoyados con las muñecas por fuera del borde del banco.
+2. Agarre prono (palmas hacia abajo).
+3. Dejar que la muñeca se flexione hacia abajo (la mano cae).
+4. Extender la muñeca hacia arriba (dorso de la mano se acerca al antebrazo). Pausa.
+5. Bajar de forma controlada.
+
+**Tips prácticos:**
+- Los extensores son significativamente más débiles que los flexores: usar 30–50% del peso del AN-01.
+- Fundamental para PREVENIR EPICONDILITIS LATERAL (codo de tenista).
+- Repeticiones altas (15–25) con peso ligero.
+
+**Pitfalls:**
+- ❌ Usar mucho peso: los extensores son pequeños y vulnerables; sobrecargarlos provoca tendinopatía.
+- ❌ Mover los antebrazos del apoyo.
+
+**Alternativas equivalentes:** AN-04 (Curl invertido), AN-07 (Plate pinch)
+
+---
+
+### AN-03 · Curl de Muñeca Trasero
+**EN:** Behind-The-Back Wrist Curl
+**Patrón:** Aislamiento | **Equipamiento:** Barra | **Nivel:** Intermedio
+
+**Músculos primarios:** Flexores del antebrazo
+**Músculos secundarios:** Flexores de los dedos
+
+**Ejecución:**
+1. De pie, agarrar una barra detrás de la espalda con agarre supino (palmas hacia atrás), manos al ancho de los hombros.
+2. Brazos extendidos colgando. La barra descansa en la base de los dedos detrás de los glúteos.
+3. Curvar las muñecas elevando la barra hacia los glúteos. Pausa.
+4. Bajar controlado.
+
+**Tips prácticos:**
+- Trabaja los flexores en un ángulo diferente al curl sentado (AN-01) — útil para variar el estímulo.
+- ROM más corto pero contracción intensa en la posición alta.
+
+**Pitfalls:**
+- ❌ Mover el cuerpo o doblar los codos.
+- ❌ Sobrecargar: la barra puede deslizarse y golpear la espalda baja.
+
+**Alternativas equivalentes:** AN-01 (Curl muñeca sentado)
+
+---
+
+### AN-04 · Curl Invertido
+**EN:** Reverse Curl | EZ-Bar Reverse Curl
+**Patrón:** Aislamiento | **Equipamiento:** Barra EZ o recta | **Nivel:** Principiante
+
+**Músculos primarios:** Braquiorradial, extensores del antebrazo
+**Músculos secundarios:** Braquial, bíceps (poco)
+
+**Ejecución:**
+1. De pie, agarre PRONO (palmas hacia abajo) con barra EZ al ancho de los hombros.
+2. Codos pegados a los lados.
+3. Curvar la barra hacia arriba como un curl de bíceps estándar, pero con agarre prono. Las muñecas se mantienen rectas.
+4. Pausa arriba. Bajar controlado.
+
+**Tips prácticos:**
+- Trabaja el braquiorradial intensamente y los extensores del antebrazo de forma isométrica.
+- Excelente para grosor del antebrazo desde la perspectiva lateral.
+- Barra EZ es más cómoda que la barra recta (menos estrés en muñeca con agarre prono).
+
+**Pitfalls:**
+- ❌ Permitir que las muñecas se flexionen hacia abajo: mantenerlas rectas durante todo el movimiento.
+- ❌ Codos que se adelantan.
+
+**Alternativas equivalentes:** B-03 (Curl martillo), AN-02 (Curl muñeca inverso)
+
+---
+
+### AN-05 · Dead Hang
+**EN:** Dead Hang | Bar Hang
+**Patrón:** Aislamiento | **Equipamiento:** Barra fija | **Nivel:** Principiante
+
+**Músculos primarios:** Flexores de los dedos, flexores del antebrazo
+**Músculos secundarios:** Trapecio, core
+
+**Ejecución:**
+1. Colgarse de una barra fija con agarre prono, manos al ancho de los hombros, brazos completamente extendidos.
+2. Hombros relajados (dead hang puro) o activos (hombros tirados hacia abajo).
+3. Mantener la posición el máximo tiempo posible. Respirar normalmente.
+4. Bajarse de forma controlada al terminar.
+
+**Tips prácticos:**
+- Excelente medida del agarre absoluto. Objetivo intermedio: 60 segundos. Avanzado: 90+.
+- Fat grips (mayor grosor de barra) añade desafío si el agarre se va antes que los antebrazos.
+- También descomprime la columna y mejora la movilidad escapular.
+- Hacer 3 series al final del entrenamiento al fallo.
+
+**Pitfalls:**
+- ❌ Soltarse de golpe sin control: riesgo de lesión articular.
+- ❌ Balancearse para alargar el tiempo.
+
+**Alternativas equivalentes:** AN-07 (Plate pinch), TR-07 (Farmer's walk)
+
+---
+
+### AN-06 · Curl de Muñeca en Polea
+**EN:** Cable Wrist Curl
+**Patrón:** Aislamiento | **Equipamiento:** Polea | **Nivel:** Principiante
+
+**Músculos primarios:** Flexores del antebrazo
+**Músculos secundarios:** Flexores de los dedos
+
+**Ejecución:**
+1. Polea baja con barra. Sentarse en un banco con los antebrazos apoyados y muñecas fuera del borde, mirando hacia la polea.
+2. Agarre supino. Misma mecánica que el curl de muñeca con barra libre.
+3. Tensión constante del cable durante todo el rango de movimiento.
+
+**Tips prácticos:**
+- Principal ventaja sobre la barra libre: tensión constante en todo el rango.
+- Ideal como finisher al final del entrenamiento.
+- Mejor sensación de bombeo que con peso libre por la tensión constante.
+
+**Pitfalls:**
+- ❌ Mismas pautas que con barra libre: no mover los antebrazos del apoyo.
+
+**Alternativas equivalentes:** AN-01 (Curl barra)
+
+---
+
+### AN-07 · Pinza de Disco
+**EN:** Plate Pinch | Plate Pinch Hold
+**Patrón:** Aislamiento | **Equipamiento:** Discos lisos | **Nivel:** Intermedio
+
+**Músculos primarios:** Flexores de los dedos, oponente del pulgar
+**Músculos secundarios:** Flexores del antebrazo
+
+**Ejecución:**
+1. Tomar dos discos (lados lisos hacia afuera) y juntarlos pellizcándolos con los dedos (pulgar en un lado, los cuatro dedos en el otro).
+2. Levantar los discos del suelo y mantenerlos suspendidos por tiempo o caminar con ellos.
+3. Empezar con discos de 5 kg cada uno (10 kg total). Progresar en peso o tiempo.
+
+**Tips prácticos:**
+- Trabaja un patrón de agarre que los demás ejercicios no entrenan: el agarre por pellizco con pulgar.
+- Útil para deportes que requieren agarre fuerte (escalada, lucha, judo).
+
+**Pitfalls:**
+- ❌ Discos demasiado gruesos al inicio: imposibilita el agarre.
+- ❌ Dejar caer los discos sobre los pies: usar calzado de gimnasio.
+
+**Alternativas equivalentes:** AN-05 (Dead hang), TR-07 (Farmer's walk)
 
 ---
 
 *Documento generado para uso como base de conocimiento del asistente de entrenamiento.*
-*Versión 1.0 — Mayo 2026*
+*Versión 1.1 — Junio 2026 — Añadidos: Trapecio (TR-01/07), Antebrazos (AN-01/07), Q-08, Q-09, I-07/I-12 (total 62 ejercicios)*

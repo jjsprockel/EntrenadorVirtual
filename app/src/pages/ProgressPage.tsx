@@ -81,6 +81,8 @@ const MG_CONFIG: Record<MuscleGroup, { label: string; color: string }> = {
   isquiotibiales_gluteos:  { label: 'Isquios/Glúteos', color: C.teal      },
   pantorrillas:            { label: 'Pantorrillas',    color: C.red       },
   core:                    { label: 'Core',            color: C.muted     },
+  trapecio:                { label: 'Trapecio',        color: '#D97706'   },
+  antebrazos:              { label: 'Antebrazos',      color: '#84CC16'   },
 };
 
 // ── Custom tooltip ────────────────────────────────────────────────────────────

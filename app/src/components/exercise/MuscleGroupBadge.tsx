@@ -11,6 +11,8 @@ const LABELS: Record<MuscleGroup, string> = {
   isquiotibiales_gluteos: 'Isquio / Glúteos',
   pantorrillas: 'Pantorrillas',
   core: 'Core',
+  trapecio: 'Trapecio',
+  antebrazos: 'Antebrazos',
 };
 
 const COLORS: Record<MuscleGroup, string> = {
@@ -23,6 +25,8 @@ const COLORS: Record<MuscleGroup, string> = {
   isquiotibiales_gluteos: 'bg-pink-500/15 text-pink-400 border-pink-500/30',
   pantorrillas: 'bg-teal-500/15 text-teal-400 border-teal-500/30',
   core: 'bg-indigo-500/15 text-indigo-400 border-indigo-500/30',
+  trapecio: 'bg-amber-500/15 text-amber-400 border-amber-500/30',
+  antebrazos: 'bg-lime-500/15 text-lime-400 border-lime-500/30',
 };
 
 interface Props {
