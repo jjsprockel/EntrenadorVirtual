@@ -8,6 +8,8 @@ import {
   Dumbbell,
   ChevronRight,
   RefreshCw,
+  ZoomIn,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -38,6 +40,7 @@ export default function ExerciseDetailPage() {
   const { getByCode, getAlternatives } = useExerciseStore();
   const [imgError, setImgError] = useState(false);
   const [showAlts, setShowAlts] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
 
   const exercise = code ? getByCode(code) : undefined;
   const alternatives = exercise ? getAlternatives(exercise.code) : [];
@@ -74,20 +77,30 @@ export default function ExerciseDetailPage() {
       {/* Hero image */}
       <div className="relative aspect-video w-full bg-muted overflow-hidden">
         {!imgError ? (
-          <img
-            src={exercise.imagePath}
-            alt={exercise.nameEs}
-            className="w-full h-full object-cover"
-            onError={() => setImgError(true)}
-          />
+          <>
+            <img
+              src={exercise.imagePath}
+              alt={exercise.nameEs}
+              className="w-full h-full object-cover"
+              onError={() => setImgError(true)}
+            />
+            <button
+              type="button"
+              onClick={() => setLightbox(true)}
+              className="absolute top-3 right-3 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors backdrop-blur-sm"
+              aria-label="Ver imagen ampliada"
+            >
+              <ZoomIn className="h-4 w-4" />
+            </button>
+          </>
         ) : (
           <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
             <Dumbbell className="h-16 w-16 opacity-20" />
             <p className="text-sm opacity-40">Imagen no disponible</p>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-        <div className="absolute bottom-4 left-4 right-4">
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute bottom-4 left-4 right-4 pointer-events-none">
           <span className="font-mono text-xs text-primary font-bold">{exercise.code}</span>
           <h1 className="text-xl font-bold text-foreground leading-tight mt-0.5">
             {exercise.nameEs}
@@ -97,6 +110,32 @@ export default function ExerciseDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Lightbox overlay */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
+          onClick={() => setLightbox(false)}
+        >
+          <button
+            type="button"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+            onClick={() => setLightbox(false)}
+            aria-label="Cerrar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img
+            src={exercise.imagePath}
+            alt={exercise.nameEs}
+            className="max-w-full max-h-[90dvh] object-contain rounded-lg shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <p className="absolute bottom-4 left-0 right-0 text-center text-sm text-white/60">
+            {exercise.code} · {exercise.nameEs}
+          </p>
+        </div>
+      )}
 
       <div className="p-4 space-y-5">
         {/* Meta chips */}
