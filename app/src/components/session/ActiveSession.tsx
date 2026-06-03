@@ -6,7 +6,7 @@ import {
   ChevronDown,
   ChevronUp,
   Trophy,
-  ExternalLink,
+  ZoomIn,
   Plus,
   Minus,
   Trash2,
@@ -27,6 +27,7 @@ import { useExerciseStore } from '@/stores/exerciseStore';
 import { useUsersStore } from '@/stores/usersStore';
 import { suggestWeight } from '@/lib/overloadEngine';
 import ExerciseThumb from '@/components/exercise/ExerciseThumb';
+import ExerciseLightbox from '@/components/exercise/ExerciseLightbox';
 import ExercisePicker from '@/components/routine/ExercisePicker';
 import SetLogger from './SetLogger';
 import RestTimer from './RestTimer';
@@ -55,6 +56,7 @@ export default function ActiveSession() {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [removingCode, setRemovingCode] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [lightboxCode, setLightboxCode] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(() =>
     activeSession
       ? Math.floor((Date.now() - new Date(activeSession.startedAt).getTime()) / 1000)
@@ -176,10 +178,6 @@ export default function ActiveSession() {
     setExpandedIdx(activeSession!.exercises.length); // new exercise index
   }
 
-  function openDetail(code: string) {
-    window.open(`/ejercicios/${code}`, '_blank', 'noopener');
-  }
-
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -299,18 +297,18 @@ export default function ActiveSession() {
                   </div>
                 </div>
 
-                {/* Detail link + chevron */}
+                {/* Image popup + chevron */}
                 <div className="flex items-center gap-0.5 shrink-0">
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      openDetail(ex.exerciseCode);
+                      setLightboxCode(ex.exerciseCode);
                     }}
                     className="p-1.5 text-muted-foreground hover:text-primary transition-colors"
-                    aria-label="Ver explicación"
+                    aria-label="Ver imagen"
                   >
-                    <ExternalLink className="h-3.5 w-3.5" />
+                    <ZoomIn className="h-3.5 w-3.5" />
                   </button>
                   {isExpanded ? (
                     <ChevronUp className="h-4 w-4 text-muted-foreground" />
@@ -517,6 +515,20 @@ export default function ActiveSession() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Exercise image lightbox */}
+      {lightboxCode && (() => {
+        const lbEx = getByCode(lightboxCode);
+        return (
+          <ExerciseLightbox
+            open
+            imagePath={`/images/ejercicios/${lightboxCode}.png`}
+            name={lbEx?.nameEs ?? lightboxCode}
+            code={lightboxCode}
+            onClose={() => setLightboxCode(null)}
+          />
+        );
+      })()}
     </div>
   );
 }
