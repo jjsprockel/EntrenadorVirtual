@@ -290,7 +290,7 @@ export default function UserFormModal({ open, onClose, editUser }: Props) {
             />
           </div>
 
-          <Button type="submit" className="w-full h-11 gap-2">
+          <Button type="button" className="w-full h-11 gap-2" onClick={handleSubmit(onSubmit)}>
             <Save className="h-4 w-4" />
             {editUser ? 'Guardar cambios' : 'Crear usuario'}
           </Button>

@@ -16,8 +16,7 @@ export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSend() {
     if (!email.trim()) return;
     setLoading(true);
     setError('');
@@ -79,7 +78,7 @@ export default function ForgotPasswordPage() {
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSend(); }} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="email">Correo electrónico</Label>
               <Input
@@ -97,7 +96,7 @@ export default function ForgotPasswordPage() {
               <p className="text-sm text-destructive">{error}</p>
             )}
 
-            <Button type="submit" className="w-full" disabled={loading || !email.trim()}>
+            <Button type="button" className="w-full" disabled={loading || !email.trim()} onClick={handleSend}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />

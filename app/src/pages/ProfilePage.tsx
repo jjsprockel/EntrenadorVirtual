@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -427,14 +427,12 @@ function ChangePassword() {
   const [showNew, setShowNew] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'mismatch' | 'loading'>('idle');
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleChangePassword() {
     if (newPw !== confirmPw) { setStatus('mismatch'); return; }
     if (newPw.length < 6) { setStatus('error'); return; }
     setStatus('loading');
 
     if (isSupabaseConfigured) {
-      // Supabase mode: session is the auth proof — no current password needed
       const { error: err } = await updatePassword(newPw);
       if (err) {
         setStatus('error');
@@ -445,7 +443,6 @@ function ChangePassword() {
         setTimeout(() => setStatus('idle'), 3000);
       }
     } else {
-      // Local mode: verify current password against stored hash
       const ok = await changePassword(sessionUserId!, curPw, newPw);
       if (ok) {
         setStatus('success');
@@ -459,7 +456,7 @@ function ChangePassword() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={(e) => { e.preventDefault(); handleChangePassword(); }} className="space-y-3">
       {/* Current password only needed in local mode */}
       {!isSupabaseConfigured && (
         <div className="space-y-1.5">
@@ -489,10 +486,11 @@ function ChangePassword() {
       {status === 'error' && <p className="text-xs text-destructive">{isSupabaseConfigured ? 'Error al actualizar. Intenta cerrar sesión y volver a entrar.' : 'Contraseña actual incorrecta o nueva muy corta.'}</p>}
       {status === 'success' && <p className="text-xs text-green-500 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Contraseña actualizada.</p>}
       <Button
-        type="submit"
+        type="button"
         variant="outline"
         className="w-full h-10 gap-2"
         disabled={(!isSupabaseConfigured && !curPw) || !newPw || !confirmPw || status === 'loading'}
+        onClick={handleChangePassword}
       >
         <KeyRound className="h-4 w-4" />
         {status === 'loading' ? 'Actualizando…' : 'Cambiar contraseña'}
@@ -530,6 +528,7 @@ export default function ProfilePage() {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
@@ -545,6 +544,22 @@ export default function ProfilePage() {
       theme: profile?.theme ?? 'dark',
     },
   });
+
+  // Sync form fields when the active user changes (e.g. admin switches to another user)
+  useEffect(() => {
+    if (!profile) return;
+    reset({
+      name: profile.name ?? '',
+      age: profile.age != null ? String(profile.age) : '',
+      bodyWeightKg: profile.bodyWeightKg != null ? String(profile.bodyWeightKg) : '',
+      level: profile.level ?? 'principiante',
+      primaryObjective: profile.primaryObjective ?? 'hipertrofia',
+      units: profile.units ?? 'kg',
+      minWeightIncrement: profile.minWeightIncrement ?? 2.5,
+      preferRestTimer: profile.preferRestTimer ?? true,
+      theme: profile.theme ?? 'dark',
+    });
+  }, [activeUserId, reset]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function onSubmit(data: ProfileFormData) {
     if (!activeUserId) return;
@@ -773,8 +788,9 @@ export default function ProfilePage() {
 
         {/* Save button */}
         <Button
-          type="submit"
+          type="button"
           className="w-full h-12 text-base font-semibold gap-2"
+          onClick={handleSubmit(onSubmit)}
         >
           <Save className="h-4 w-4" />
           {saved ? '¡Guardado!' : 'Guardar cambios'}

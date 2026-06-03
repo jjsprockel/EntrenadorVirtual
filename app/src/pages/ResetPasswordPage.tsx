@@ -62,8 +62,7 @@ export default function ResetPasswordPage() {
     });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSave() {
     if (password !== confirm) {
       setError('Las contraseñas no coinciden.');
       return;
@@ -113,7 +112,7 @@ export default function ResetPasswordPage() {
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="password">Nueva contraseña</Label>
               <div className="relative">
@@ -153,7 +152,7 @@ export default function ResetPasswordPage() {
 
             {error && <p className="text-sm text-destructive">{error}</p>}
 
-            <Button type="submit" className="w-full" disabled={loading || !password || !confirm}>
+            <Button type="button" className="w-full" disabled={loading || !password || !confirm} onClick={handleSave}>
               {loading ? (
                 <span className="flex items-center gap-2">
                   <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
