@@ -1,9 +1,10 @@
 import { NavLink } from 'react-router-dom';
-import { Dumbbell, CalendarDays, BarChart2, User, Home, Shield } from 'lucide-react';
+import { Dumbbell, CalendarDays, BarChart2, User, Home, Shield, Zap } from 'lucide-react';
 import { useUsersStore } from '@/stores/usersStore';
 
 const baseNavItems = [
   { to: '/', label: 'Hoy', icon: Home, exact: true },
+  { to: '/sesion-libre', label: 'Sesión libre', icon: Zap, exact: false },
   { to: '/rutinas', label: 'Rutinas', icon: CalendarDays, exact: false },
   { to: '/ejercicios', label: 'Ejercicios', icon: Dumbbell, exact: false },
   { to: '/progreso', label: 'Progreso', icon: BarChart2, exact: false },

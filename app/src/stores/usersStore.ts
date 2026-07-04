@@ -13,7 +13,7 @@ interface UsersState {
   hydrated: boolean;
 
   initAdmin: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string) => void;
-  addUser: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string, avatarColor?: string) => void;
+  addUser: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string, avatarColor?: string, id?: string) => void;
   updateUser: (id: string, partial: Partial<Pick<AppUser, 'role' | 'avatarColor' | 'email'>>) => void;
   updateUserProfile: (id: string, profilePartial: Partial<UserProfile>) => void;
   deleteUser: (id: string) => void;
@@ -53,11 +53,11 @@ export const useUsersStore = create<UsersState>()(
         set({ users: [admin], activeUserId: admin.id, sessionUserId: admin.id, initialized: true });
       },
 
-      addUser: (profile, email, passwordHash, tempPassword, avatarColor) => {
+      addUser: (profile, email, passwordHash, tempPassword, avatarColor, id) => {
         const { users } = get();
         const colorIdx = users.length % AVATAR_COLORS.length;
         const user: AppUser = {
-          id: crypto.randomUUID(),
+          id: id ?? crypto.randomUUID(),
           role: 'user',
           avatarColor: avatarColor ?? AVATAR_COLORS[colorIdx],
           createdAt: new Date(),
@@ -66,7 +66,7 @@ export const useUsersStore = create<UsersState>()(
           passwordHash,
           tempPassword,
         };
-        set((state) => ({ users: [...state.users, user] }));
+        set((state) => ({ users: [...state.users.filter((u) => u.id !== user.id), user] }));
       },
 
       updateUser: (id, partial) =>

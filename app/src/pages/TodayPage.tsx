@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Dumbbell, Calendar, Play, ChevronRight, Pencil, ExternalLink } from 'lucide-react';
+import { Plus, Dumbbell, Calendar, Play, ChevronRight, Pencil, ExternalLink, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRoutineStore } from '@/stores/routineStore';
 import { useSessionStore } from '@/stores/sessionStore';
@@ -40,13 +40,19 @@ export default function TodayPage() {
         <div className="space-y-1">
           <p className="font-semibold">Sin rutina activa</p>
           <p className="text-sm text-muted-foreground">
-            Crea o activa una rutina para comenzar a entrenar
+            Crea o activa una rutina, o empieza una sesión libre
           </p>
         </div>
-        <Button onClick={() => navigate('/rutinas')} className="gap-2">
-          <Calendar className="h-4 w-4" />
-          Ver rutinas
-        </Button>
+        <div className="flex flex-col gap-2 w-full max-w-[200px]">
+          <Button onClick={() => navigate('/rutinas')} className="gap-2 w-full">
+            <Calendar className="h-4 w-4" />
+            Ver rutinas
+          </Button>
+          <Button variant="outline" onClick={() => navigate('/sesion-libre')} className="gap-2 w-full">
+            <Zap className="h-4 w-4" />
+            Sesión libre
+          </Button>
+        </div>
       </div>
     );
   }
@@ -288,6 +294,22 @@ export default function TodayPage() {
             </Button>
           </div>
         )}
+
+        {/* Quick session shortcut */}
+        <button
+          type="button"
+          onClick={() => navigate('/sesion-libre')}
+          className="flex items-center gap-3 w-full rounded-xl border border-dashed border-border px-4 py-3 text-left hover:border-primary/50 hover:bg-muted/30 transition-colors group"
+        >
+          <div className="w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+            <Zap className="h-4.5 w-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">Sesión libre</p>
+            <p className="text-[11px] text-muted-foreground">Elige ejercicios individuales a tu ritmo</p>
+          </div>
+          <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
+        </button>
       </div>
 
       {/* Day edit modal */}

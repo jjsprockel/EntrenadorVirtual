@@ -9,6 +9,7 @@ import ExerciseDetailPage from '@/pages/ExerciseDetailPage';
 import ProgressPage from '@/pages/ProgressPage';
 import ProfilePage from '@/pages/ProfilePage';
 import AdminPage from '@/pages/AdminPage';
+import QuickSessionPage from '@/pages/QuickSessionPage';
 import LoginPage from '@/pages/LoginPage';
 import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
@@ -154,6 +155,7 @@ function AppRoutes() {
         <Route path="rutinas" element={<RoutinesPage />} />
         <Route path="rutinas/nueva" element={<RoutineBuilderPage />} />
         <Route path="rutinas/:id/editar" element={<RoutineBuilderPage />} />
+        <Route path="sesion-libre" element={<QuickSessionPage />} />
         <Route path="ejercicios" element={<ExercisesPage />} />
         <Route path="ejercicios/:code" element={<ExerciseDetailPage />} />
         <Route path="progreso" element={<ProgressPage />} />
