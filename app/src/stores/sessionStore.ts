@@ -90,8 +90,21 @@ export const useSessionStore = create<SessionState>()(
     {
       name: 'sessions',
       storage: createJSONStorage(() => idbStorage),
-      // Don't persist active session across page reloads
-      partialize: (state) => ({ sessions: state.sessions }),
+      // Persist activeSession so Android kills don't lose mid-workout progress.
+      // On rehydrate we check if it's stale (> 8 hours) and discard it.
+      partialize: (state) => ({
+        sessions: state.sessions,
+        activeSession: state.activeSession,
+      }),
+      onRehydrateStorage: () => (state) => {
+        if (!state?.activeSession) return;
+        const startedAt = new Date(state.activeSession.startedAt).getTime();
+        const hours8 = 8 * 60 * 60 * 1000;
+        if (Date.now() - startedAt > hours8) {
+          // Session is stale — discard it silently
+          state.activeSession = null;
+        }
+      },
     },
   ),
 );

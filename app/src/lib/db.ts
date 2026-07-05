@@ -25,12 +25,18 @@ async function getDB(): Promise<IDBPDatabase> {
         db.createObjectStore(KV_STORE);
       }
       if (oldVersion < 2) {
-        // Sync queue for offline-first cloud sync
         db.createObjectStore(SYNC_QUEUE_STORE, { keyPath: 'id' });
         db.createObjectStore(SYNC_DEAD_LETTER_STORE, { keyPath: 'id' });
       }
     },
+    // Android can close IDB connections when the app is backgrounded.
+    // Reset the cached handle so the next getDB() call reopens it.
+    terminated() {
+      _db = null;
+    },
   });
+  // Also reset on explicit close (e.g. version upgrade from another tab)
+  _db.addEventListener('close', () => { _db = null; });
   return _db;
 }
 

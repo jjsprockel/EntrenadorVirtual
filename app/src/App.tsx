@@ -15,6 +15,7 @@ import AuthCallbackPage from '@/pages/AuthCallbackPage';
 import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/ResetPasswordPage';
 import { useExerciseStore } from '@/stores/exerciseStore';
+import { useSessionStore } from '@/stores/sessionStore';
 import { useUserStore } from '@/stores/userStore';
 import { useUsersStore } from '@/stores/usersStore';
 import { useAuthStore } from '@/stores/authStore';
@@ -99,6 +100,20 @@ function AppRoutes() {
     syncEngine.start();
     return () => syncEngine.stop();
   }, []);
+
+  // Force Zustand stores to flush pending IDB writes when Android sends the
+  // app to background. Without this, an abrupt kill can lose the active session.
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        // Trigger a no-op state update on the session store so Zustand's
+        // persist middleware re-serializes and writes to IDB synchronously.
+        useSessionStore.getState().updateActiveSession({});
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Theme management
   const activeTheme = useUsersStore(
