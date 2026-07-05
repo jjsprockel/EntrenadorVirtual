@@ -1670,6 +1670,57 @@ Cada ejercicio incluye:
 
 ---
 
+### C-09 · Abdominales en Máquina
+**EN:** Ab Crunch Machine | Machine Crunch
+**Patrón:** Core (flexión de tronco) | **Equipamiento:** Máquina | **Nivel:** Principiante
+
+**Músculos primarios:** Recto abdominal
+**Músculos secundarios:** Oblicuos, transverso abdominal
+
+**Ejecución:**
+1. Sentarse en la máquina, sujetar las asas o apoyar los brazos en los almohadillados.
+2. Con los pies apoyados en el suelo o en los reposapiés, flexionar el tronco hacia adelante contrayendo el abdomen.
+3. Bajar de forma controlada hasta la posición inicial sin perder la tensión abdominal.
+
+**Tips prácticos:**
+- Ideal para principiantes: permite controlar el peso y el rango de movimiento con precisión.
+- Concentrarse en curvar la columna (flexión real), no solo inclinar el torso.
+- La máquina guía el movimiento y reduce el riesgo de usar impulso.
+
+**Pitfalls:**
+- ❌ Tirar del cuello o de los hombros en lugar de contraer el abdomen.
+- ❌ Usar exceso de peso que impida completar el rango de movimiento completo.
+
+**Alternativas equivalentes:** C-02 (Crunch abdominal), C-04 (Elevación de piernas), C-03 (Rueda abdominal)
+
+---
+
+### C-10 · Rotación de Torso en Máquina
+**EN:** Torso Rotation Machine | Rotary Torso Machine
+**Patrón:** Core (rotación de tronco) | **Equipamiento:** Máquina | **Nivel:** Principiante
+
+**Músculos primarios:** Oblicuos (interno y externo)
+**Músculos secundarios:** Transverso abdominal, erectores espinales
+
+**Ejecución:**
+1. Sentarse en la máquina con la espalda apoyada en el respaldo y las caderas bloqueadas (los pads sujetan las piernas para aislar el torso).
+2. Sujetar las asas o apoyar los brazos en los almohadillados a la altura del pecho.
+3. Rotar el torso hacia un lado de forma controlada hasta el límite del recorrido, manteniendo las caderas inmóviles.
+4. Regresar lentamente a la posición central y repetir hacia el otro lado.
+
+**Tips prácticos:**
+- Las caderas deben permanecer fijas: todo el movimiento ocurre en la columna torácica y los oblicuos.
+- Usar cargas moderadas; el objetivo es control, no potencia.
+- Realizar el mismo número de repeticiones en ambos lados para un trabajo simétrico.
+
+**Pitfalls:**
+- ❌ Rotar las caderas: anula el aislamiento de los oblicuos.
+- ❌ Movimiento rápido o con rebote al final del recorrido.
+
+**Alternativas equivalentes:** C-05 (Twist ruso), C-06 (Plancha lateral)
+
+---
+
 ## TABLA RESUMEN DE ALTERNATIVAS POR PATRÓN DE MOVIMIENTO
 
 | Patrón | Ejercicio principal | Alternativas |
