@@ -62,8 +62,10 @@ export default defineConfig({
             },
           },
         ],
-        skipWaiting: true,
-        clientsClaim: true,
+        // Do NOT skipWaiting — forcing a SW update mid-workout would reload
+        // the page and interrupt the session. Users get updates on next open.
+        skipWaiting: false,
+        clientsClaim: false,
       },
     }),
   ],

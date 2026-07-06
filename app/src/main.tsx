@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
+import ErrorBoundary from './components/ErrorBoundary.tsx';
 
 // Polyfill crypto.randomUUID for Safari < 15.4 (uses getRandomValues which is universally supported)
 if (typeof crypto !== 'undefined' && !crypto.randomUUID) {
@@ -22,6 +23,8 @@ document.documentElement.classList.add('dark');
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>,
 );

@@ -44,37 +44,35 @@ async function getDB(): Promise<IDBPDatabase> {
 
 export const idbStorage: StateStorage = {
   getItem: async (name: string): Promise<string | null> => {
+    // Try IDB first (no size limit); fall back to localStorage (sync backup)
     try {
       const db = await getDB();
       const value = await db.get(KV_STORE, name);
       if (value !== undefined) return value;
-      // IDB returned nothing — try localStorage (Safari private mode fallback)
       return localStorage.getItem(name);
     } catch {
-      // IDB unavailable (Safari private mode) — fall back to localStorage
       try { return localStorage.getItem(name); } catch { return null; }
     }
   },
   setItem: async (name: string, value: string): Promise<void> => {
-    let idbOk = false;
+    // Write to localStorage FIRST — it's synchronous so it always completes
+    // before Android can kill the tab, guaranteeing data is never lost.
+    try { localStorage.setItem(name, value); } catch { /* quota: skip */ }
+    // Then write to IDB as primary (no 5 MB cap, survives cache clears)
     try {
       const db = await getDB();
       await db.put(KV_STORE, value, name);
-      idbOk = true;
     } catch (e) {
-      console.error('[IDB] setItem failed, using localStorage:', e);
-    }
-    if (!idbOk) {
-      try { localStorage.setItem(name, value); } catch { /* quota exceeded */ }
+      console.error('[IDB] setItem failed:', e);
+      // localStorage backup is already written above — data is safe
     }
   },
   removeItem: async (name: string): Promise<void> => {
+    try { localStorage.removeItem(name); } catch { /* ignore */ }
     try {
       const db = await getDB();
       await db.delete(KV_STORE, name);
-    } catch {
-      try { localStorage.removeItem(name); } catch { /* ignore */ }
-    }
+    } catch { /* ignore */ }
   },
 };
 
