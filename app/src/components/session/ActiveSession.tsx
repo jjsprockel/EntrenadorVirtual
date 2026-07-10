@@ -213,7 +213,7 @@ export default function ActiveSession() {
       </div>
 
       {/* Exercise list */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-32">
+      <div className={`flex-1 overflow-y-auto p-4 space-y-2.5 ${showTimer ? 'pb-72' : 'pb-32'}`}>
         {activeSession.exercises.map((ex, idx) => {
           const exercise = getByCode(ex.exerciseCode);
           const isExpanded = expandedIdx === idx;
