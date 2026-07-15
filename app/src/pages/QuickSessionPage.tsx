@@ -19,6 +19,7 @@ import ExercisePicker from '@/components/routine/ExercisePicker';
 import ExerciseThumb from '@/components/exercise/ExerciseThumb';
 import ActiveSession from '@/components/session/ActiveSession';
 import CardioEntryForm from '@/components/session/CardioEntryForm';
+import CardioTimerScreen from '@/components/session/CardioTimerScreen';
 import type { Session, SessionExercise, CardioEntry } from '@/types/session';
 import { CARDIO_LABELS } from '@/types/session';
 import type { ExerciseSlot } from '@/types/routine';
@@ -86,7 +87,10 @@ export default function QuickSessionPage() {
   const [addingCardio, setAddingCardio] = useState(false);
 
   if (activeSession) {
-    return <ActiveSession />;
+    const isCardioOnly =
+      activeSession.exercises.length === 0 &&
+      (activeSession.cardioEntries?.length ?? 0) > 0;
+    return isCardioOnly ? <CardioTimerScreen /> : <ActiveSession />;
   }
 
   function addExercise(code: string) {
@@ -357,9 +361,10 @@ export default function QuickSessionPage() {
           </div>
         ))}
 
-        {/* Inline cardio form */}
+        {/* Inline cardio form — simplified: distancia/vatios/calorías se registran post-cronómetro */}
         {addingCardio && (
           <CardioEntryForm
+            simplified
             onAdd={(entry) => {
               setCardioEntries((prev) => [...prev, entry]);
               setAddingCardio(false);

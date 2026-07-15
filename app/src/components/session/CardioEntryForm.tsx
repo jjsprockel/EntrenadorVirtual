@@ -17,9 +17,11 @@ const CARDIO_TYPES: CardioType[] = [
 interface Props {
   onAdd: (entry: CardioEntry) => void;
   onCancel: () => void;
+  /** When true, hides distance/watts/calories (use in setup — those are logged after the timer) */
+  simplified?: boolean;
 }
 
-export default function CardioEntryForm({ onAdd, onCancel }: Props) {
+export default function CardioEntryForm({ onAdd, onCancel, simplified = false }: Props) {
   const [type, setType] = useState<CardioType>('caminadora');
   const [minutes, setMinutes] = useState('30');
   const [distance, setDistance] = useState('');
@@ -84,48 +86,50 @@ export default function CardioEntryForm({ onAdd, onCancel }: Props) {
         </div>
       </div>
 
-      {/* Campos opcionales */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="space-y-1">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold leading-tight">
-            Dist. (km)
-          </p>
-          <input
-            type="number"
-            inputMode="decimal"
-            placeholder="—"
-            value={distance}
-            onChange={(e) => setDistance(e.target.value)}
-            className="w-full h-10 px-2 rounded-lg border border-border bg-background text-sm text-center font-mono focus:outline-none focus:border-blue-500 transition-colors"
-          />
+      {/* Campos opcionales — ocultos en modo simplified (se registran post-cronómetro) */}
+      {!simplified && (
+        <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-1">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold leading-tight">
+              Dist. (km)
+            </p>
+            <input
+              type="number"
+              inputMode="decimal"
+              placeholder="—"
+              value={distance}
+              onChange={(e) => setDistance(e.target.value)}
+              className="w-full h-10 px-2 rounded-lg border border-border bg-background text-sm text-center font-mono focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold leading-tight">
+              Vatios (W)
+            </p>
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="—"
+              value={watts}
+              onChange={(e) => setWatts(e.target.value)}
+              className="w-full h-10 px-2 rounded-lg border border-border bg-background text-sm text-center font-mono focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
+          <div className="space-y-1">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold leading-tight">
+              Calorías
+            </p>
+            <input
+              type="number"
+              inputMode="numeric"
+              placeholder="—"
+              value={calories}
+              onChange={(e) => setCalories(e.target.value)}
+              className="w-full h-10 px-2 rounded-lg border border-border bg-background text-sm text-center font-mono focus:outline-none focus:border-blue-500 transition-colors"
+            />
+          </div>
         </div>
-        <div className="space-y-1">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold leading-tight">
-            Vatios (W)
-          </p>
-          <input
-            type="number"
-            inputMode="numeric"
-            placeholder="—"
-            value={watts}
-            onChange={(e) => setWatts(e.target.value)}
-            className="w-full h-10 px-2 rounded-lg border border-border bg-background text-sm text-center font-mono focus:outline-none focus:border-blue-500 transition-colors"
-          />
-        </div>
-        <div className="space-y-1">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold leading-tight">
-            Calorías
-          </p>
-          <input
-            type="number"
-            inputMode="numeric"
-            placeholder="—"
-            value={calories}
-            onChange={(e) => setCalories(e.target.value)}
-            className="w-full h-10 px-2 rounded-lg border border-border bg-background text-sm text-center font-mono focus:outline-none focus:border-blue-500 transition-colors"
-          />
-        </div>
-      </div>
+      )}
 
       {/* Acciones */}
       <div className="flex gap-2 pt-1">
