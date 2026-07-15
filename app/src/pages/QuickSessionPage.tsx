@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
   Plus,
@@ -76,15 +76,18 @@ function Stepper({
 
 export default function QuickSessionPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { activeSession, startSession, sessions } = useSessionStore();
   const { getByCode } = useExerciseStore();
   const activeUserId = useUsersStore((s) => s.activeUserId);
 
+  // Auto-open cardio form when navigated with mode:'cardio' state (e.g. from TodayPage)
+  const navState = location.state as { mode?: string } | null;
   const [exercises, setExercises] = useState<QuickExercise[]>([]);
   const [cardioEntries, setCardioEntries] = useState<CardioEntry[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [expandedCode, setExpandedCode] = useState<string | null>(null);
-  const [addingCardio, setAddingCardio] = useState(false);
+  const [addingCardio, setAddingCardio] = useState(() => navState?.mode === 'cardio');
 
   if (activeSession) {
     const isCardioOnly =
