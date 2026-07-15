@@ -17,6 +17,7 @@ import { CARDIO_LABELS } from '@/types/session';
 
 const RADIUS = 48;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const ADJUST_OPTIONS = [15, 30, 60] as const;
 
 type Phase = 'running' | 'paused' | 'done';
 
@@ -35,11 +36,22 @@ export default function CardioTimerScreen() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [completedEntries, setCompletedEntries] = useState<CardioEntry[]>([]);
 
-  // Timer
+  // Timer state
   const [phase, setPhase] = useState<Phase>('running');
   const [elapsed, setElapsed] = useState(0);
+  // plannedSeconds is mutable so the user can adjust the target mid-session
+  const [plannedSeconds, setPlannedSeconds] = useState(
+    () => (entries[0]?.durationMinutes ?? 0) * 60,
+  );
   const [goalReached, setGoalReached] = useState(false);
+
+  // Refs for use inside setInterval callback (avoid stale closures)
+  const elapsedRef = useRef(0);
+  const plannedRef = useRef(plannedSeconds);
   const goalReachedRef = useRef(false);
+
+  // Keep refs in sync with state
+  plannedRef.current = plannedSeconds;
 
   // Completion form
   const [finalMinutes, setFinalMinutes] = useState('');
@@ -49,15 +61,14 @@ export default function CardioTimerScreen() {
 
   const [confirmCancel, setConfirmCancel] = useState(false);
 
-  const entry = entries[currentIdx];
-  const plannedSeconds = (entry?.durationMinutes ?? 0) * 60;
-
+  // Interval — restarts only when phase changes; reads plannedRef to avoid restart on adjust
   useEffect(() => {
     if (phase !== 'running') return;
     const interval = setInterval(() => {
       setElapsed((e) => {
         const next = e + 1;
-        if (!goalReachedRef.current && plannedSeconds > 0 && next >= plannedSeconds) {
+        elapsedRef.current = next;
+        if (!goalReachedRef.current && plannedRef.current > 0 && next >= plannedRef.current) {
           goalReachedRef.current = true;
           setGoalReached(true);
         }
@@ -65,8 +76,9 @@ export default function CardioTimerScreen() {
       });
     }, 1000);
     return () => clearInterval(interval);
-  }, [phase, plannedSeconds]);
+  }, [phase]);
 
+  const entry = entries[currentIdx];
   if (!activeSession || !entry) return null;
 
   const remaining = Math.max(0, plannedSeconds - elapsed);
@@ -80,6 +92,20 @@ export default function CardioTimerScreen() {
       : goalReached
       ? 'stroke-success'
       : 'stroke-blue-500';
+
+  function adjust(delta: number) {
+    setPlannedSeconds((prev) => {
+      // Don't let the target fall below elapsed + 5s (always some remaining time)
+      const next = Math.max(elapsedRef.current + 5, prev + delta);
+      plannedRef.current = next;
+      // If user added time and we were in overtime, go back to countdown mode
+      if (delta > 0 && goalReachedRef.current && next > elapsedRef.current) {
+        goalReachedRef.current = false;
+        setGoalReached(false);
+      }
+      return next;
+    });
+  }
 
   function handleDone() {
     setPhase('done');
@@ -107,10 +133,15 @@ export default function CardioTimerScreen() {
         totalCalories: totalKcal > 0 ? totalKcal : undefined,
       });
     } else {
+      const nextEntry = entries[currentIdx + 1];
       setCompletedEntries(allDone);
       setCurrentIdx((i) => i + 1);
       setPhase('running');
       setElapsed(0);
+      elapsedRef.current = 0;
+      const nextPlanned = (nextEntry.durationMinutes ?? 0) * 60;
+      setPlannedSeconds(nextPlanned);
+      plannedRef.current = nextPlanned;
       setGoalReached(false);
       goalReachedRef.current = false;
       setFinalMinutes('');
@@ -142,9 +173,7 @@ export default function CardioTimerScreen() {
           <div className="rounded-xl border border-success/30 bg-success/5 p-6 space-y-5">
             <div className="text-center space-y-1">
               <Trophy className="h-12 w-12 text-success mx-auto" />
-              <p className="font-bold text-base">
-                ¡{CARDIO_LABELS[entry.type]} completado!
-              </p>
+              <p className="font-bold text-base">¡{CARDIO_LABELS[entry.type]} completado!</p>
               <p className="text-sm text-muted-foreground">
                 Tiempo real:{' '}
                 <span className="font-mono">{elapsedMins}m {elapsedSecs}s</span>
@@ -152,10 +181,10 @@ export default function CardioTimerScreen() {
             </div>
 
             <div className="space-y-3">
-              {/* Editable duration */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Duración a registrar <span className="font-normal normal-case">(min)</span>
+                  Duración a registrar{' '}
+                  <span className="font-normal normal-case">(min)</span>
                 </label>
                 <input
                   type="number"
@@ -166,7 +195,6 @@ export default function CardioTimerScreen() {
                 />
               </div>
 
-              {/* Optional fields */}
               <div className="grid grid-cols-3 gap-2">
                 <div className="space-y-1">
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold leading-tight">
@@ -225,6 +253,9 @@ export default function CardioTimerScreen() {
   }
 
   // ── Active timer (running / paused) ───────────────────────────────────────
+  const plannedMins = Math.floor(plannedSeconds / 60);
+  const plannedSecs = plannedSeconds % 60;
+
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
@@ -232,7 +263,7 @@ export default function CardioTimerScreen() {
         <div className="flex-1 min-w-0">
           <p className="font-bold text-sm">{CARDIO_LABELS[entry.type]}</p>
           <p className="text-xs text-muted-foreground">
-            Meta: {entry.durationMinutes} min
+            Meta: {plannedMins}:{plannedSecs.toString().padStart(2, '0')}
             {entries.length > 1 && ` · ${currentIdx + 1}/${entries.length}`}
           </p>
         </div>
@@ -247,7 +278,7 @@ export default function CardioTimerScreen() {
       </div>
 
       {/* Timer body */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 gap-8">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 pb-6 pt-4 gap-6">
         {/* Goal reached badge */}
         {goalReached && (
           <div className="px-4 py-1.5 rounded-full bg-success/15 border border-success/25 text-success text-xs font-semibold">
@@ -256,7 +287,7 @@ export default function CardioTimerScreen() {
         )}
 
         {/* Circular dial */}
-        <div className="relative w-[220px] h-[220px]">
+        <div className="relative w-[210px] h-[210px]">
           <svg viewBox="0 0 110 110" className="w-full h-full -rotate-90">
             <circle
               cx="55" cy="55" r={RADIUS}
@@ -300,15 +331,15 @@ export default function CardioTimerScreen() {
         </div>
 
         {phase === 'paused' && (
-          <p className="text-sm font-semibold text-muted-foreground -mt-4">En pausa</p>
+          <p className="text-sm font-semibold text-muted-foreground -mt-3">En pausa</p>
         )}
 
-        {/* Controls */}
+        {/* Pause / Terminar */}
         <div className="flex gap-3 w-full max-w-xs">
           <button
             type="button"
             onClick={() => setPhase((p) => (p === 'running' ? 'paused' : 'running'))}
-            className={`flex-1 flex items-center justify-center gap-2 h-12 rounded-xl border text-sm font-semibold transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 h-11 rounded-xl border text-sm font-semibold transition-colors ${
               phase === 'paused'
                 ? 'bg-primary border-primary text-primary-foreground'
                 : 'border-border text-foreground hover:border-primary/40 hover:bg-muted/30'
@@ -320,15 +351,46 @@ export default function CardioTimerScreen() {
               <><Pause className="h-4 w-4" /> Pausar</>
             )}
           </button>
-
           <button
             type="button"
             onClick={handleDone}
-            className="flex items-center justify-center gap-2 h-12 px-5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+            className="flex items-center justify-center gap-2 h-11 px-5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
           >
             <Square className="h-4 w-4" />
             Terminar
           </button>
+        </div>
+
+        {/* Time adjustment */}
+        <div className="w-full max-w-xs space-y-2">
+          <p className="text-[10px] text-center text-muted-foreground uppercase tracking-widest">
+            Ajustar tiempo meta
+          </p>
+          <div className="flex gap-1.5">
+            {/* Subtract buttons */}
+            {[...ADJUST_OPTIONS].reverse().map((s) => (
+              <button
+                key={`-${s}`}
+                type="button"
+                onClick={() => adjust(-s)}
+                className="flex-1 py-2.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/40 transition-colors"
+              >
+                −{s}s
+              </button>
+            ))}
+            <div className="w-px bg-border mx-0.5 self-stretch" />
+            {/* Add buttons */}
+            {ADJUST_OPTIONS.map((s) => (
+              <button
+                key={`+${s}`}
+                type="button"
+                onClick={() => adjust(s)}
+                className="flex-1 py-2.5 rounded-xl border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:border-blue-500/40 transition-colors"
+              >
+                +{s}s
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
