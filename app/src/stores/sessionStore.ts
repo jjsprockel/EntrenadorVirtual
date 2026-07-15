@@ -2,7 +2,12 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { idbStorage } from '@/lib/db';
 import { syncEngine } from '@/lib/syncEngine';
-import type { Session, SessionExercise, CompletedSet } from '@/types/session';
+import type { Session, SessionExercise, CompletedSet, CardioEntry } from '@/types/session';
+
+interface CompleteOpts {
+  cardioEntries?: CardioEntry[];
+  totalCalories?: number;
+}
 
 interface SessionState {
   sessions: Session[];
@@ -11,7 +16,7 @@ interface SessionState {
   updateActiveSession: (partial: Partial<Session>) => void;
   logSet: (exerciseCode: string, set: CompletedSet) => void;
   updateExercise: (exerciseCode: string, partial: Partial<SessionExercise>) => void;
-  completeSession: () => void;
+  completeSession: (opts?: CompleteOpts) => void;
   cancelSession: () => void;
   getUserSessions: (userId: string, isAdmin: boolean) => Session[];
   getSessionsByUser: (userId: string) => Session[];
@@ -60,7 +65,7 @@ export const useSessionStore = create<SessionState>()(
           };
         }),
 
-      completeSession: () => {
+      completeSession: (opts) => {
         const { activeSession, sessions } = get();
         if (!activeSession) return;
         const volume = activeSession.exercises.reduce(
@@ -68,7 +73,13 @@ export const useSessionStore = create<SessionState>()(
             total + ex.completedSets.reduce((s, set) => s + set.weight * set.reps, 0),
           0,
         );
-        const completed = { ...activeSession, completedAt: new Date(), totalVolume: volume };
+        const completed: Session = {
+          ...activeSession,
+          completedAt: new Date(),
+          totalVolume: volume,
+          cardioEntries: opts?.cardioEntries ?? activeSession.cardioEntries,
+          totalCalories: opts?.totalCalories,
+        };
         set({ activeSession: null, sessions: [...sessions, completed] });
         syncEngine.enqueueSession(completed).catch(console.error);
       },

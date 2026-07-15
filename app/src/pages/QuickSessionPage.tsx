@@ -8,6 +8,7 @@ import {
   Trash2,
   ChevronDown,
   ChevronUp,
+  Activity,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSessionStore } from '@/stores/sessionStore';
@@ -17,7 +18,9 @@ import { suggestWeight } from '@/lib/overloadEngine';
 import ExercisePicker from '@/components/routine/ExercisePicker';
 import ExerciseThumb from '@/components/exercise/ExerciseThumb';
 import ActiveSession from '@/components/session/ActiveSession';
-import type { Session, SessionExercise } from '@/types/session';
+import CardioEntryForm from '@/components/session/CardioEntryForm';
+import type { Session, SessionExercise, CardioEntry } from '@/types/session';
+import { CARDIO_LABELS } from '@/types/session';
 import type { ExerciseSlot } from '@/types/routine';
 
 interface QuickExercise {
@@ -77,8 +80,10 @@ export default function QuickSessionPage() {
   const activeUserId = useUsersStore((s) => s.activeUserId);
 
   const [exercises, setExercises] = useState<QuickExercise[]>([]);
+  const [cardioEntries, setCardioEntries] = useState<CardioEntry[]>([]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [expandedCode, setExpandedCode] = useState<string | null>(null);
+  const [addingCardio, setAddingCardio] = useState(false);
 
   if (activeSession) {
     return <ActiveSession />;
@@ -103,7 +108,7 @@ export default function QuickSessionPage() {
   }
 
   function handleStart() {
-    if (exercises.length === 0) return;
+    if (exercises.length === 0 && cardioEntries.length === 0) return;
 
     const pastSessions = sessions.filter(
       (s) => s.userId === activeUserId || !s.userId,
@@ -137,10 +142,11 @@ export default function QuickSessionPage() {
       userId: activeUserId ?? undefined,
       routineId: 'libre',
       dayId: 'libre',
-      dayName: 'Sesión libre',
+      dayName: cardioEntries.length > 0 && exercises.length === 0 ? 'Cardio' : 'Sesión libre',
       date: new Date(),
       startedAt: new Date(),
       exercises: sessionExercises,
+      cardioEntries: cardioEntries.length > 0 ? [...cardioEntries] : undefined,
     };
 
     startSession(session);
@@ -163,9 +169,11 @@ export default function QuickSessionPage() {
             Elige los ejercicios que quieres realizar hoy
           </p>
         </div>
-        {exercises.length > 0 && (
+        {(exercises.length > 0 || cardioEntries.length > 0) && (
           <span className="text-xs text-muted-foreground shrink-0">
-            {exercises.length} ejercicio{exercises.length !== 1 ? 's' : ''}
+            {exercises.length > 0 && `${exercises.length} ejercicio${exercises.length !== 1 ? 's' : ''}`}
+            {exercises.length > 0 && cardioEntries.length > 0 && ' · '}
+            {cardioEntries.length > 0 && `${cardioEntries.length} cardio`}
           </span>
         )}
       </div>
@@ -173,21 +181,31 @@ export default function QuickSessionPage() {
       {/* Body */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2.5 pb-36">
         {/* Empty state */}
-        {exercises.length === 0 && (
+        {exercises.length === 0 && cardioEntries.length === 0 && !addingCardio && (
           <div className="flex flex-col items-center justify-center gap-5 py-20 text-center">
             <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center">
               <Dumbbell className="h-8 w-8 text-muted-foreground/40" />
             </div>
             <div className="space-y-1.5">
-              <p className="font-semibold">Sin ejercicios todavía</p>
+              <p className="font-semibold">Sin actividad todavía</p>
               <p className="text-sm text-muted-foreground max-w-[240px]">
-                Añade los ejercicios que quieres realizar y configura series, repeticiones y descanso.
+                Añade ejercicios de fuerza, cardio, o ambos para empezar.
               </p>
             </div>
-            <Button onClick={() => setPickerOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Añadir ejercicio
-            </Button>
+            <div className="flex gap-3 flex-wrap justify-center">
+              <Button onClick={() => setPickerOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Ejercicio
+              </Button>
+              <button
+                type="button"
+                onClick={() => setAddingCardio(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-blue-500/30 text-sm font-medium text-blue-400 hover:border-blue-500/60 hover:text-blue-300 transition-colors"
+              >
+                <Activity className="h-4 w-4" />
+                Cardio
+              </button>
+            </div>
           </div>
         )}
 
@@ -311,21 +329,70 @@ export default function QuickSessionPage() {
           );
         })}
 
-        {/* Add more button */}
-        {exercises.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setPickerOpen(true)}
-            className="flex items-center justify-center gap-2 w-full rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 py-3 text-sm transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            Añadir ejercicio
-          </button>
+        {/* Cardio entry cards */}
+        {cardioEntries.map((entry) => (
+          <div key={entry.id} className="rounded-xl border border-blue-500/20 overflow-hidden">
+            <div className="flex items-center gap-2.5 px-3 py-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                <Activity className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium">{CARDIO_LABELS[entry.type]}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {entry.durationMinutes} min
+                  {entry.distanceKm != null ? ` · ${entry.distanceKm} km` : ''}
+                  {entry.watts != null ? ` · ${entry.watts}W` : ''}
+                  {entry.calories != null ? ` · ${entry.calories} kcal` : ''}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCardioEntries((prev) => prev.filter((e) => e.id !== entry.id))}
+                className="p-1.5 text-muted-foreground hover:text-destructive transition-colors rounded-md"
+                aria-label="Quitar cardio"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+        ))}
+
+        {/* Inline cardio form */}
+        {addingCardio && (
+          <CardioEntryForm
+            onAdd={(entry) => {
+              setCardioEntries((prev) => [...prev, entry]);
+              setAddingCardio(false);
+            }}
+            onCancel={() => setAddingCardio(false)}
+          />
+        )}
+
+        {/* Add more buttons */}
+        {(exercises.length > 0 || cardioEntries.length > 0) && !addingCardio && (
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary/50 py-3 text-sm transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              Ejercicio
+            </button>
+            <button
+              type="button"
+              onClick={() => setAddingCardio(true)}
+              className="flex items-center justify-center gap-1.5 rounded-xl border border-dashed border-blue-500/20 text-muted-foreground hover:text-foreground hover:border-blue-500/40 py-3 text-sm transition-colors"
+            >
+              <Activity className="h-4 w-4" />
+              Cardio
+            </button>
+          </div>
         )}
       </div>
 
       {/* Start button (fixed bottom) */}
-      {exercises.length > 0 && (
+      {(exercises.length > 0 || cardioEntries.length > 0) && !addingCardio && (
         <div className="fixed bottom-16 md:bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border">
           <div className="max-w-lg mx-auto">
             <Button

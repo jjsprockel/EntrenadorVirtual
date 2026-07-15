@@ -21,6 +21,34 @@ export interface SessionExercise {
   notes?: string;
 }
 
+export type CardioType =
+  | 'caminadora'
+  | 'eliptica'
+  | 'bicicleta_estatica'
+  | 'remo'
+  | 'escaladora'
+  | 'natacion'
+  | 'otro';
+
+export const CARDIO_LABELS: Record<CardioType, string> = {
+  caminadora: 'Caminadora',
+  eliptica: 'Elíptica',
+  bicicleta_estatica: 'Bicicleta estática',
+  remo: 'Remo',
+  escaladora: 'Escaladora',
+  natacion: 'Natación',
+  otro: 'Otro',
+};
+
+export interface CardioEntry {
+  id: string;
+  type: CardioType;
+  durationMinutes: number;
+  distanceKm?: number;
+  watts?: number;
+  calories?: number;
+}
+
 export interface Session {
   id: string;
   userId?: string;
@@ -33,4 +61,6 @@ export interface Session {
   completedAt?: Date;
   totalVolume?: number;
   notes?: string;
+  cardioEntries?: CardioEntry[];
+  totalCalories?: number;
 }

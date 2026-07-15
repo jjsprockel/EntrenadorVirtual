@@ -10,6 +10,8 @@ import {
   Plus,
   Minus,
   Trash2,
+  Activity,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,7 +33,9 @@ import ExerciseLightbox from '@/components/exercise/ExerciseLightbox';
 import ExercisePicker from '@/components/routine/ExercisePicker';
 import SetLogger from './SetLogger';
 import RestTimer from './RestTimer';
-import type { CompletedSet, SessionExercise } from '@/types/session';
+import CardioEntryForm from './CardioEntryForm';
+import type { CompletedSet, SessionExercise, CardioEntry } from '@/types/session';
+import { CARDIO_LABELS } from '@/types/session';
 import type { ExerciseSlot } from '@/types/routine';
 
 export default function ActiveSession() {
@@ -54,6 +58,13 @@ export default function ActiveSession() {
   const [showTimer, setShowTimer] = useState(false);
   const [timerSeconds, setTimerSeconds] = useState(60);
   const [confirmCancel, setConfirmCancel] = useState(false);
+
+  // Completion screen state
+  const [completionCardio, setCompletionCardio] = useState<CardioEntry[]>(
+    () => activeSession?.cardioEntries ?? [],
+  );
+  const [completionCalories, setCompletionCalories] = useState('');
+  const [addingCardio, setAddingCardio] = useState(false);
   const [removingCode, setRemovingCode] = useState<string | null>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [lightboxCode, setLightboxCode] = useState<string | null>(null);
@@ -420,16 +431,23 @@ export default function ActiveSession() {
 
         {/* Session complete */}
         {isComplete && (
-          <div className="rounded-xl border border-success/30 bg-success/5 p-6 text-center space-y-4">
-            <Trophy className="h-12 w-12 text-success mx-auto" />
-            <div className="space-y-1">
-              <p className="font-bold text-base">¡Entrenamiento completado!</p>
-              <p className="text-sm text-muted-foreground">
-                Volumen total:{' '}
-                <span className="font-mono font-semibold text-foreground">
-                  {Math.round(totalVolume).toLocaleString()} kg
-                </span>
+          <div className="rounded-xl border border-success/30 bg-success/5 p-6 space-y-5">
+            {/* Trophy + stats */}
+            <div className="text-center space-y-1">
+              <Trophy className="h-12 w-12 text-success mx-auto" />
+              <p className="font-bold text-base">
+                {activeSession.exercises.length === 0
+                  ? '¡Cardio completado!'
+                  : '¡Entrenamiento completado!'}
               </p>
+              {totalVolume > 0 && (
+                <p className="text-sm text-muted-foreground">
+                  Volumen:{' '}
+                  <span className="font-mono font-semibold text-foreground">
+                    {Math.round(totalVolume).toLocaleString()} kg
+                  </span>
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
                 Duración:{' '}
                 <span className="font-mono">
@@ -437,7 +455,89 @@ export default function ActiveSession() {
                 </span>
               </p>
             </div>
-            <Button onClick={completeSession} className="w-full h-11 gap-2">
+
+            {/* Cardio section */}
+            <div className="space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Cardio
+              </p>
+
+              {completionCardio.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="flex items-center gap-2.5 p-3 rounded-lg bg-background border border-border"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <Activity className="h-4 w-4 text-blue-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium">{CARDIO_LABELS[entry.type]}</p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {entry.durationMinutes} min
+                      {entry.distanceKm != null ? ` · ${entry.distanceKm} km` : ''}
+                      {entry.watts != null ? ` · ${entry.watts}W` : ''}
+                      {entry.calories != null ? ` · ${entry.calories} kcal` : ''}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCompletionCardio((prev) => prev.filter((e) => e.id !== entry.id))
+                    }
+                    className="p-1.5 text-muted-foreground hover:text-destructive transition-colors shrink-0"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+
+              {addingCardio ? (
+                <CardioEntryForm
+                  onAdd={(entry) => {
+                    setCompletionCardio((prev) => [...prev, entry]);
+                    setAddingCardio(false);
+                  }}
+                  onCancel={() => setAddingCardio(false)}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAddingCardio(true)}
+                  className="flex items-center justify-center gap-2 w-full rounded-xl border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-blue-500/30 py-2.5 text-sm transition-colors"
+                >
+                  <Plus className="h-4 w-4" />
+                  Añadir cardio
+                </button>
+              )}
+            </div>
+
+            {/* Calories input */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                Calorías totales quemadas{' '}
+                <span className="text-[10px] font-normal normal-case">(opcional)</span>
+              </label>
+              <input
+                type="number"
+                inputMode="numeric"
+                placeholder="ej. 450"
+                value={completionCalories}
+                onChange={(e) => setCompletionCalories(e.target.value)}
+                className="w-full h-10 px-3 rounded-lg border border-border bg-background text-sm font-mono focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+
+            <Button
+              onClick={() =>
+                completeSession({
+                  cardioEntries: completionCardio.length > 0 ? completionCardio : undefined,
+                  totalCalories: completionCalories
+                    ? parseInt(completionCalories, 10)
+                    : undefined,
+                })
+              }
+              className="w-full h-11 gap-2"
+            >
               <CheckCircle2 className="h-4 w-4" />
               Guardar sesión
             </Button>
