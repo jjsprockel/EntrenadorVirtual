@@ -11,7 +11,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2, Dumbbell, ChevronDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2, Dumbbell, ChevronDown, Activity } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
@@ -30,6 +30,8 @@ import {
 } from '@/lib/statsEngine';
 import type { MetricType } from '@/lib/statsEngine';
 import type { MuscleGroup } from '@/types/exercise';
+import type { Session, CardioType } from '@/types/session';
+import { CARDIO_LABELS } from '@/types/session';
 
 // ── Chart theme ───────────────────────────────────────────────────────────────
 
@@ -313,6 +315,45 @@ function BarOrLineChart({
   );
 }
 
+// ── Cardio helpers ────────────────────────────────────────────────────────────
+
+function getSessionCalories(s: Session): number {
+  if (s.totalCalories) return s.totalCalories;
+  return (s.cardioEntries ?? []).reduce((sum, e) => sum + (e.calories ?? 0), 0);
+}
+
+function getCardioWeeklyData(
+  sessions: Session[],
+  weeksBack: number,
+): { period: string; minutes: number }[] {
+  const effective = weeksBack === 0 ? 26 : weeksBack;
+  const MS_WEEK = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  return Array.from({ length: effective }, (_, i) => {
+    const weekOffset = effective - 1 - i;
+    const weekEnd = now - weekOffset * MS_WEEK;
+    const weekStart = weekEnd - MS_WEEK;
+
+    const minutes = sessions
+      .filter((s) => {
+        const d = new Date(s.date).getTime();
+        return d >= weekStart && d < weekEnd;
+      })
+      .reduce(
+        (sum, s) =>
+          sum + (s.cardioEntries ?? []).reduce((m, e) => m + e.durationMinutes, 0),
+        0,
+      );
+
+    const period = new Date(weekStart).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+    });
+    return { period, minutes };
+  });
+}
+
 // ── Tab: Resumen ──────────────────────────────────────────────────────────────
 
 function ResumenTab({
@@ -333,6 +374,17 @@ function ResumenTab({
   );
   const prs = useMemo(() => getPersonalRecords(sessions), [sessions]);
   const { getByCode } = useExerciseStore();
+
+  const totalCalories = useMemo(
+    () => sessions.reduce((sum, s) => sum + getSessionCalories(s), 0),
+    [sessions],
+  );
+  const weekCalories = useMemo(() => {
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return sessions
+      .filter((s) => new Date(s.date).getTime() >= cutoff)
+      .reduce((sum, s) => sum + getSessionCalories(s), 0);
+  }, [sessions]);
 
   const weekDiff = stats.prevWeekVolume
     ? Math.round(((stats.weekVolume - stats.prevWeekVolume) / stats.prevWeekVolume) * 100)
@@ -373,6 +425,20 @@ function ResumenTab({
           value={String(stats.uniqueExercises)}
           sub="en el historial"
         />
+        {totalCalories > 0 && (
+          <StatCard
+            label="Calorías totales"
+            value={`${totalCalories.toLocaleString()} kcal`}
+            sub="registradas"
+          />
+        )}
+        {weekCalories > 0 && (
+          <StatCard
+            label="Calorías esta semana"
+            value={`${weekCalories.toLocaleString()} kcal`}
+            sub="últimos 7 días"
+          />
+        )}
       </div>
 
       {/* Metric + chart */}
@@ -801,6 +867,219 @@ function PPLTab({
   );
 }
 
+// ── Tab: Cardio ───────────────────────────────────────────────────────────────
+
+function CardioTab({
+  sessions,
+  weeksBack,
+}: {
+  sessions: Session[];
+  weeksBack: number;
+}) {
+  const cardioSessions = useMemo(
+    () => sessions.filter((s) => (s.cardioEntries?.length ?? 0) > 0),
+    [sessions],
+  );
+
+  const allTypes = useMemo(() => {
+    const types = new Set<CardioType>();
+    cardioSessions.forEach((s) => s.cardioEntries?.forEach((e) => types.add(e.type)));
+    return [...types];
+  }, [cardioSessions]);
+
+  const [selectedType, setSelectedType] = useState<CardioType | 'all'>('all');
+
+  const totalMinutes = useMemo(
+    () =>
+      cardioSessions.reduce(
+        (sum, s) => sum + (s.cardioEntries ?? []).reduce((m, e) => m + e.durationMinutes, 0),
+        0,
+      ),
+    [cardioSessions],
+  );
+  const totalCalories = useMemo(
+    () => cardioSessions.reduce((sum, s) => sum + getSessionCalories(s), 0),
+    [cardioSessions],
+  );
+  const totalKm = useMemo(
+    () =>
+      cardioSessions.reduce(
+        (sum, s) => sum + (s.cardioEntries ?? []).reduce((m, e) => m + (e.distanceKm ?? 0), 0),
+        0,
+      ),
+    [cardioSessions],
+  );
+
+  const weeklyData = useMemo(
+    () => getCardioWeeklyData(cardioSessions, weeksBack),
+    [cardioSessions, weeksBack],
+  );
+
+  const filteredSessions = useMemo(() => {
+    const base =
+      selectedType === 'all'
+        ? cardioSessions
+        : cardioSessions.filter((s) => s.cardioEntries?.some((e) => e.type === selectedType));
+    return [...base].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+    );
+  }, [cardioSessions, selectedType]);
+
+  if (cardioSessions.length === 0) {
+    return <EmptyState text="Completa sesiones de cardio para ver las estadísticas." />;
+  }
+
+  const hasChartData = weeklyData.some((d) => d.minutes > 0);
+
+  return (
+    <div className="space-y-5">
+      {/* Stats */}
+      <div className="px-4 grid grid-cols-2 gap-2.5">
+        <StatCard
+          label="Sesiones cardio"
+          value={String(cardioSessions.length)}
+          sub="completadas"
+        />
+        <StatCard
+          label="Tiempo total"
+          value={
+            totalMinutes >= 60
+              ? `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`
+              : `${totalMinutes} min`
+          }
+          sub="acumulado"
+        />
+        {totalCalories > 0 && (
+          <StatCard
+            label="Calorías quemadas"
+            value={`${totalCalories.toLocaleString()} kcal`}
+            sub="total registrado"
+          />
+        )}
+        {totalKm > 0.01 && (
+          <StatCard
+            label="Distancia total"
+            value={`${totalKm.toFixed(1)} km`}
+            sub="acumulada"
+          />
+        )}
+      </div>
+
+      {/* Weekly chart */}
+      {hasChartData && (
+        <div className="px-4 space-y-2">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+            Minutos por semana
+          </p>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart
+              data={weeklyData}
+              margin={{ top: 4, right: 4, left: -18, bottom: 0 }}
+              barSize={Math.max(6, Math.floor(300 / weeklyData.length) - 4)}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+              <XAxis
+                dataKey="period"
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip content={makeTooltip('min')} />
+              <Bar dataKey="minutes" fill={C.secondary} radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Type filter chips */}
+      {allTypes.length > 1 && (
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none px-4">
+          <button
+            type="button"
+            onClick={() => setSelectedType('all')}
+            className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+              selectedType === 'all'
+                ? 'bg-blue-500 border-blue-500 text-white'
+                : 'border-border text-muted-foreground hover:border-blue-400/50 hover:text-foreground'
+            }`}
+          >
+            Todos
+          </button>
+          {allTypes.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setSelectedType(t)}
+              className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                selectedType === t
+                  ? 'bg-blue-500 border-blue-500 text-white'
+                  : 'border-border text-muted-foreground hover:border-blue-400/50 hover:text-foreground'
+              }`}
+            >
+              {CARDIO_LABELS[t]}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Session history */}
+      <div className="px-4 space-y-2">
+        <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+          Historial
+        </p>
+        <div className="space-y-1.5">
+          {filteredSessions.map((s) => {
+            const entries = s.cardioEntries ?? [];
+            const mins = entries.reduce((m, e) => m + e.durationMinutes, 0);
+            const km = entries.reduce((m, e) => m + (e.distanceKm ?? 0), 0);
+            const kcal = getSessionCalories(s);
+            const types = [...new Set(entries.map((e) => CARDIO_LABELS[e.type]))];
+            const meta = [
+              km > 0 ? `${km.toFixed(1)} km` : null,
+              kcal > 0 ? `${kcal.toLocaleString()} kcal` : null,
+            ]
+              .filter(Boolean)
+              .join(' · ');
+
+            return (
+              <div
+                key={s.id}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-card border border-border"
+              >
+                <div className="shrink-0 w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <Activity className="h-4 w-4 text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{types.join(' + ')}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {new Date(s.date).toLocaleDateString('es-ES', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: '2-digit',
+                    })}
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-sm font-bold font-mono text-blue-400">{mins} min</p>
+                  {meta && (
+                    <p className="text-[10px] text-muted-foreground">{meta}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Admin user picker ─────────────────────────────────────────────────────────
 
 const ALL_USERS_KEY = '__all__';
@@ -975,11 +1254,12 @@ export default function ProgressPage() {
 
           {/* Tab bar */}
           <div className="px-4 pt-3">
-            <TabsList className="grid grid-cols-4 w-full h-8 text-[11px]">
-              <TabsTrigger value="resumen"   className="text-[11px]">Total</TabsTrigger>
-              <TabsTrigger value="ejercicio" className="text-[11px]">Ejercicio</TabsTrigger>
-              <TabsTrigger value="muscular"  className="text-[11px]">Muscular</TabsTrigger>
-              <TabsTrigger value="ppl"       className="text-[11px]">PPL</TabsTrigger>
+            <TabsList className="grid grid-cols-5 w-full h-8">
+              <TabsTrigger value="resumen"   className="text-[10px]">Total</TabsTrigger>
+              <TabsTrigger value="ejercicio" className="text-[10px]">Ejercicio</TabsTrigger>
+              <TabsTrigger value="muscular"  className="text-[10px]">Muscular</TabsTrigger>
+              <TabsTrigger value="ppl"       className="text-[10px]">PPL</TabsTrigger>
+              <TabsTrigger value="cardio"    className="text-[10px]">Cardio</TabsTrigger>
             </TabsList>
           </div>
 
@@ -1018,6 +1298,10 @@ export default function ProgressPage() {
               onMetricChange={setMetric}
               weeksBack={weeksBack}
             />
+          </TabsContent>
+
+          <TabsContent value="cardio" className="pt-4 pb-8">
+            <CardioTab sessions={sessions} weeksBack={weeksBack} />
           </TabsContent>
         </Tabs>
       </div>
