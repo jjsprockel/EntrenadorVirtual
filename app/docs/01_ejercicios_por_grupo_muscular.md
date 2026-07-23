@@ -572,6 +572,88 @@ Cada ejercicio incluye:
 
 ---
 
+### E-10 · Pull-Over en Polea Alta de Pie
+**EN:** Standing Cable Pullover | Straight-Arm Pulldown
+**Patrón:** Tracción vertical | **Equipamiento:** Polea alta, cuerda o barra | **Nivel:** Principiante–Intermedio
+
+**Músculos primarios:** Dorsal ancho (énfasis en la inserción inferior y estiramiento máximo)
+**Músculos secundarios:** Redondo mayor, tríceps (cabeza larga), core
+
+**Ejecución:**
+1. De pie frente a la polea alta. Tomar la cuerda (o barra recta) con ambas manos a la anchura de los hombros, agarre prono.
+2. Inclinarse ligeramente hacia adelante, brazos casi extendidos con una pequeña flexión de codo fija durante todo el movimiento.
+3. Llevar las manos en arco descendente hacia los muslos, apretando el dorsal en la parte baja.
+4. Regresar de forma controlada hasta que los brazos queden paralelos al suelo o ligeramente por encima, manteniendo tensión.
+
+**Tips prácticos:**
+- Mantener los codos casi extendidos durante todo el recorrido; son los hombros quienes deben moverse, no el codo.
+- Es uno de los mejores ejercicios para sentir y conectar con el dorsal en el estiramiento.
+- Útil como ejercicio de calentamiento o de "activación" del dorsal antes de jalones o dominadas.
+
+**Pitfalls:**
+- ❌ Doblar los codos durante el movimiento: convierte el ejercicio en un jalón de codo, no en una extensión de hombro.
+- ❌ Inclinación excesiva del torso: cambia el ángulo y reduce la activación del dorsal.
+- ❌ No controlar la fase excéntrica: se pierde el estiramiento que hace valioso al ejercicio.
+
+**Alternativas equivalentes:** E-08 (Pull-Over con mancuerna), E-01 (Dominadas)
+
+---
+
+### E-11 · Jalón Unilateral a la Cadera
+**EN:** Single-Arm Cable Pulldown to Hip | Unilateral Lat Pulldown
+**Patrón:** Tracción vertical | **Equipamiento:** Polea alta, agarre individual | **Nivel:** Intermedio
+
+**Músculos primarios:** Dorsal ancho (unilateral, énfasis en el estiramiento)
+**Músculos secundarios:** Redondo mayor, bíceps, core (anti-rotación)
+
+**Ejecución:**
+1. De pie o arrodillado frente a la polea alta. Tomar el agarre individual con una mano, brazo extendido hacia arriba.
+2. Mantener el torso estable y el core activado. El brazo libre puede apoyarse en la máquina para mayor estabilidad.
+3. Tirar el agarre hacia abajo y hacia la cadera del lado opuesto (diagonal), llevando el codo hacia la cadera del mismo lado.
+4. Apretar el dorsal en la parte baja del movimiento. Subir de forma controlada hasta el estiramiento completo.
+
+**Tips prácticos:**
+- El trabajo unilateral permite corregir asimetrías de fuerza y mejorar la conexión mente-músculo con el dorsal.
+- Excelente para quienes tienen dificultad para "sentir" el dorsal en jalones bilaterales.
+- Priorizar el rango de movimiento y el estiramiento sobre la carga.
+
+**Pitfalls:**
+- ❌ Rotar el torso para ayudar el movimiento: debe ser el hombro quien descienda, no la cadera que gira.
+- ❌ No extender el brazo completamente al subir: pierde el estiramiento máximo del dorsal.
+- ❌ Agarre demasiado tenso en la mano: provoca que el bíceps compense.
+
+**Alternativas equivalentes:** E-02 (Jalón al pecho), E-10 (Pull-Over en polea)
+
+---
+
+### E-12 · Jalón Unilateral Arrodillado
+**EN:** Kneeling Single-Arm Lat Pulldown | Kneeling Cable Pulldown
+**Patrón:** Tracción vertical | **Equipamiento:** Polea alta, agarre individual | **Nivel:** Intermedio
+
+**Músculos primarios:** Dorsal ancho (unilateral)
+**Músculos secundarios:** Redondo mayor, bíceps, core (estabilización total)
+
+**Ejecución:**
+1. Arrodillarse frente a la polea alta, a una distancia que permita que el brazo quede extendido con tensión. Rodillas a la anchura de las caderas.
+2. Tomar el agarre individual con una mano, brazo extendido hacia arriba y ligeramente hacia adelante.
+3. Mantener el torso erguido y el core muy activado (la posición arrodillada demanda mayor estabilidad que de pie).
+4. Tirar hacia abajo llevando el codo hacia la cadera del mismo lado, apretando el dorsal.
+5. Regresar de forma controlada hasta el estiramiento completo.
+
+**Tips prácticos:**
+- La posición arrodillada elimina el impulso de las piernas y obliga al core y al dorsal a trabajar más.
+- Ideal para avanzar la conexión mente-músculo antes de añadir peso en jalones bilaterales.
+- Usar un peso que permita completar el rango completo sin compensación.
+
+**Pitfalls:**
+- ❌ Sentarse hacia atrás sobre los talones durante el movimiento: reduce la tensión y desequilibra la postura.
+- ❌ Rotar la cadera o el torso: el movimiento debe ser puro de extensión de hombro.
+- ❌ Perder la posición vertical del torso: la espalda baja no debe arquearse.
+
+**Alternativas equivalentes:** E-11 (Jalón unilateral a la cadera), E-02 (Jalón al pecho bilateral)
+
+---
+
 ---
 
 # HOMBROS
@@ -717,6 +799,35 @@ Cada ejercicio incluye:
 
 ---
 
+### H-06 · Jalón Lateral en Polea
+**EN:** Cable Lateral Raise | Single-Arm Cable Lateral Raise
+**Patrón:** Aislamiento | **Equipamiento:** Polea baja, agarre individual | **Nivel:** Principiante
+
+**Músculos primarios:** Deltoides lateral (cabeza media)
+**Músculos secundarios:** Deltoides anterior, trapecio superior (estabilización)
+
+**Ejecución:**
+1. Colocar la polea en la posición más baja. Ponerse de lado a la máquina y tomar el agarre con la mano más alejada (la que cruza por delante del cuerpo).
+2. De pie, erguido, con el brazo ligeramente flexionado en el codo (ángulo fijo durante todo el movimiento).
+3. Elevar el brazo lateralmente hacia arriba hasta llegar a la altura del hombro o ligeramente por encima, trazando un arco.
+4. Controlar el descenso de forma lenta y continua, manteniendo tensión en el deltoides.
+
+**Tips prácticos:**
+- La polea mantiene tensión constante durante todo el recorrido, a diferencia de la mancuerna que pierde tensión en la parte baja.
+- Puede realizarse unilateralmente o en cable cruzado (ambos brazos simultáneamente desde poleas opuestas).
+- Usar peso ligero; el deltoides lateral es un músculo pequeño que se fatiga rápido con cargas altas.
+- El codo debe mantenerse casi extendido y la muñeca "rota" ligeramente hacia abajo al subir (como si vaciara una jarra).
+
+**Pitfalls:**
+- ❌ Elevar el hombro ipsilateral: el trapecio superior sustituye al deltoides lateral.
+- ❌ Doblar el codo en exceso durante la elevación: reduce el brazo de palanca y la activación del deltoides.
+- ❌ Usar impulso del torso o del brazo libre para subir: exceso de peso.
+- ❌ No controlar la bajada: se pierde la fase excéntrica, que es muy efectiva en este músculo.
+
+**Alternativas equivalentes:** H-03 (Elevaciones laterales con mancuerna), H-01 (Press militar)
+
+---
+
 ---
 
 # BÍCEPS
@@ -845,6 +956,35 @@ Cada ejercicio incluye:
 - ❌ "Arrancar" el peso desde el fondo: el bíceps está en posición vulnerable en la extensión.
 
 **Alternativas equivalentes:** B-02 (Curl mancuerna inclinado), B-04 (Curl polea)
+
+---
+
+### B-06 · Curl de Bíceps en Banco Inclinado
+**EN:** Incline Dumbbell Curl | Incline Curl
+**Patrón:** Aislamiento (flexión de codo) | **Equipamiento:** Mancuernas, banco inclinado | **Nivel:** Principiante–Intermedio
+
+**Músculos primarios:** Bíceps braquial (énfasis en la cabeza larga y el estiramiento máximo)
+**Músculos secundarios:** Braquial, braquiorradial
+
+**Ejecución:**
+1. Sentarse en un banco inclinado entre 45° y 60°. Espalda completamente apoyada en el respaldo, hombros hacia atrás.
+2. Dejar colgar los brazos a los lados del banco con las mancuernas en agarre neutro (palmas enfrentadas) o supino (palmas hacia arriba).
+3. Flexionar los codos subiendo las mancuernas hacia los hombros. No mover los hombros ni el torso para ayudar.
+4. Al bajar, extender los brazos completamente aprovechando el estiramiento aumentado que da el banco inclinado.
+
+**Tips prácticos:**
+- La inclinación del banco pone la cabeza larga del bíceps en estiramiento máximo al inicio, lo que aumenta la tensión en ese rango y potencia el crecimiento.
+- Es uno de los ejercicios más efectivos para desarrollar el pico del bíceps.
+- Reducir el peso respecto al curl de pie: el ángulo hace el ejercicio más difícil en el estiramiento.
+- Puede hacerse con ambos brazos simultáneamente o alternando.
+
+**Pitfalls:**
+- ❌ Inclinar el banco demasiado vertical (>70°): reduce el ángulo de estiramiento y se parece a un curl de pie normal.
+- ❌ Levantar los hombros al subir: cambia el punto de pivote y reduce el rango efectivo.
+- ❌ No bajar completamente: se pierde el estiramiento que es la ventaja de este ejercicio.
+- ❌ Balancear el torso: los pies deben estar firmes en el suelo.
+
+**Alternativas equivalentes:** B-05 (Curl Scott), B-04 (Curl en polea)
 
 ---
 
