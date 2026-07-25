@@ -2155,6 +2155,34 @@ Cada ejercicio incluye:
 
 ---
 
+### I-14 · Patada de Glúteo con Rodilla Flexionada
+**EN:** Bent-Knee Glute Kickback | Kneeling Cable Kickback | Glute Kickback Machine
+**Patrón:** Extensión de cadera (unilateral) | **Equipamiento:** Máquina de kickback o polea baja con estribo | **Nivel:** Principiante–Intermedio
+
+**Músculos primarios:** Glúteo mayor
+**Músculos secundarios:** Isquiotibiales (menor participación que en la versión de pierna extendida)
+
+**Ejecución:**
+1. Apoyarse en la máquina de kickback (o arrodillarse frente a la polea baja) con el pie de trabajo sobre la almohadilla o estribo, rodilla flexionada a 90°.
+2. Mantener la rodilla en ese ángulo fijo durante todo el movimiento — no se extiende la pierna en ningún momento.
+3. Empujar el pie hacia atrás y arriba, extendiendo la cadera, manteniendo la flexión de rodilla constante. El torso permanece estable, sin balanceo.
+4. Apretar el glúteo en el punto más alto. Regresar de forma controlada sin dejar caer el peso.
+5. Completar todas las repeticiones de un lado antes de cambiar de pierna.
+
+**Tips prácticos:**
+- Al mantener la rodilla flexionada (en vez de la pierna extendida como en I-06), se acorta el brazo de palanca de los isquiotibiales y se aísla más al glúteo mayor.
+- Ideal como ejercicio de "activación" al inicio de un día de pierna o como finalizador de alto volumen al final.
+- Priorizar la contracción y el rango de movimiento sobre la carga; es un ejercicio de aislamiento, no de fuerza máxima.
+
+**Pitfalls:**
+- ❌ Extender la rodilla durante el movimiento: se convierte en una variante híbrida y pierde el aislamiento del glúteo.
+- ❌ Arquear la espalda baja para ganar rango: la extensión debe venir de la cadera, no de la zona lumbar.
+- ❌ Usar impulso o balanceo del torso para mover más peso.
+
+**Alternativas equivalentes:** I-06 (Patada de glúteo, pierna extendida), I-03 (Hip thrust)
+
+---
+
 ---
 
 # TRAPECIO

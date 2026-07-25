@@ -8,11 +8,12 @@ function slot(
   repsMax: number,
   restSeconds: number,
   notes?: string,
+  alternativeCodes?: string[],
 ): ExerciseSlot {
   return {
     id: crypto.randomUUID(),
     exerciseCode,
-    alternativeCodes: [],
+    alternativeCodes: alternativeCodes ?? [],
     sets,
     repsTarget: { min: repsMin, max: repsMax },
     restSeconds,
@@ -101,6 +102,69 @@ const pplSimpleLegsB = (): RoutineDay =>
     slot('PA-02', 3, 15, 20, 45),
   ]);
 
+// ── Rutina Weider — Un grupo muscular por día (6 días) ───────────────────────
+
+const weiderPecho = (): RoutineDay =>
+  day('Lunes — Pecho', ['pecho'], [
+    slot('P-01', 4, 8, 10, 150),
+    slot('P-02', 3, 10, 12, 120),
+    slot('P-09', 3, 10, 12, 90, undefined, ['P-04']),
+    slot('P-05', 3, 12, 15, 60),
+    slot('P-06', 3, 12, 15, 60),
+  ]);
+
+const weiderEspalda = (): RoutineDay =>
+  day('Martes — Espalda', ['espalda', 'trapecio'], [
+    slot('E-06', 4, 6, 8, 180),
+    slot('E-01', 4, 8, 10, 120, undefined, ['E-02']),
+    slot('E-03', 4, 8, 10, 120),
+    slot('E-05', 3, 10, 12, 90),
+    slot('E-10', 3, 12, 15, 60),
+    slot('TR-01', 3, 12, 15, 60),
+    slot('E-09', 3, 15, 20, 45),
+  ]);
+
+const weiderPiernas = (): RoutineDay =>
+  day('Miércoles — Piernas', ['cuadriceps', 'isquiotibiales_gluteos', 'pantorrillas'], [
+    slot('Q-01', 4, 8, 10, 180),
+    slot('I-01', 4, 10, 12, 120),
+    slot('Q-02', 3, 12, 15, 120),
+    slot('I-02', 3, 12, 15, 60),
+    slot('Q-05', 3, 15, 15, 60),
+    slot('PA-01', 4, 15, 20, 45),
+  ]);
+
+const weiderHombros = (): RoutineDay =>
+  day('Jueves — Hombros', ['hombros', 'trapecio'], [
+    slot('H-01', 4, 8, 10, 150),
+    slot('H-02', 3, 10, 12, 120),
+    slot('H-03', 4, 12, 15, 60),
+    slot('H-05', 3, 15, 20, 60),
+    slot('H-04', 3, 12, 15, 45),
+    slot('TR-05', 3, 12, 15, 60),
+  ]);
+
+const weiderBrazos = (): RoutineDay =>
+  day('Viernes — Brazos', ['biceps', 'triceps', 'antebrazos'], [
+    slot('B-01', 4, 8, 10, 90),
+    slot('T-01', 4, 8, 10, 90),
+    slot('B-06', 3, 10, 12, 60),
+    slot('T-04', 3, 10, 12, 60),
+    slot('B-03', 3, 12, 15, 45),
+    slot('T-02', 3, 12, 15, 45),
+    slot('AN-01', 3, 15, 20, 45),
+  ]);
+
+const weiderGluteosCore = (): RoutineDay =>
+  day('Sábado — Glúteos y Core', ['isquiotibiales_gluteos', 'core'], [
+    slot('I-03', 4, 10, 12, 120),
+    slot('Q-07', 3, 10, 12, 90, 'Por pierna'),
+    slot('I-13', 3, 15, 20, 45, 'Por pierna'),
+    slot('I-14', 3, 12, 15, 45, 'Por pierna'),
+    slot('C-09', 3, 12, 15, 45),
+    slot('C-10', 3, 15, 15, 45, 'Por lado'),
+  ]);
+
 // ── Rutina de Hellen — Split 5 días ──────────────────────────────────────────
 
 const hellenLunes = (): RoutineDay =>
@@ -170,6 +234,24 @@ export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
       pplSimplePushB(),
       pplSimplePullB(),
       pplSimpleLegsB(),
+    ],
+  },
+  {
+    id: 'weider-6dias',
+    name: 'Rutina Weider — Un grupo muscular por día',
+    description:
+      'División clásica de gimnasio (6 días): cada sesión se dedica a un solo grupo muscular con más volumen. Pecho, Espalda, Piernas, Hombros, Brazos y Glúteos/Core.',
+    objective: 'hipertrofia',
+    level: 'intermedio',
+    daysPerWeek: 6,
+    durationWeeks: 0,
+    days: () => [
+      weiderPecho(),
+      weiderEspalda(),
+      weiderPiernas(),
+      weiderHombros(),
+      weiderBrazos(),
+      weiderGluteosCore(),
     ],
   },
   {
