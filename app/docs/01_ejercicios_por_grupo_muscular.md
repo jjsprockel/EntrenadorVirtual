@@ -654,6 +654,33 @@ Cada ejercicio incluye:
 
 ---
 
+### E-13 · Hiperextensión Lumbar en Banco
+**EN:** Back Extension | Hyperextension | 45-Degree Back Extension
+**Patrón:** Bisagra de cadera (extensión de tronco) | **Equipamiento:** Banco de hiperextensión (45° o horizontal) | **Nivel:** Principiante
+
+**Músculos primarios:** Erectores espinales (zona lumbar)
+**Músculos secundarios:** Glúteo mayor, isquiotibiales
+
+**Ejecución:**
+1. Colocarse en el banco de hiperextensión con las caderas apoyadas en el cojín y los tobillos asegurados bajo los rodillos.
+2. Cruzar los brazos sobre el pecho (o sostener un disco) y dejar caer el torso hacia adelante hasta sentir el estiramiento en isquios/lumbar, sin redondear la espalda.
+3. Extender el torso hacia arriba contrayendo glúteos y espalda baja, hasta quedar en línea recta con las piernas (sin hiperextender más allá de la posición neutra).
+4. Bajar de forma controlada y repetir.
+
+**Tips prácticos:**
+- Mantener la espalda neutra en todo momento: no redondear ni hiperextender en exceso.
+- Para más énfasis en glúteo, enfocarse en apretar los glúteos al subir en vez de "tirar" con la zona lumbar.
+- Añadir peso con un disco sobre el pecho una vez dominado el patrón con peso corporal.
+
+**Pitfalls:**
+- ❌ Redondear la espalda baja en la fase baja: riesgo lumbar.
+- ❌ Hiperextender pasando de la línea recta: compresión lumbar excesiva.
+- ❌ Usar impulso o rebote en vez de control.
+
+**Alternativas equivalentes:** I-01 (Peso muerto rumano), I-04 (Buenos días)
+
+---
+
 ---
 
 # HOMBROS
@@ -1861,6 +1888,168 @@ Cada ejercicio incluye:
 
 ---
 
+### C-11 · Encogimientos con Rodillas Flexionadas con Disco
+**EN:** Weighted Reverse Crunch | Bent-Knee Hip Raise with Plate
+**Patrón:** Core (flexión de cadera/tronco) | **Equipamiento:** Disco o mancuerna, colchoneta | **Nivel:** Principiante–Intermedio
+
+**Músculos primarios:** Recto abdominal (porción inferior)
+**Músculos secundarios:** Oblicuos, flexores de cadera
+
+**Ejecución:**
+1. Acostarse boca arriba, rodillas flexionadas a 90°, sosteniendo un disco entre los pies o los tobillos.
+2. Manos apoyadas a los lados o bajo la zona lumbar para soporte. Contraer el abdomen para llevar las rodillas hacia el pecho, elevando ligeramente la cadera del suelo.
+3. Apretar el abdomen en el punto más alto, evitando usar impulso de piernas.
+4. Bajar de forma controlada sin dejar caer las piernas de golpe ni perder la tensión abdominal.
+
+**Tips prácticos:**
+- El disco entre los pies añade resistencia progresiva a un ejercicio de peso corporal.
+- Enfocarse en el movimiento de la pelvis (báscula posterior) más que en solo doblar las rodillas.
+- Controlar la velocidad, especialmente en el descenso.
+
+**Pitfalls:**
+- ❌ Usar impulso o balanceo de las piernas en vez de contraer el abdomen.
+- ❌ Arquear la espalda baja al bajar las piernas.
+- ❌ Rango de movimiento incompleto: solo mover las rodillas sin elevar la cadera.
+
+**Alternativas equivalentes:** C-04 (Elevación de piernas), C-12 (Elevación de piernas en piso)
+
+---
+
+### C-12 · Elevación de Piernas en Piso
+**EN:** Lying Leg Raise | Floor Leg Raise
+**Patrón:** Core (flexión de cadera) | **Equipamiento:** Ninguno (colchoneta) | **Nivel:** Principiante
+
+**Músculos primarios:** Recto abdominal (porción inferior), flexores de cadera
+**Músculos secundarios:** Oblicuos, core (estabilización lumbar)
+
+**Ejecución:**
+1. Acostarse boca arriba con las piernas extendidas y las manos bajo la zona lumbar o a los lados para soporte.
+2. Con las piernas casi rectas, elevarlas juntas hasta formar un ángulo de 90° con el suelo (o hasta donde la zona lumbar se mantenga pegada al piso).
+3. Bajar las piernas de forma controlada hasta un punto justo antes de que la espalda baja se despegue del suelo o pierda el contacto.
+4. Repetir sin dejar que los pies toquen el suelo entre repeticiones (tensión continua).
+
+**Tips prácticos:**
+- La clave es mantener la zona lumbar en contacto con el suelo durante todo el movimiento: si se despega, el rango se ha vuelto demasiado grande para el nivel actual.
+- Para principiantes, flexionar ligeramente las rodillas reduce la palanca y facilita el control.
+
+**Pitfalls:**
+- ❌ Arquear la espalda baja (despegarla del suelo) para bajar más las piernas.
+- ❌ Usar impulso e ir demasiado rápido.
+- ❌ Bajar las piernas completamente hasta el suelo, perdiendo la tensión.
+
+**Alternativas equivalentes:** C-04 (Elevación de piernas colgado/en banco), C-13 (Elevación de piernas flexionadas)
+
+---
+
+### C-13 · Elevación de Piernas Flexionadas
+**EN:** Bent-Knee Leg Raise | Tuck Leg Raise
+**Patrón:** Core (flexión de cadera) | **Equipamiento:** Ninguno (colchoneta) | **Nivel:** Principiante
+
+**Músculos primarios:** Recto abdominal (porción inferior)
+**Músculos secundarios:** Flexores de cadera, oblicuos
+
+**Ejecución:**
+1. Acostarse boca arriba, rodillas flexionadas a unos 90°, pies ligeramente elevados del suelo.
+2. Manos a los lados o bajo la zona lumbar. Llevar las rodillas hacia el pecho contrayendo el abdomen, sin usar impulso.
+3. Extender las piernas de forma controlada hasta casi la posición inicial, sin tocar el suelo con los talones ni perder la tensión abdominal.
+4. Repetir manteniendo el ritmo controlado en ambas fases.
+
+**Tips prácticos:**
+- Al mantener las rodillas flexionadas se reduce la palanca de las piernas comparado con C-12, haciendo esta variante más accesible para quienes recién empiezan a trabajar el core.
+- Ideal como progresión antes de pasar a la elevación de piernas rectas.
+
+**Pitfalls:**
+- ❌ Dejar caer los pies al suelo entre repeticiones: pierde la tensión continua.
+- ❌ Usar las manos para "ayudar" empujando el suelo excesivamente.
+- ❌ Arquear la espalda baja.
+
+**Alternativas equivalentes:** C-12 (Elevación de piernas en piso), C-11 (Encogimientos con rodillas flexionadas)
+
+---
+
+### C-14 · Escalador
+**EN:** Mountain Climbers
+**Patrón:** Core (anti-extensión, dinámico) | **Equipamiento:** Ninguno | **Nivel:** Principiante–Intermedio
+
+**Músculos primarios:** Recto abdominal, flexores de cadera
+**Músculos secundarios:** Hombros, core (estabilización), sistema cardiovascular
+
+**Ejecución:**
+1. Posición de plancha alta, manos bajo los hombros, cuerpo en línea recta de cabeza a talones.
+2. Llevar una rodilla hacia el pecho de forma explosiva pero controlada, manteniendo la cadera baja y estable.
+3. Regresar esa pierna a la posición inicial mientras se lleva la otra rodilla hacia el pecho, alternando en un ritmo continuo (como si se corriera en el lugar en posición de plancha).
+4. Mantener el core activado y la espalda plana durante todo el ejercicio, sin dejar que la cadera suba o baje en exceso.
+
+**Tips prácticos:**
+- Excelente ejercicio híbrido de core y acondicionamiento cardiovascular.
+- Controlar la velocidad según el objetivo: más lento para énfasis en control del core, más rápido para componente cardiovascular.
+- Mantener los hombros directamente sobre las manos durante todo el movimiento.
+
+**Pitfalls:**
+- ❌ Elevar demasiado la cadera: pierde tensión del core.
+- ❌ Dejar que la cadera se hunda: compensación lumbar.
+- ❌ Mover solo las piernas sin mantener el torso estable.
+
+**Alternativas equivalentes:** C-07 (Dead bug), C-01 (Plancha frontal)
+
+---
+
+### C-15 · Puente de Glúteo
+**EN:** Glute Bridge
+**Patrón:** Bisagra de cadera (extensión, bilateral) | **Equipamiento:** Ninguno (colchoneta) | **Nivel:** Principiante
+
+**Músculos primarios:** Glúteo mayor
+**Músculos secundarios:** Isquiotibiales, core (estabilización lumbar)
+
+**Ejecución:**
+1. Acostarse boca arriba, rodillas flexionadas, pies apoyados en el suelo a la anchura de la cadera, cerca de los glúteos.
+2. Brazos a los lados, palmas hacia abajo para apoyo. Empujar a través de los talones para elevar la cadera, extendiendo las caderas hasta formar una línea recta entre hombros, cadera y rodillas.
+3. Apretar los glúteos con fuerza en la posición superior, evitando arquear excesivamente la espalda baja.
+4. Bajar de forma controlada sin dejar caer la cadera de golpe.
+
+**Tips prácticos:**
+- Excelente ejercicio de activación de glúteo, ideal como calentamiento antes de sentadillas o peso muerto.
+- Progresar en carga con una banda elástica o disco sobre la cadera.
+- Empujar con los talones (no con la punta de los pies) maximiza el reclutamiento de glúteo sobre los isquiotibiales.
+
+**Pitfalls:**
+- ❌ Hiperextender la espalda baja en la parte alta en vez de extender la cadera.
+- ❌ Empujar con la punta de los pies: activa más isquiotibiales que glúteo.
+- ❌ Rango de movimiento incompleto.
+
+**Alternativas equivalentes:** I-03 (Hip thrust), I-18 (Extensión de cadera en máquina)
+
+---
+
+### C-16 · Sentadilla sin Peso
+**EN:** Bodyweight Squat | Air Squat
+**Patrón:** Sentadilla | **Equipamiento:** Ninguno | **Nivel:** Principiante
+
+**Músculos primarios:** Cuádriceps, glúteo mayor
+**Músculos secundarios:** Isquiotibiales, core (estabilización)
+
+**Ejecución:**
+1. Pies a la anchura de los hombros, puntas ligeramente hacia afuera. Brazos extendidos al frente para contrapeso o cruzados sobre el pecho.
+2. Iniciar el movimiento llevando la cadera hacia atrás y abajo, flexionando rodillas y caderas simultáneamente, manteniendo el pecho erguido.
+3. Descender hasta que los muslos queden paralelos al suelo (o más abajo, según movilidad), con las rodillas siguiendo la dirección de los pies.
+4. Empujar a través de todo el pie para regresar a la posición inicial, extendiendo cadera y rodilla al mismo tiempo.
+
+**Tips prácticos:**
+- Ejercicio base fundamental para aprender el patrón de sentadilla antes de añadir carga externa.
+- Útil como parte de un calentamiento, en circuitos de acondicionamiento, o para principiantes absolutos que están construyendo movilidad y control motor.
+- Enfocarse en la profundidad y la técnica antes que en la velocidad.
+
+**Pitfalls:**
+- ❌ Talones que se levantan del suelo: falta de movilidad de tobillo.
+- ❌ Rodillas colapsando hacia adentro.
+- ❌ Espalda redondeada en el descenso.
+
+**Alternativas equivalentes:** Q-06 (Sentadilla goblet), Q-01 (Sentadilla con barra)
+
+---
+
+---
+
 ## TABLA RESUMEN DE ALTERNATIVAS POR PATRÓN DE MOVIMIENTO
 
 | Patrón | Ejercicio principal | Alternativas |
@@ -2236,6 +2425,113 @@ Cada ejercicio incluye:
 - ❌ Realizar las repeticiones rápido, perdiendo el control de la fase excéntrica.
 
 **Alternativas equivalentes:** I-06 (Patada de glúteo, polea baja), I-15 (Patada cruzada), I-14 (Patada con rodilla flexionada)
+
+---
+
+### I-17 · Step-Up con Mancuernas
+**EN:** Dumbbell Step-Up
+**Patrón:** Sentadilla (unilateral) | **Equipamiento:** Mancuernas, banco o cajón | **Nivel:** Principiante–Intermedio
+
+**Músculos primarios:** Glúteo mayor, cuádriceps
+**Músculos secundarios:** Isquiotibiales, core (equilibrio)
+
+**Ejecución:**
+1. Pararse frente a un banco o cajón a la altura de la rodilla, con una mancuerna en cada mano a los lados.
+2. Colocar todo el pie de la pierna de trabajo sobre el banco. Empujar a través del talón para subir el cuerpo, extendiendo cadera y rodilla, sin impulsarse con la pierna de atrás.
+3. Llevar la pierna de atrás arriba hasta quedar de pie sobre el banco, con control.
+4. Bajar de forma controlada con la misma pierna, tocando el suelo suavemente con la pierna de atrás. Completar las repeticiones de un lado antes de cambiar.
+
+**Tips prácticos:**
+- Empujar con el talón (no con la punta) para maximizar el reclutamiento de glúteo.
+- Usar una altura de banco a la rodilla o un poco más abajo para principiantes.
+- Evitar rebotar la pierna trasera contra el suelo para "ayudarse".
+
+**Pitfalls:**
+- ❌ Usar la pierna de atrás para impulsarse: reduce el trabajo unilateral.
+- ❌ Inclinarse demasiado hacia adelante.
+- ❌ Banco demasiado alto para el nivel de fuerza actual.
+
+**Alternativas equivalentes:** Q-07 (Sentadilla búlgara), Q-04 (Zancada)
+
+---
+
+### I-18 · Extensión de Cadera en Máquina
+**EN:** Machine Hip Extension | Glute Extension Machine
+**Patrón:** Extensión de cadera | **Equipamiento:** Máquina de extensión de cadera | **Nivel:** Principiante
+
+**Músculos primarios:** Glúteo mayor
+**Músculos secundarios:** Isquiotibiales, erectores espinales
+
+**Ejecución:**
+1. Ajustar la máquina y colocar el pie de trabajo en la almohadilla, con el torso apoyado y ligeramente inclinado hacia adelante.
+2. Sujetar las manijas para estabilizar el torso.
+3. Empujar la almohadilla hacia atrás y abajo, extendiendo la cadera, manteniendo la rodilla con una ligera flexión constante.
+4. Apretar el glúteo en el punto final. Regresar de forma controlada sin dejar caer el peso.
+
+**Tips prácticos:**
+- Patrón similar a I-14 (patada con rodilla flexionada) pero con mayor estabilidad y carga posible al estar apoyado en la máquina.
+- Ideal para principiantes que buscan aprender a activar el glúteo sin depender del equilibrio.
+- Permite cargas más altas que las variantes de polea.
+
+**Pitfalls:**
+- ❌ Arquear la espalda baja para ganar rango.
+- ❌ Usar demasiado peso, lo que obliga a usar impulso.
+- ❌ No controlar la fase excéntrica.
+
+**Alternativas equivalentes:** I-14 (Patada con rodilla flexionada), I-03 (Hip thrust)
+
+---
+
+### I-19 · Step-Up con Polea desde Abajo
+**EN:** Low Cable Step-Up | Cable-Resisted Step-Up
+**Patrón:** Sentadilla (unilateral) | **Equipamiento:** Polea baja, cinturón o manilla, banco/cajón | **Nivel:** Intermedio
+
+**Músculos primarios:** Glúteo mayor, cuádriceps
+**Músculos secundarios:** Isquiotibiales, core (estabilización y anti-rotación)
+
+**Ejecución:**
+1. Enganchar un cinturón de lastre o manilla a la polea baja, colocada detrás del banco/cajón. Pararse de espaldas a la polea, con el cable tirando ligeramente hacia atrás.
+2. Colocar el pie de trabajo sobre el banco. La resistencia de la polea añade una componente de tracción hacia atrás que exige más del glúteo para completar la extensión de cadera.
+3. Empujar a través del talón para subir, extendiendo cadera y rodilla contra la resistencia del cable.
+4. Bajar de forma controlada, manteniendo tensión constante en el cable. Completar todas las repeticiones de un lado antes de cambiar.
+
+**Tips prácticos:**
+- La tensión constante de la polea mantiene el glúteo trabajando durante todo el recorrido, incluso al inicio del movimiento, a diferencia del step-up con mancuernas.
+- Empezar con poco peso para aprender el patrón antes de aumentar la carga.
+
+**Pitfalls:**
+- ❌ Dejar que el cable "tire" del torso hacia atrás, perdiendo la postura erguida.
+- ❌ Usar la pierna de atrás para ayudarse.
+- ❌ Ir demasiado rápido, perdiendo el control excéntrico.
+
+**Alternativas equivalentes:** I-17 (Step-up con mancuernas), Q-07 (Sentadilla búlgara)
+
+---
+
+### I-20 · Sentadilla Sumo con Mancuerna
+**EN:** Dumbbell Sumo Squat | Sumo Goblet Squat
+**Patrón:** Sentadilla (postura ancha) | **Equipamiento:** Mancuerna | **Nivel:** Principiante
+
+**Músculos primarios:** Glúteo mayor, aductores
+**Músculos secundarios:** Cuádriceps, isquiotibiales, core
+
+**Ejecución:**
+1. Postura con los pies bastante más anchos que los hombros, puntas ligeramente rotadas hacia afuera. Sostener una mancuerna con ambas manos, verticalmente, frente al cuerpo (estilo goblet).
+2. Descender flexionando cadera y rodillas, llevando las rodillas en la misma dirección que las puntas de los pies, manteniendo el torso erguido.
+3. Bajar hasta que los muslos queden paralelos al suelo o un poco más abajo, sin perder la posición neutra de la espalda.
+4. Empujar a través de todo el pie para subir, apretando glúteos y aductores en la parte alta.
+
+**Tips prácticos:**
+- La postura ancha y la rotación externa de cadera hacen que este ejercicio recluta más aductores y glúteo que la sentadilla goblet estándar.
+- Mantener el peso cerca del cuerpo, con los codos apuntando hacia abajo entre las piernas al final del descenso.
+- Buena opción para principiantes que buscan trabajar aductores sin máquina específica.
+
+**Pitfalls:**
+- ❌ Rodillas colapsando hacia adentro (valgo).
+- ❌ Postura demasiado ancha que limita la profundidad.
+- ❌ Inclinar el torso hacia adelante en exceso.
+
+**Alternativas equivalentes:** Q-06 (Sentadilla goblet), I-12 (Aducción de cadera de pie)
 
 ---
 
