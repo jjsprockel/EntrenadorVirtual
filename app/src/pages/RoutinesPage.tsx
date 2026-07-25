@@ -16,7 +16,8 @@ import { useRoutineStore } from '@/stores/routineStore';
 import { useUsersStore } from '@/stores/usersStore';
 import { SUGGESTED_ROUTINES } from '@/lib/suggestedRoutines';
 import type { SuggestedRoutine } from '@/lib/suggestedRoutines';
-import type { Routine } from '@/types/routine';
+import DayEditor from '@/components/routine/DayEditor';
+import type { Routine, RoutineDay } from '@/types/routine';
 
 const OBJECTIVE_LABELS: Record<Routine['objective'], string> = {
   hipertrofia: 'Hipertrofia',
@@ -159,8 +160,11 @@ function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
   const activeUserId = useUsersStore((s) => s.activeUserId);
   const [expanded, setExpanded] = useState(false);
   const [confirmActivate, setConfirmActivate] = useState(false);
+  const [days, setDays] = useState<RoutineDay[]>(() => suggested.days());
 
-  const days = suggested.days();
+  function updateDay(index: number, updated: RoutineDay) {
+    setDays((prev) => prev.map((d, i) => (i === index ? updated : d)));
+  }
 
   function handleActivate() {
     const routine: Routine = {
@@ -172,7 +176,7 @@ function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
       structure: 'custom',
       daysPerWeek: suggested.daysPerWeek,
       durationWeeks: suggested.durationWeeks,
-      days: suggested.days(),
+      days,
       periodization: { type: 'ninguna' },
       active: true,
       createdAt: new Date(),
@@ -213,18 +217,13 @@ function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
           <ChevronDown
             className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
           />
-          {expanded ? 'Ocultar días' : `Ver ${days.length} días`}
+          {expanded ? 'Ocultar y editar días' : `Ver y editar ${days.length} días`}
         </button>
 
         {expanded && (
-          <div className="flex flex-wrap gap-1.5">
-            {days.map((d) => (
-              <span
-                key={d.id}
-                className="text-[10px] bg-card border border-border text-muted-foreground px-2 py-0.5 rounded-md"
-              >
-                {d.dayName} · {d.exercises.length} ej.
-              </span>
+          <div className="space-y-2">
+            {days.map((d, i) => (
+              <DayEditor key={d.id} day={d} onChange={(updated) => updateDay(i, updated)} />
             ))}
           </div>
         )}
@@ -244,8 +243,8 @@ function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
           <AlertDialogHeader>
             <AlertDialogTitle>¿Activar "{suggested.name}"?</AlertDialogTitle>
             <AlertDialogDescription>
-              Se añadirá a tus rutinas y quedará como la rutina activa. Podrás editarla o
-              desactivarla después.
+              Se añadirá a tus rutinas (con los cambios que hayas hecho) y quedará como la
+              rutina activa. Podrás editarla o desactivarla después.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -281,21 +280,6 @@ export default function RoutinesPage() {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
-        {/* Suggested routines library — always available, one-tap activation */}
-        {SUGGESTED_ROUTINES.length > 0 && (
-          <div className="space-y-2.5">
-            <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-1.5">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              Rutinas sugeridas
-            </p>
-            <div className="space-y-3">
-              {SUGGESTED_ROUTINES.map((s) => (
-                <SuggestedRoutineCard key={s.id} suggested={s} />
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* User's own routines */}
         <div className="space-y-2.5">
           {routines.length > 0 && (
@@ -321,6 +305,21 @@ export default function RoutinesPage() {
             </div>
           )}
         </div>
+
+        {/* Suggested routines library — always available, one-tap activation */}
+        {SUGGESTED_ROUTINES.length > 0 && (
+          <div className="space-y-2.5">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Rutinas sugeridas
+            </p>
+            <div className="space-y-3">
+              {SUGGESTED_ROUTINES.map((s) => (
+                <SuggestedRoutineCard key={s.id} suggested={s} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
