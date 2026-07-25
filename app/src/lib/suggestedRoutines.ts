@@ -215,6 +215,17 @@ const hellenViernes = (): RoutineDay =>
     slot('I-09', 3, 15, 20, 45),
   ]);
 
+// ── Glúteo en Polea — 1 día ───────────────────────────────────────────────────
+
+const gluteoPoleaDia = (): RoutineDay =>
+  day('Glúteo en Polea', ['isquiotibiales_gluteos'], [
+    slot('I-06', 3, 15, 20, 45, 'Por pierna'),
+    slot('I-13', 3, 15, 20, 45, 'Por pierna'),
+    slot('I-14', 3, 15, 20, 45, 'Por pierna'),
+    slot('I-15', 3, 15, 20, 45, 'Por pierna'),
+    slot('I-16', 3, 15, 20, 45, 'Por pierna'),
+  ]);
+
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
@@ -270,5 +281,16 @@ export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
       hellenJueves(),
       hellenViernes(),
     ],
+  },
+  {
+    id: 'gluteo-polea-1dia',
+    name: 'Rutina de Glúteo en Polea',
+    description:
+      'Día único de aislamiento de glúteo con 5 variantes de patada en polea: estándar, lateral, rodilla flexionada, cruzada y polea alta.',
+    objective: 'hipertrofia',
+    level: 'principiante',
+    daysPerWeek: 1,
+    durationWeeks: 0,
+    days: () => [gluteoPoleaDia()],
   },
 ];
