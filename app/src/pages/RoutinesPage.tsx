@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Zap, Edit, Trash2, Calendar, Dumbbell } from 'lucide-react';
+import { Plus, Zap, Edit, Trash2, Calendar, Dumbbell, ChevronDown, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -14,6 +14,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useRoutineStore } from '@/stores/routineStore';
 import { useUsersStore } from '@/stores/usersStore';
+import { SUGGESTED_ROUTINES } from '@/lib/suggestedRoutines';
+import type { SuggestedRoutine } from '@/lib/suggestedRoutines';
 import type { Routine } from '@/types/routine';
 
 const OBJECTIVE_LABELS: Record<Routine['objective'], string> = {
@@ -152,6 +154,110 @@ function RoutineCard({ routine }: { routine: Routine }) {
   );
 }
 
+function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
+  const { addRoutine, setActiveRoutine } = useRoutineStore();
+  const activeUserId = useUsersStore((s) => s.activeUserId);
+  const [expanded, setExpanded] = useState(false);
+  const [confirmActivate, setConfirmActivate] = useState(false);
+
+  const days = suggested.days();
+
+  function handleActivate() {
+    const routine: Routine = {
+      id: crypto.randomUUID(),
+      userId: activeUserId ?? undefined,
+      name: suggested.name,
+      objective: suggested.objective,
+      level: suggested.level,
+      structure: 'custom',
+      daysPerWeek: suggested.daysPerWeek,
+      durationWeeks: suggested.durationWeeks,
+      days: suggested.days(),
+      periodization: { type: 'ninguna' },
+      active: true,
+      createdAt: new Date(),
+      startedAt: new Date(),
+    };
+    addRoutine(routine);
+    setActiveRoutine(routine.id);
+    setConfirmActivate(false);
+  }
+
+  return (
+    <>
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <p className="font-bold text-base leading-tight flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+              {suggested.name}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">{suggested.description}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3.5 w-3.5" />
+            {suggested.daysPerWeek} días/sem
+          </span>
+          <span className="capitalize">{suggested.level}</span>
+          <span className="capitalize">{suggested.objective}</span>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronDown
+            className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          />
+          {expanded ? 'Ocultar días' : `Ver ${days.length} días`}
+        </button>
+
+        {expanded && (
+          <div className="flex flex-wrap gap-1.5">
+            {days.map((d) => (
+              <span
+                key={d.id}
+                className="text-[10px] bg-card border border-border text-muted-foreground px-2 py-0.5 rounded-md"
+              >
+                {d.dayName} · {d.exercises.length} ej.
+              </span>
+            ))}
+          </div>
+        )}
+
+        <Button
+          size="sm"
+          className="w-full h-9 text-xs gap-1.5"
+          onClick={() => setConfirmActivate(true)}
+        >
+          <Zap className="h-3.5 w-3.5" />
+          Activar rutina
+        </Button>
+      </div>
+
+      <AlertDialog open={confirmActivate} onOpenChange={setConfirmActivate}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Activar "{suggested.name}"?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Se añadirá a tus rutinas y quedará como la rutina activa. Podrás editarla o
+              desactivarla después.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleActivate}>Activar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
+}
+
 export default function RoutinesPage() {
   const navigate = useNavigate();
   const { getUserRoutines } = useRoutineStore();
@@ -174,22 +280,47 @@ export default function RoutinesPage() {
         </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {routines.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
-            <Dumbbell className="h-12 w-12 opacity-20" />
-            <div className="text-center space-y-1">
-              <p className="text-sm font-medium text-foreground">No tienes rutinas todavía</p>
-              <p className="text-xs">Crea tu primera rutina para empezar a entrenar</p>
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        {/* Suggested routines library — always available, one-tap activation */}
+        {SUGGESTED_ROUTINES.length > 0 && (
+          <div className="space-y-2.5">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              Rutinas sugeridas
+            </p>
+            <div className="space-y-3">
+              {SUGGESTED_ROUTINES.map((s) => (
+                <SuggestedRoutineCard key={s.id} suggested={s} />
+              ))}
             </div>
-            <Button className="gap-2" onClick={() => navigate('/rutinas/nueva')}>
-              <Plus className="h-4 w-4" />
-              Crear rutina
-            </Button>
           </div>
-        ) : (
-          routines.map((r) => <RoutineCard key={r.id} routine={r} />)
         )}
+
+        {/* User's own routines */}
+        <div className="space-y-2.5">
+          {routines.length > 0 && (
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+              Mis rutinas
+            </p>
+          )}
+          {routines.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-4 text-muted-foreground">
+              <Dumbbell className="h-12 w-12 opacity-20" />
+              <div className="text-center space-y-1">
+                <p className="text-sm font-medium text-foreground">No tienes rutinas todavía</p>
+                <p className="text-xs">Crea tu primera rutina o activa una sugerida</p>
+              </div>
+              <Button className="gap-2" onClick={() => navigate('/rutinas/nueva')}>
+                <Plus className="h-4 w-4" />
+                Crear rutina
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {routines.map((r) => <RoutineCard key={r.id} routine={r} />)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
