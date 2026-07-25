@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, ChevronDown, ChevronUp, Images } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import ExerciseSlotCard from './ExerciseSlotCard';
 import ExercisePicker from './ExercisePicker';
+import DayExercisesReel from './DayExercisesReel';
 import type { RoutineDay, ExerciseSlot } from '@/types/routine';
 import type { MuscleGroup } from '@/types/exercise';
 import { MUSCLE_GROUP_LABELS } from '@/components/exercise/MuscleGroupBadge';
@@ -21,6 +22,7 @@ export default function DayEditor({ day, onChange, defaultOpen = false }: Props)
   const [open, setOpen] = useState(defaultOpen);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [replacingSlotId, setReplacingSlotId] = useState<string | null>(null);
+  const [reelOpen, setReelOpen] = useState(false);
 
   function updateDay(partial: Partial<RoutineDay>) {
     onChange({ ...day, ...partial });
@@ -74,25 +76,40 @@ export default function DayEditor({ day, onChange, defaultOpen = false }: Props)
   return (
     <div className="rounded-xl border border-border bg-card overflow-hidden">
       {/* Day header */}
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-3 w-full px-4 py-3 text-left hover:bg-muted/30 transition-colors"
-      >
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm text-foreground">{day.dayName}</p>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {day.exercises.length} ejercicio{day.exercises.length !== 1 ? 's' : ''}
-            {day.muscleGroups.length > 0 &&
-              ` · ${day.muscleGroups.map((g) => MUSCLE_GROUP_LABELS[g]).join(', ')}`}
-          </p>
-        </div>
-        {open ? (
-          <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+      <div className="flex items-center gap-1 w-full px-2 py-1.5">
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex items-center gap-3 flex-1 min-w-0 px-2 py-1.5 text-left rounded-lg hover:bg-muted/30 transition-colors"
+        >
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-foreground">{day.dayName}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {day.exercises.length} ejercicio{day.exercises.length !== 1 ? 's' : ''}
+              {day.muscleGroups.length > 0 &&
+                ` · ${day.muscleGroups.map((g) => MUSCLE_GROUP_LABELS[g]).join(', ')}`}
+            </p>
+          </div>
+          {open ? (
+            <ChevronUp className="h-4 w-4 text-muted-foreground shrink-0" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
+          )}
+        </button>
+        {day.exercises.length > 0 && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setReelOpen(true);
+            }}
+            className="shrink-0 p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+            aria-label="Ver imágenes de los ejercicios"
+          >
+            <Images className="h-4 w-4" />
+          </button>
         )}
-      </button>
+      </div>
 
       {open && (
         <div className="border-t border-border p-4 space-y-4">
@@ -178,6 +195,13 @@ export default function DayEditor({ day, onChange, defaultOpen = false }: Props)
         }}
         onSelect={addExercise}
         selectedCodes={day.exercises.map((s) => s.exerciseCode)}
+      />
+
+      <DayExercisesReel
+        open={reelOpen}
+        onClose={() => setReelOpen(false)}
+        dayName={day.dayName}
+        exercises={day.exercises}
       />
     </div>
   );

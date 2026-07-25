@@ -43,9 +43,15 @@ const STRUCTURE_LABELS: Record<Routine['structure'], string> = {
 
 function RoutineCard({ routine }: { routine: Routine }) {
   const navigate = useNavigate();
-  const { deleteRoutine, setActiveRoutine, activeRoutineId } = useRoutineStore();
+  const { deleteRoutine, setActiveRoutine, activeRoutineId, updateRoutine } = useRoutineStore();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const isActive = routine.id === activeRoutineId;
+
+  function updateDay(index: number, updated: RoutineDay) {
+    const days = routine.days.map((d, i) => (i === index ? updated : d));
+    updateRoutine(routine.id, { days });
+  }
 
   return (
     <>
@@ -97,6 +103,26 @@ function RoutineCard({ routine }: { routine: Routine }) {
             </span>
           ))}
         </div>
+
+        {/* Expand + edit days */}
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronDown
+            className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
+          />
+          {expanded ? 'Ocultar y editar días' : `Ver y editar ${routine.days.length} días`}
+        </button>
+
+        {expanded && (
+          <div className="space-y-2">
+            {routine.days.map((d, i) => (
+              <DayEditor key={d.id} day={d} onChange={(updated) => updateDay(i, updated)} />
+            ))}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex gap-2">
