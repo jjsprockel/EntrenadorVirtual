@@ -226,6 +226,25 @@ const gluteoPoleaDia = (): RoutineDay =>
     slot('I-16', 3, 15, 20, 45, 'Por pierna'),
   ]);
 
+// ── Glúteo-Femoral-Abdomen — 1 día ────────────────────────────────────────────
+
+const gluteoFemoralAbdomenDia = (): RoutineDay =>
+  day('Glúteo, Femoral y Abdomen', ['isquiotibiales_gluteos', 'cuadriceps', 'core'], [
+    slot('C-16', 1, 20, 20, 30, 'Calentamiento'),
+    slot('C-15', 1, 15, 15, 30, 'Calentamiento'),
+    slot('C-01', 1, 1, 1, 30, 'Calentamiento'),
+    slot('Q-04', 1, 20, 20, 30, 'Calentamiento'),
+    slot('I-03', 4, 8, 12, 120),
+    slot('I-20', 4, 10, 12, 90),
+    slot('I-06', 3, 12, 15, 60),
+    slot('I-01', 4, 8, 12, 120),
+    slot('I-02', 4, 10, 15, 90),
+    slot('I-04', 3, 10, 12, 90),
+    slot('C-02', 4, 20, 20, 45),
+    slot('C-12', 4, 15, 15, 45),
+    slot('C-01', 3, 1, 1, 45),
+  ]);
+
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
@@ -292,5 +311,16 @@ export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
     daysPerWeek: 1,
     durationWeeks: 0,
     days: () => [gluteoPoleaDia()],
+  },
+  {
+    id: 'gluteo-femoral-abdomen-1dia',
+    name: 'Glúteo-Femoral-Abdomen (1 día)',
+    description:
+      'Día único: activación con calentamiento (sentadilla, puente, plancha, zancada), trabajo pesado de glúteo/femoral y finalizador de abdomen.',
+    objective: 'hipertrofia',
+    level: 'intermedio',
+    daysPerWeek: 1,
+    durationWeeks: 0,
+    days: () => [gluteoFemoralAbdomenDia()],
   },
 ];
