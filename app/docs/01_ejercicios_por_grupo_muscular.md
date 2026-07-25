@@ -1180,6 +1180,33 @@ Cada ejercicio incluye:
 
 ---
 
+### T-07 · Extensión de Tríceps Unilateral sobre la Cabeza
+**EN:** Single-Arm Overhead Tricep Extension | One-Arm Dumbbell Overhead Extension
+**Patrón:** Aislamiento (unilateral) | **Equipamiento:** Mancuerna | **Nivel:** Principiante–Intermedio
+
+**Músculos primarios:** Tríceps braquial (énfasis en cabeza larga)
+**Músculos secundarios:** Core (estabilización, anti-inclinación lateral)
+
+**Ejecución:**
+1. Sentado o de pie, sostener una mancuerna con una mano, brazo extendido sobre la cabeza, codo apuntando al techo cerca de la oreja.
+2. Sujetar el codo de trabajo con la mano libre para mantenerlo fijo y evitar que se abra hacia afuera.
+3. Doblar el codo bajando la mancuerna por detrás de la cabeza de forma controlada, sin mover el hombro ni el torso.
+4. Extender el codo para subir, apretando el tríceps en la parte alta. Completar todas las repeticiones de un lado antes de cambiar.
+
+**Tips prácticos:**
+- El trabajo unilateral permite corregir asimetrías de fuerza entre ambos brazos y mejorar la conexión mente-músculo.
+- Sujetar el codo con la mano libre ayuda a mantenerlo estable, un problema común en la versión bilateral con mancuerna.
+- Usar menos peso que en la variante a dos manos (T-04); es más exigente en estabilidad por brazo.
+
+**Pitfalls:**
+- ❌ Dejar que el codo se abra hacia afuera durante el descenso: pierde tensión en el tríceps.
+- ❌ Inclinar el torso hacia el lado contrario para compensar el peso.
+- ❌ Mover el hombro en vez de solo el antebrazo: convierte el ejercicio en un press por encima de la cabeza.
+
+**Alternativas equivalentes:** T-04 (Extensión sobre la cabeza, bilateral), T-01 (Press francés)
+
+---
+
 ---
 
 # CUÁDRICEPS
