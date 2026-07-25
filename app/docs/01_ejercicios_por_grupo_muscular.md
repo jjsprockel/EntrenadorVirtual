@@ -2183,6 +2183,62 @@ Cada ejercicio incluye:
 
 ---
 
+### I-15 · Patada de Glúteo Cruzada
+**EN:** Crossover Cable Kickback | Cross-Body Glute Kickback
+**Patrón:** Extensión de cadera (unilateral) | **Equipamiento:** Polea baja, manilla de tobillo | **Nivel:** Intermedio
+
+**Músculos primarios:** Glúteo mayor
+**Músculos secundarios:** Glúteo medio, isquiotibiales
+
+**Ejecución:**
+1. Enganchar la manilla de tobillo a la polea baja. Partir con la pierna de trabajo cruzada por delante de la pierna de apoyo, en ligera aducción.
+2. Sujetarse de un apoyo frontal, torso ligeramente inclinado hacia adelante, core activado.
+3. Desde esa posición cruzada, llevar la pierna hacia atrás y en diagonal hacia el lado opuesto, extendiendo la cadera y terminando el movimiento en ligera abducción.
+4. Apretar el glúteo en el punto más alto, con la pierna casi extendida. Regresar de forma controlada hasta la posición cruzada inicial, sin perder tensión.
+5. Completar todas las repeticiones de un lado antes de cambiar de pierna.
+
+**Tips prácticos:**
+- Partir desde la posición cruzada (aducción) aumenta el rango de movimiento total y el estiramiento inicial del glúteo comparado con el kickback estándar.
+- Al combinar extensión con un componente diagonal de abducción, recluta tanto el glúteo mayor como el medio.
+- Priorizar el control en la fase excéntrica (el regreso a la posición cruzada) para maximizar el tiempo bajo tensión.
+
+**Pitfalls:**
+- ❌ No cruzar lo suficiente al inicio: se pierde el rango de movimiento adicional que hace valioso a este ejercicio.
+- ❌ Rotar el torso para generar impulso en vez de mover la pierna de forma aislada.
+- ❌ Balancear la pierna en vez de controlar el recorrido completo.
+
+**Alternativas equivalentes:** I-06 (Patada de glúteo estándar), I-14 (Patada con rodilla flexionada)
+
+---
+
+### I-16 · Patada de Glúteo con Polea Alta
+**EN:** High Cable Kickback | Overhead Cable Glute Kickback
+**Patrón:** Extensión de cadera (unilateral) | **Equipamiento:** Polea alta, manilla de tobillo, banco opcional | **Nivel:** Intermedio
+
+**Músculos primarios:** Glúteo mayor (énfasis en la porción superior)
+**Músculos secundarios:** Isquiotibiales, erectores espinales (estabilización)
+
+**Ejecución:**
+1. Enganchar la manilla de tobillo a la polea alta, quedando el cable detrás y por encima del cuerpo. Apoyar el torso sobre un banco inclinado o hiperextensión para mayor estabilidad, o inclinarlo manualmente hacia adelante (bisagra de cadera).
+2. Con el torso inclinado, la línea del cable queda diagonal desde arriba-atrás hasta el tobillo, cambiando la curva de resistencia respecto a la polea baja (más tensión en el rango medio de la extensión).
+3. Extender la cadera empujando la pierna hacia abajo y atrás, manteniendo la rodilla con una flexión leve y constante.
+4. Apretar el glúteo al final del recorrido. Regresar de forma controlada sin perder la inclinación del torso.
+5. Completar todas las repeticiones de un lado antes de cambiar de pierna.
+
+**Tips prácticos:**
+- La inclinación del torso hacia adelante es esencial: sin ella, la línea de tracción de la polea alta no genera tensión efectiva en el glúteo.
+- Es una variante útil para alternar la curva de resistencia respecto a los kickbacks de polea baja (I-06, I-15), evitando la adaptación al mismo patrón de tensión.
+- Apoyarse en un banco de hiperextensión reduce la demanda de estabilización lumbar y permite enfocarse mejor en el glúteo.
+
+**Pitfalls:**
+- ❌ Mantener el torso demasiado erguido: elimina la tensión efectiva del ejercicio.
+- ❌ Hiperextender la zona lumbar para ganar rango: el movimiento debe originarse en la cadera.
+- ❌ Realizar las repeticiones rápido, perdiendo el control de la fase excéntrica.
+
+**Alternativas equivalentes:** I-06 (Patada de glúteo, polea baja), I-15 (Patada cruzada), I-14 (Patada con rodilla flexionada)
+
+---
+
 ---
 
 # TRAPECIO
