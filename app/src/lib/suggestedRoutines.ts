@@ -7,6 +7,7 @@ function slot(
   repsMin: number,
   repsMax: number,
   restSeconds: number,
+  notes?: string,
 ): ExerciseSlot {
   return {
     id: crypto.randomUUID(),
@@ -16,6 +17,7 @@ function slot(
     repsTarget: { min: repsMin, max: repsMax },
     restSeconds,
     setType: 'normal',
+    notes,
   };
 }
 
@@ -37,6 +39,67 @@ export interface SuggestedRoutine {
   durationWeeks: number;
   days: () => RoutineDay[];
 }
+
+// ── PPL 6 días — Versión simple ──────────────────────────────────────────────
+
+const pplSimplePushA = (): RoutineDay =>
+  day('Push A', ['pecho', 'hombros', 'triceps'], [
+    slot('P-01', 4, 6, 8, 150),
+    slot('H-01', 3, 8, 10, 120),
+    slot('P-02', 3, 10, 12, 90),
+    slot('H-03', 3, 12, 15, 60),
+    slot('T-06', 3, 8, 10, 90),
+    slot('T-02', 2, 12, 15, 60),
+  ]);
+
+const pplSimplePullA = (): RoutineDay =>
+  day('Pull A', ['espalda', 'biceps'], [
+    slot('E-06', 4, 5, 6, 180),
+    slot('E-02', 4, 10, 12, 120),
+    slot('E-03', 3, 8, 10, 120),
+    slot('E-09', 3, 15, 20, 60),
+    slot('B-01', 3, 10, 12, 75),
+  ]);
+
+const pplSimpleLegsA = (): RoutineDay =>
+  day('Legs A', ['cuadriceps', 'isquiotibiales_gluteos', 'pantorrillas', 'core'], [
+    slot('Q-01', 4, 6, 8, 150),
+    slot('I-01', 3, 8, 10, 120),
+    slot('Q-02', 3, 10, 12, 90),
+    slot('I-07', 3, 12, 15, 60),
+    slot('PA-01', 3, 15, 20, 45),
+    slot('C-09', 3, 12, 15, 45),
+  ]);
+
+const pplSimplePushB = (): RoutineDay =>
+  day('Push B', ['pecho', 'hombros', 'triceps'], [
+    slot('P-04', 4, 8, 12, 120),
+    slot('H-02', 3, 10, 12, 90),
+    slot('P-06', 3, 12, 15, 60),
+    slot('H-03', 4, 15, 20, 45),
+    slot('T-01', 3, 10, 12, 75),
+    slot('T-02', 2, 15, 20, 45),
+  ]);
+
+const pplSimplePullB = (): RoutineDay =>
+  day('Pull B', ['espalda', 'biceps', 'trapecio'], [
+    slot('E-02', 4, 10, 12, 120),
+    slot('E-05', 3, 10, 12, 90),
+    slot('E-10', 3, 12, 15, 60),
+    slot('TR-01', 3, 12, 15, 60),
+    slot('B-06', 3, 10, 12, 75),
+    slot('B-03', 2, 12, 15, 45),
+  ]);
+
+const pplSimpleLegsB = (): RoutineDay =>
+  day('Legs B', ['isquiotibiales_gluteos', 'cuadriceps', 'pantorrillas'], [
+    slot('I-03', 4, 10, 12, 120),
+    slot('Q-07', 3, 10, 12, 90, 'Por pierna'),
+    slot('Q-05', 3, 12, 15, 60),
+    slot('I-02', 3, 12, 15, 60),
+    slot('I-13', 3, 15, 20, 45, 'Por pierna'),
+    slot('PA-02', 3, 15, 20, 45),
+  ]);
 
 // ── Rutina de Hellen — Split 5 días ──────────────────────────────────────────
 
@@ -91,6 +154,24 @@ const hellenViernes = (): RoutineDay =>
 // ── Registry ──────────────────────────────────────────────────────────────────
 
 export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
+  {
+    id: 'ppl-6dias-simple',
+    name: 'PPL 6 días — Versión simple',
+    description:
+      'Push / Pull / Legs x2 con progresión clásica de fuerza-hipertrofia. Plantilla directa para intermedios.',
+    objective: 'hipertrofia',
+    level: 'intermedio',
+    daysPerWeek: 6,
+    durationWeeks: 0,
+    days: () => [
+      pplSimplePushA(),
+      pplSimplePullA(),
+      pplSimpleLegsA(),
+      pplSimplePushB(),
+      pplSimplePullB(),
+      pplSimpleLegsB(),
+    ],
+  },
   {
     id: 'hellen-5dias',
     name: 'Rutina de Hellen',

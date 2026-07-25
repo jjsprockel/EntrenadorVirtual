@@ -2125,6 +2125,36 @@ Cada ejercicio incluye:
 
 ---
 
+### I-13 · Patada Lateral en Polea
+**EN:** Cable Standing Lateral Kickback | Standing Cable Hip Abduction (Ankle)
+**Patrón:** Aislamiento (unilateral) | **Equipamiento:** Polea baja, manilla de tobillo | **Nivel:** Principiante–Intermedio
+
+**Músculos primarios:** Glúteo medio, glúteo menor
+**Músculos secundarios:** Glúteo mayor (porción superior), tensor de la fascia lata, core (estabilización)
+
+**Ejecución:**
+1. Enganchar la manilla de tobillo a la polea baja y colocarla en el tobillo de la pierna a trabajar. Ponerse de lado a la máquina, sujetándose de un apoyo con la mano más cercana.
+2. Pierna de apoyo ligeramente flexionada, torso erguido y core activado.
+3. Con la pierna de trabajo casi extendida, llevarla lateralmente hacia afuera (alejándola de la polea), sin rotar la cadera ni el torso.
+4. Pausar brevemente en la posición final. Regresar de forma controlada hasta el punto de estiramiento, sin dejar que el peso tire de golpe.
+5. Completar todas las repeticiones de un lado antes de cambiar de pierna.
+
+**Tips prácticos:**
+- Movimiento unilateral: ideal para corregir asimetrías de fuerza entre glúteo medio izquierdo y derecho.
+- La tensión constante de la polea (a diferencia de la máquina de abducción sentada) mantiene el glúteo medio trabajando en todo el rango.
+- Mantener la cadera "cerrada" (sin abrir hacia el techo) es clave para aislar el glúteo medio y no compensar con flexores de cadera.
+- Peso ligero-moderado; se prioriza el control y la contracción sobre la carga.
+
+**Pitfalls:**
+- ❌ Rotar la cadera hacia afuera al levantar la pierna: convierte el movimiento en una combinación de rotación externa y flexión, perdiendo aislamiento.
+- ❌ Inclinar el torso hacia el lado contrario para "ayudar" a subir la pierna: reduce la activación del glúteo medio.
+- ❌ Usar impulso (balanceo) en vez de un movimiento controlado.
+- ❌ Elevar demasiado la pierna (por encima de la horizontal): activa el tensor de la fascia lata en exceso.
+
+**Alternativas equivalentes:** I-11 (Abducción de pie en máquina), I-09 (Abducción sentado), I-06 (Patada de glúteo)
+
+---
+
 ---
 
 # TRAPECIO
