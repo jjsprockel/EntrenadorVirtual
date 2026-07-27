@@ -1,11 +1,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { X, Plus, Minus, Volume2, VolumeX } from 'lucide-react';
+import { useSessionStore } from '@/stores/sessionStore';
 
 // ── SVG circular progress ─────────────────────────────────────────────────────
 const RADIUS = 48;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS; // ≈ 301.6
 
 // ── Completion sound (Web Audio API — no external files) ─────────────────────
+// Louder, longer four-tone rising sequence so it's noticeable even if the
+// phone is in a pocket or across the room.
 function playBeep() {
   try {
     // @ts-expect-error webkitAudioContext is non-standard
@@ -13,7 +16,7 @@ function playBeep() {
     if (!Ctx) return;
     const ctx = new Ctx();
 
-    const schedule = (freq: number, startOffset: number, dur: number) => {
+    const schedule = (freq: number, startOffset: number, dur: number, gainLevel: number) => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
@@ -21,15 +24,20 @@ function playBeep() {
       osc.type = 'sine';
       osc.frequency.value = freq;
       const t = ctx.currentTime + startOffset;
-      gain.gain.setValueAtTime(0.3, t);
+      gain.gain.setValueAtTime(gainLevel, t);
       gain.gain.exponentialRampToValueAtTime(0.001, t + dur);
       osc.start(t);
       osc.stop(t + dur + 0.05);
     };
 
-    // Two-tone beep: low → high = "done!"
-    schedule(660, 0,    0.12);
-    schedule(880, 0.18, 0.22);
+    // Four-tone rising sequence, louder and more prolonged than a single beep.
+    schedule(523, 0,    0.18, 0.5); // C5
+    schedule(659, 0.22, 0.18, 0.5); // E5
+    schedule(784, 0.44, 0.18, 0.5); // G5
+    schedule(1047, 0.66, 0.55, 0.55); // C6 — held longer for a clear "finish" tone
+
+    // Close the context once everything has finished playing.
+    setTimeout(() => ctx.close().catch(() => {}), 1400);
   } catch {
     // AudioContext unavailable — silently skip
   }
@@ -38,42 +46,88 @@ function playBeep() {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 interface Props {
-  seconds: number;
   onComplete: () => void;
   onSkip: () => void;
 }
 
-export default function RestTimer({ seconds, onComplete, onSkip }: Props) {
-  const [remaining, setRemaining] = useState(seconds);
+function computeRemaining(endAt: number | null): number {
+  if (!endAt) return 0;
+  return Math.max(0, Math.round((endAt - Date.now()) / 1000));
+}
+
+export default function RestTimer({ onComplete, onSkip }: Props) {
+  const restTimerEndAt = useSessionStore((s) => s.restTimerEndAt);
+  const restTimerTotalSeconds = useSessionStore((s) => s.restTimerTotalSeconds);
+  const adjustRestTimer = useSessionStore((s) => s.adjustRestTimer);
+
+  const [remaining, setRemaining] = useState(() => computeRemaining(restTimerEndAt));
   const [muted, setMuted] = useState(() => localStorage.getItem('restTimerMuted') === '1');
 
-  // Tracks the highest value remaining has reached so the arc always starts full
-  // and re-fills when the user adds time.
-  const maxRef = useRef(seconds);
-
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const doneRef = useRef(onComplete);
   doneRef.current = onComplete;
   const mutedRef = useRef(muted);
   mutedRef.current = muted;
+  const firedRef = useRef(false);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
+  // Recompute from the absolute end timestamp (wall clock), not a decrementing
+  // counter — this survives background tab throttling, since every tick just
+  // re-derives "how much time is actually left" instead of trusting that the
+  // interval ticked exactly once per second.
   useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current!);
-          if (!mutedRef.current) playBeep();
-          // Small delay so the beep starts before the component unmounts
-          setTimeout(() => doneRef.current(), 80);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    firedRef.current = false;
+
+    function tick() {
+      const next = computeRemaining(restTimerEndAt);
+      setRemaining(next);
+      if (next <= 0 && !firedRef.current) {
+        firedRef.current = true;
+        if (!mutedRef.current) playBeep();
+        if (!mutedRef.current && navigator.vibrate) navigator.vibrate([250, 100, 250]);
+        setTimeout(() => doneRef.current(), 80);
+      }
+    }
+
+    tick();
+    const interval = setInterval(tick, 250);
+
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') tick();
+    }
+    document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibility);
     };
-  }, []);
+  }, [restTimerEndAt]);
+
+  // Keep the screen awake (Android/Chrome) while the rest timer is running.
+  // Wake locks auto-release when the tab is hidden, so re-acquire on return.
+  useEffect(() => {
+    if (!('wakeLock' in navigator)) return;
+
+    async function acquire() {
+      try {
+        wakeLockRef.current = await navigator.wakeLock.request('screen');
+      } catch {
+        // Permission denied or unsupported — timer still works, screen may sleep
+      }
+    }
+
+    if (remaining > 0 && document.visibilityState === 'visible') acquire();
+
+    function handleVisibility() {
+      if (document.visibilityState === 'visible' && remaining > 0) acquire();
+    }
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      wakeLockRef.current?.release().catch(() => {});
+      wakeLockRef.current = null;
+    };
+  }, [remaining > 0]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleMute() {
     setMuted((m) => {
@@ -84,16 +138,18 @@ export default function RestTimer({ seconds, onComplete, onSkip }: Props) {
   }
 
   function adjust(delta: number) {
-    setRemaining((r) => {
-      const next = Math.max(5, r + delta);
-      if (next > maxRef.current) maxRef.current = next;
-      return next;
-    });
+    adjustRestTimer(delta);
+  }
+
+  function handleSkip() {
+    firedRef.current = true;
+    onSkip();
   }
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
-  const progress = remaining / maxRef.current;
+  const total = restTimerTotalSeconds || 1;
+  const progress = remaining / total;
   const strokeOffset = CIRCUMFERENCE * (1 - progress);
 
   return (
@@ -156,7 +212,7 @@ export default function RestTimer({ seconds, onComplete, onSkip }: Props) {
             {/* Skip */}
             <button
               type="button"
-              onClick={onSkip}
+              onClick={handleSkip}
               className="flex-1 flex items-center justify-center gap-1.5 text-sm font-semibold text-muted-foreground hover:text-foreground border border-border hover:border-primary/40 rounded-xl py-2.5 transition-colors"
             >
               <X className="h-4 w-4" />

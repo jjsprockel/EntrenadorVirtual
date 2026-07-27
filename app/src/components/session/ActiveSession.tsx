@@ -40,8 +40,16 @@ import type { ExerciseSlot } from '@/types/routine';
 
 export default function ActiveSession() {
   const activeSession = useSessionStore((s) => s.activeSession);
-  const { logSet, completeSession, cancelSession, updateExercise, updateActiveSession } =
-    useSessionStore();
+  const {
+    logSet,
+    completeSession,
+    cancelSession,
+    updateExercise,
+    updateActiveSession,
+    startRestTimer,
+    clearRestTimer,
+  } = useSessionStore();
+  const restTimerEndAt = useSessionStore((s) => s.restTimerEndAt);
   const sessions = useSessionStore((s) => s.sessions);
   const { getByCode } = useExerciseStore();
   const preferRestTimer = useUsersStore((s) => s.getActiveUser()?.profile.preferRestTimer ?? true);
@@ -55,8 +63,6 @@ export default function ActiveSession() {
     return idx >= 0 ? idx : 0;
   });
 
-  const [showTimer, setShowTimer] = useState(false);
-  const [timerSeconds, setTimerSeconds] = useState(60);
   const [confirmCancel, setConfirmCancel] = useState(false);
 
   // Completion screen state
@@ -85,6 +91,7 @@ export default function ActiveSession() {
   currentExIdxRef.current = currentExIdx;
 
   const isComplete = activeSession != null && currentExIdx === -1;
+  const showTimer = restTimerEndAt != null;
 
   useEffect(() => {
     const interval = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -121,8 +128,7 @@ export default function ActiveSession() {
       : true;
 
     if (hasMoreWork && preferRestTimer) {
-      setTimerSeconds(restSecs);
-      setShowTimer(true);
+      startRestTimer(restSecs);
     }
 
     // Auto-advance to next incomplete exercise after this one finishes
@@ -141,7 +147,7 @@ export default function ActiveSession() {
   }
 
   function handleTimerDone() {
-    setShowTimer(false);
+    clearRestTimer();
     // Move focus to the current suggested exercise
     const idx = currentExIdxRef.current;
     if (idx >= 0) setExpandedIdx(idx);
@@ -546,9 +552,8 @@ export default function ActiveSession() {
       </div>
 
       {/* Rest timer */}
-      {showTimer && (
+      {restTimerEndAt != null && (
         <RestTimer
-          seconds={timerSeconds}
           onComplete={handleTimerDone}
           onSkip={handleTimerDone}
         />

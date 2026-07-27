@@ -12,12 +12,19 @@ interface CompleteOpts {
 interface SessionState {
   sessions: Session[];
   activeSession: Session | null;
+  // Rest timer target is an absolute timestamp (not a countdown) so it survives
+  // route navigation, backgrounding, and even a full app close/reopen.
+  restTimerEndAt: number | null;
+  restTimerTotalSeconds: number | null;
   startSession: (session: Session) => void;
   updateActiveSession: (partial: Partial<Session>) => void;
   logSet: (exerciseCode: string, set: CompletedSet) => void;
   updateExercise: (exerciseCode: string, partial: Partial<SessionExercise>) => void;
   completeSession: (opts?: CompleteOpts) => void;
   cancelSession: () => void;
+  startRestTimer: (seconds: number) => void;
+  adjustRestTimer: (deltaSeconds: number) => void;
+  clearRestTimer: () => void;
   getUserSessions: (userId: string, isAdmin: boolean) => Session[];
   getSessionsByUser: (userId: string) => Session[];
   getAllSessions: () => Session[];
@@ -29,6 +36,8 @@ export const useSessionStore = create<SessionState>()(
     (set, get) => ({
       sessions: [],
       activeSession: null,
+      restTimerEndAt: null,
+      restTimerTotalSeconds: null,
 
       startSession: (session) => set({ activeSession: session }),
 
@@ -80,11 +89,34 @@ export const useSessionStore = create<SessionState>()(
           cardioEntries: opts?.cardioEntries ?? activeSession.cardioEntries,
           totalCalories: opts?.totalCalories,
         };
-        set({ activeSession: null, sessions: [...sessions, completed] });
+        set({
+          activeSession: null,
+          sessions: [...sessions, completed],
+          restTimerEndAt: null,
+          restTimerTotalSeconds: null,
+        });
         syncEngine.enqueueSession(completed).catch(console.error);
       },
 
-      cancelSession: () => set({ activeSession: null }),
+      cancelSession: () =>
+        set({ activeSession: null, restTimerEndAt: null, restTimerTotalSeconds: null }),
+
+      startRestTimer: (seconds) =>
+        set({ restTimerEndAt: Date.now() + seconds * 1000, restTimerTotalSeconds: seconds }),
+
+      adjustRestTimer: (deltaSeconds) =>
+        set((state) => {
+          if (state.restTimerEndAt == null || state.restTimerTotalSeconds == null) return state;
+          const now = Date.now();
+          const currentRemaining = Math.max(0, Math.round((state.restTimerEndAt - now) / 1000));
+          const nextRemaining = Math.max(5, currentRemaining + deltaSeconds);
+          return {
+            restTimerEndAt: now + nextRemaining * 1000,
+            restTimerTotalSeconds: Math.max(state.restTimerTotalSeconds, nextRemaining),
+          };
+        }),
+
+      clearRestTimer: () => set({ restTimerEndAt: null, restTimerTotalSeconds: null }),
 
       getUserSessions: (userId, isAdmin) => {
         const { sessions } = get();
@@ -106,14 +138,24 @@ export const useSessionStore = create<SessionState>()(
       partialize: (state) => ({
         sessions: state.sessions,
         activeSession: state.activeSession,
+        restTimerEndAt: state.restTimerEndAt,
+        restTimerTotalSeconds: state.restTimerTotalSeconds,
       }),
       onRehydrateStorage: () => (state) => {
-        if (!state?.activeSession) return;
+        if (!state?.activeSession) {
+          if (state) {
+            state.restTimerEndAt = null;
+            state.restTimerTotalSeconds = null;
+          }
+          return;
+        }
         const startedAt = new Date(state.activeSession.startedAt).getTime();
         const hours8 = 8 * 60 * 60 * 1000;
         if (Date.now() - startedAt > hours8) {
           // Session is stale — discard it silently
           state.activeSession = null;
+          state.restTimerEndAt = null;
+          state.restTimerTotalSeconds = null;
         }
       },
     },

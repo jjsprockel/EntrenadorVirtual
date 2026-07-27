@@ -69,7 +69,7 @@ type ProfileFormData = z.infer<typeof profileSchema>;
 
 // ── Chip selector ─────────────────────────────────────────────────────────────
 
-function ChipGroup<T extends string>({
+function ChipGroup<T extends string | number>({
   options,
   labels,
   value,
@@ -417,7 +417,10 @@ function AdminUserList() {
 // ── Change password ───────────────────────────────────────────────────────────
 
 function ChangePassword() {
-  const { sessionUserId, changePassword } = useUsersStore();
+  // Use activeUserId (the profile currently being viewed), not sessionUserId
+  // (who is actually logged in) — otherwise an admin viewing another user's
+  // profile would silently change their OWN password instead of that user's.
+  const { activeUserId, changePassword } = useUsersStore();
   const updatePassword = useAuthStore((s) => s.updatePassword);
 
   const [curPw, setCurPw] = useState('');
@@ -443,7 +446,7 @@ function ChangePassword() {
         setTimeout(() => setStatus('idle'), 3000);
       }
     } else {
-      const ok = await changePassword(sessionUserId!, curPw, newPw);
+      const ok = await changePassword(activeUserId!, curPw, newPw);
       if (ok) {
         setStatus('success');
         setCurPw(''); setNewPw(''); setConfirmPw('');
@@ -729,10 +732,10 @@ export default function ProfilePage() {
               control={control}
               render={({ field }) => (
                 <ChipGroup
-                  options={[0.5, 1, 1.25, 2.5, 5] as unknown as ('0.5' | '1' | '1.25' | '2.5' | '5')[]}
-                  labels={{ '0.5': '0.5 kg', '1': '1 kg', '1.25': '1.25 kg', '2.5': '2.5 kg', '5': '5 kg' } as Record<string, string>}
-                  value={String(field.value) as never}
-                  onChange={(v) => field.onChange(Number(v))}
+                  options={[0.5, 1, 1.25, 2.5, 5] as const}
+                  labels={{ 0.5: '0.5 kg', 1: '1 kg', 1.25: '1.25 kg', 2.5: '2.5 kg', 5: '5 kg' }}
+                  value={field.value}
+                  onChange={field.onChange}
                 />
               )}
             />
