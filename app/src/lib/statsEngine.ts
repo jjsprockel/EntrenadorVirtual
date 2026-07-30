@@ -314,7 +314,9 @@ export function getExerciseSetHistory(
     if (history.length >= limit) break;
     const ex = s.exercises.find((e) => e.exerciseCode === exerciseCode);
     if (!ex) continue;
-    const sets = ex.completedSets.filter((cs) => cs.status === 'completed');
+    const sets = ex.completedSets
+      .filter((cs) => cs.status === 'completed')
+      .sort((a, b) => a.setNumber - b.setNumber);
     if (sets.length === 0) continue;
     history.push({ date: new Date(s.date), sets });
   }

@@ -294,7 +294,7 @@ const gluteoFemoralAbdomenDia = (): RoutineDay =>
 // ── Abdomen Minimalista — 1 día ───────────────────────────────────────────────
 
 const abdomenMinimalistaDia = (): RoutineDay =>
-  day('Abdomen Minimalista', ['core'], [
+  day('Sesión breve de Abdomen', ['core'], [
     slot('C-11', 3, 8, 12, 45),
     slot('C-13', 3, 8, 12, 45),
     slot('C-05', 3, 8, 12, 45),
@@ -396,7 +396,7 @@ export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
   },
   {
     id: 'abdomen-minimalista-1dia',
-    name: 'Sesión de Abdomen Minimalista',
+    name: 'Sesión breve de Abdomen',
     description:
       'Día único y directo: 3 ejercicios de core (recto abdominal inferior, superior y oblicuos) a 3 series de 8 a 12.',
     objective: 'hipertrofia',
