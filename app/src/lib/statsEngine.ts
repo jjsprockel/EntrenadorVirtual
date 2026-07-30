@@ -1,4 +1,4 @@
-import type { Session } from '@/types/session';
+import type { Session, CompletedSet } from '@/types/session';
 
 // ── Metric & time-range types ─────────────────────────────────────────────────
 
@@ -285,6 +285,41 @@ export function getExercisePoints(
         },
       ];
     });
+}
+
+// ── Per-set exercise history (for the "last sessions" panel during a workout) ──
+
+export interface ExerciseSessionHistory {
+  date: Date;
+  sets: CompletedSet[];
+}
+
+/**
+ * Returns, most-recent-first, the completed sets logged for `exerciseCode` in
+ * each of the last `limit` sessions that included it — full per-set detail
+ * (weight, reps, RIR), not aggregated like getExercisePoints.
+ */
+export function getExerciseSetHistory(
+  sessions: Session[],
+  exerciseCode: string,
+  limit = 6,
+): ExerciseSessionHistory[] {
+  const done = completed(sessions)
+    .slice()
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  const history: ExerciseSessionHistory[] = [];
+
+  for (const s of done) {
+    if (history.length >= limit) break;
+    const ex = s.exercises.find((e) => e.exerciseCode === exerciseCode);
+    if (!ex) continue;
+    const sets = ex.completedSets.filter((cs) => cs.status === 'completed');
+    if (sets.length === 0) continue;
+    history.push({ date: new Date(s.date), sets });
+  }
+
+  return history;
 }
 
 // ── Legacy exports (unchanged) ────────────────────────────────────────────────

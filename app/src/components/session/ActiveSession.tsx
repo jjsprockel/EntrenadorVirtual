@@ -33,6 +33,7 @@ import ExerciseLightbox from '@/components/exercise/ExerciseLightbox';
 import ExercisePicker from '@/components/routine/ExercisePicker';
 import SetLogger from './SetLogger';
 import RestTimer from './RestTimer';
+import ExerciseHistoryPanel from './ExerciseHistoryPanel';
 import CardioEntryForm from './CardioEntryForm';
 import type { CompletedSet, SessionExercise, CardioEntry } from '@/types/session';
 import { CARDIO_LABELS } from '@/types/session';
@@ -359,6 +360,9 @@ export default function ActiveSession() {
                       ))}
                     </div>
                   )}
+
+                  {/* Historial de entrenamientos anteriores para este ejercicio */}
+                  <ExerciseHistoryPanel exerciseCode={ex.exerciseCode} />
 
                   {/* SetLogger (visible for any exercise, even out of order) */}
                   {!isDone && !showTimer && (
