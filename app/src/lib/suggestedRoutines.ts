@@ -165,6 +165,52 @@ const weiderGluteosCore = (): RoutineDay =>
     slot('C-10', 3, 15, 15, 45, 'Por lado'),
   ]);
 
+// ── Torso-Pierna 4 días ───────────────────────────────────────────────────────
+
+const torsoPiernaTorsoA = (): RoutineDay =>
+  day('Torso A — Horizontal y Pesado', ['pecho', 'espalda', 'hombros', 'biceps', 'triceps'], [
+    slot('P-01', 4, 6, 8, 150),
+    slot('E-03', 4, 6, 8, 150),
+    slot('H-01', 3, 8, 10, 120),
+    slot('E-02', 3, 10, 12, 90),
+    slot('H-03', 3, 12, 15, 60),
+    slot('B-01', 3, 10, 12, 75),
+    slot('T-02', 3, 12, 15, 45),
+  ]);
+
+const torsoPiernaPiernaA = (): RoutineDay =>
+  day('Pierna A — Énfasis en Sentadilla', ['cuadriceps', 'isquiotibiales_gluteos', 'pantorrillas', 'core'], [
+    slot('Q-01', 4, 6, 8, 180),
+    slot('I-01', 3, 8, 10, 120),
+    slot('Q-02', 3, 10, 12, 120),
+    slot('I-02', 3, 12, 15, 60),
+    slot('PA-01', 4, 15, 20, 45),
+    slot('C-09', 3, 12, 15, 45),
+  ]);
+
+const torsoPiernaTorsoB = (): RoutineDay =>
+  day('Torso B — Vertical y Volumen', ['espalda', 'pecho', 'hombros', 'trapecio', 'biceps', 'triceps'], [
+    slot('E-01', 4, 8, 10, 150, undefined, ['E-02']),
+    slot('P-04', 4, 10, 12, 120),
+    slot('E-05', 3, 10, 12, 90),
+    slot('H-02', 3, 10, 12, 90),
+    slot('P-06', 3, 12, 15, 60),
+    slot('TR-01', 3, 12, 15, 60),
+    slot('B-06', 3, 10, 12, 75),
+    slot('T-01', 3, 10, 12, 60),
+  ]);
+
+const torsoPiernaPiernaB = (): RoutineDay =>
+  day('Pierna B — Bisagra y Glúteo', ['isquiotibiales_gluteos', 'cuadriceps', 'espalda'], [
+    slot('I-03', 4, 10, 12, 120),
+    slot('Q-07', 3, 10, 12, 90, 'Por pierna'),
+    slot('I-07', 3, 12, 15, 60),
+    slot('Q-05', 3, 12, 15, 60),
+    slot('E-13', 3, 12, 15, 60),
+    slot('I-13', 3, 15, 20, 45, 'Por pierna'),
+    slot('PA-02', 3, 15, 20, 45),
+  ]);
+
 // ── Rutina de Hellen — Split 5 días ──────────────────────────────────────────
 
 const hellenLunes = (): RoutineDay =>
@@ -291,6 +337,22 @@ export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
       weiderHombros(),
       weiderBrazos(),
       weiderGluteosCore(),
+    ],
+  },
+  {
+    id: 'torso-pierna-4dias',
+    name: 'Torso-Pierna 4 días',
+    description:
+      'Cada grupo muscular se entrena 2x/semana. Los días A cargan más peso con menos reps; los B suben el volumen y cambian los ángulos.',
+    objective: 'hipertrofia',
+    level: 'intermedio',
+    daysPerWeek: 4,
+    durationWeeks: 0,
+    days: () => [
+      torsoPiernaTorsoA(),
+      torsoPiernaPiernaA(),
+      torsoPiernaTorsoB(),
+      torsoPiernaPiernaB(),
     ],
   },
   {
