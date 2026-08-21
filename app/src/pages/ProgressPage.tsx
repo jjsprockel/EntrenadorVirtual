@@ -322,6 +322,21 @@ function getSessionCalories(s: Session): number {
   return (s.cardioEntries ?? []).reduce((sum, e) => sum + (e.calories ?? 0), 0);
 }
 
+function getSessionDurationMinutes(s: Session): number {
+  if (!s.completedAt) return 0;
+  const ms = new Date(s.completedAt).getTime() - new Date(s.startedAt).getTime();
+  return Math.max(0, Math.round(ms / 60000));
+}
+
+function fmtDuration(minutes: number): string {
+  if (minutes >= 60) {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+  return `${minutes} min`;
+}
+
 function getCardioWeeklyData(
   sessions: Session[],
   weeksBack: number,
@@ -386,6 +401,23 @@ function ResumenTab({
       .reduce((sum, s) => sum + getSessionCalories(s), 0);
   }, [sessions]);
 
+  const totalDurationMinutes = useMemo(
+    () => sessions.reduce((sum, s) => sum + getSessionDurationMinutes(s), 0),
+    [sessions],
+  );
+  const avgDurationMinutes = useMemo(
+    () => (sessions.length > 0 ? Math.round(totalDurationMinutes / sessions.length) : 0),
+    [sessions, totalDurationMinutes],
+  );
+
+  const recentSessions = useMemo(
+    () =>
+      [...sessions]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 10),
+    [sessions],
+  );
+
   const weekDiff = stats.prevWeekVolume
     ? Math.round(((stats.weekVolume - stats.prevWeekVolume) / stats.prevWeekVolume) * 100)
     : null;
@@ -439,6 +471,20 @@ function ResumenTab({
             sub="últimos 7 días"
           />
         )}
+        {totalDurationMinutes > 0 && (
+          <StatCard
+            label="Tiempo total entrenado"
+            value={fmtDuration(totalDurationMinutes)}
+            sub="acumulado"
+          />
+        )}
+        {avgDurationMinutes > 0 && (
+          <StatCard
+            label="Duración promedio"
+            value={fmtDuration(avgDurationMinutes)}
+            sub="por sesión"
+          />
+        )}
       </div>
 
       {/* Metric + chart */}
@@ -446,6 +492,54 @@ function ResumenTab({
       <div className="px-4">
         <BarOrLineChart data={chartData} metric={metric} color={C.primary} />
       </div>
+
+      {/* Recent sessions — duration + calories per session */}
+      {recentSessions.length > 0 && (
+        <div className="px-4 space-y-2">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+            Últimas sesiones
+          </p>
+          <div className="space-y-1.5">
+            {recentSessions.map((s) => {
+              const durationMin = getSessionDurationMinutes(s);
+              const kcal = getSessionCalories(s);
+              const vol = s.totalVolume ?? 0;
+              return (
+                <div
+                  key={s.id}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg bg-card border border-border"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {s.dayName ?? 'Sesión'}
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">
+                      {new Date(s.date).toLocaleDateString('es-ES', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: '2-digit',
+                      })}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0 space-y-0.5">
+                    <p className="text-sm font-bold font-mono text-primary">
+                      {durationMin > 0 ? fmtDuration(durationMin) : '—'}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">
+                      {[
+                        vol > 0 ? `${vol.toLocaleString()} kg` : null,
+                        kcal > 0 ? `${kcal.toLocaleString()} kcal` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ') || '—'}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* PRs */}
       {prs.length > 0 && (
