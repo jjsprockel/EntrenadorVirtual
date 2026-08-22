@@ -337,6 +337,35 @@ function fmtDuration(minutes: number): string {
   return `${minutes} min`;
 }
 
+function getWeeklySessionMetric(
+  sessions: Session[],
+  weeksBack: number,
+  valueFn: (s: Session) => number,
+): { period: string; value: number }[] {
+  const effective = weeksBack === 0 ? 26 : weeksBack;
+  const MS_WEEK = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+
+  return Array.from({ length: effective }, (_, i) => {
+    const weekOffset = effective - 1 - i;
+    const weekEnd = now - weekOffset * MS_WEEK;
+    const weekStart = weekEnd - MS_WEEK;
+
+    const value = sessions
+      .filter((s) => {
+        const d = new Date(s.date).getTime();
+        return d >= weekStart && d < weekEnd;
+      })
+      .reduce((sum, s) => sum + valueFn(s), 0);
+
+    const period = new Date(weekStart).toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+    });
+    return { period, value };
+  });
+}
+
 function getCardioWeeklyData(
   sessions: Session[],
   weeksBack: number,
@@ -418,6 +447,17 @@ function ResumenTab({
     [sessions],
   );
 
+  const caloriesWeeklyData = useMemo(
+    () => getWeeklySessionMetric(sessions, weeksBack, getSessionCalories),
+    [sessions, weeksBack],
+  );
+  const durationWeeklyData = useMemo(
+    () => getWeeklySessionMetric(sessions, weeksBack, getSessionDurationMinutes),
+    [sessions, weeksBack],
+  );
+  const hasCaloriesData = caloriesWeeklyData.some((d) => d.value > 0);
+  const hasDurationData = durationWeeklyData.some((d) => d.value > 0);
+
   const weekDiff = stats.prevWeekVolume
     ? Math.round(((stats.weekVolume - stats.prevWeekVolume) / stats.prevWeekVolume) * 100)
     : null;
@@ -492,6 +532,70 @@ function ResumenTab({
       <div className="px-4">
         <BarOrLineChart data={chartData} metric={metric} color={C.primary} />
       </div>
+
+      {/* Calories per week */}
+      {hasCaloriesData && (
+        <div className="px-4 space-y-2">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+            Calorías por semana
+          </p>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart
+              data={caloriesWeeklyData}
+              margin={{ top: 4, right: 4, left: -18, bottom: 0 }}
+              barSize={Math.max(6, Math.floor(300 / caloriesWeeklyData.length) - 4)}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+              <XAxis
+                dataKey="period"
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip content={makeTooltip('kcal')} />
+              <Bar dataKey="value" fill={C.warning} radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Training duration per week */}
+      {hasDurationData && (
+        <div className="px-4 space-y-2">
+          <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+            Duración de entrenamiento por semana
+          </p>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart
+              data={durationWeeklyData}
+              margin={{ top: 4, right: 4, left: -18, bottom: 0 }}
+              barSize={Math.max(6, Math.floor(300 / durationWeeklyData.length) - 4)}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+              <XAxis
+                dataKey="period"
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+                interval="preserveStartEnd"
+              />
+              <YAxis
+                tick={{ fill: C.muted, fontSize: 9 }}
+                axisLine={false}
+                tickLine={false}
+              />
+              <Tooltip content={makeTooltip('min')} />
+              <Bar dataKey="value" fill={C.teal} radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
 
       {/* Recent sessions — duration + calories per session */}
       {recentSessions.length > 0 && (
