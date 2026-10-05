@@ -11,6 +11,7 @@ export interface UserProfile {
   name: string;
   age?: number;
   bodyWeightKg?: number;
+  heightCm?: number;
   level: Level;
   primaryObjective: Objective;
   units: 'kg' | 'lb';

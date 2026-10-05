@@ -57,6 +57,7 @@ const profileSchema = z.object({
   name: z.string().min(1, 'El nombre es requerido'),
   age: z.string().optional(),
   bodyWeightKg: z.string().optional(),
+  heightCm: z.string().optional(),
   level: z.enum(['principiante', 'intermedio', 'avanzado']),
   primaryObjective: z.enum(['hipertrofia', 'fuerza', 'mixto', 'resistencia']),
   units: z.enum(['kg', 'lb']),
@@ -539,6 +540,7 @@ export default function ProfilePage() {
       name: profile?.name ?? '',
       age: profile?.age != null ? String(profile.age) : '',
       bodyWeightKg: profile?.bodyWeightKg != null ? String(profile.bodyWeightKg) : '',
+      heightCm: profile?.heightCm != null ? String(profile.heightCm) : '',
       level: profile?.level ?? 'principiante',
       primaryObjective: profile?.primaryObjective ?? 'hipertrofia',
       units: profile?.units ?? 'kg',
@@ -555,6 +557,7 @@ export default function ProfilePage() {
       name: profile.name ?? '',
       age: profile.age != null ? String(profile.age) : '',
       bodyWeightKg: profile.bodyWeightKg != null ? String(profile.bodyWeightKg) : '',
+      heightCm: profile.heightCm != null ? String(profile.heightCm) : '',
       level: profile.level ?? 'principiante',
       primaryObjective: profile.primaryObjective ?? 'hipertrofia',
       units: profile.units ?? 'kg',
@@ -568,10 +571,12 @@ export default function ProfilePage() {
     if (!activeUserId) return;
     const age = data.age ? parseFloat(data.age) : undefined;
     const bodyWeightKg = data.bodyWeightKg ? parseFloat(data.bodyWeightKg) : undefined;
+    const heightCm = data.heightCm ? parseFloat(data.heightCm) : undefined;
     updateUserProfile(activeUserId, {
       name: data.name,
       age: age && !isNaN(age) ? age : undefined,
       bodyWeightKg: bodyWeightKg && !isNaN(bodyWeightKg) ? bodyWeightKg : undefined,
+      heightCm: heightCm && !isNaN(heightCm) ? heightCm : undefined,
       level: data.level as Level,
       primaryObjective: data.primaryObjective as Objective,
       units: data.units,
@@ -645,7 +650,7 @@ export default function ProfilePage() {
             />
           </FormField>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <FormField label="Edad" error={errors.age?.message}>
               <Input
                 {...register('age')}
@@ -655,7 +660,16 @@ export default function ProfilePage() {
                 className="h-11 font-mono"
               />
             </FormField>
-            <FormField label="Peso corporal (kg)" error={errors.bodyWeightKg?.message}>
+            <FormField label="Estatura (cm)" error={errors.heightCm?.message}>
+              <Input
+                {...register('heightCm')}
+                type="number"
+                inputMode="decimal"
+                placeholder="—"
+                className="h-11 font-mono"
+              />
+            </FormField>
+            <FormField label="Peso (kg)" error={errors.bodyWeightKg?.message}>
               <Input
                 {...register('bodyWeightKg')}
                 type="number"

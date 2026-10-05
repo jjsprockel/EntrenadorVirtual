@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   BarChart,
   Bar,
@@ -11,7 +12,10 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2, Dumbbell, ChevronDown, Activity } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2, Dumbbell, ChevronDown, Activity, Plus, Ruler } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import BodyFigure from '@/components/measurements/BodyFigure';
+import { useMeasurementStore } from '@/stores/measurementStore';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useExerciseStore } from '@/stores/exerciseStore';
@@ -32,6 +36,16 @@ import type { MetricType } from '@/lib/statsEngine';
 import type { MuscleGroup } from '@/types/exercise';
 import type { Session, CardioType } from '@/types/session';
 import { CARDIO_LABELS } from '@/types/session';
+import type { BodyMeasurement, MeasurementSiteId } from '@/types/measurement';
+import {
+  MEASUREMENT_NOISE_CM,
+  MEASUREMENT_SITES,
+  SITE_BY_ID,
+  fmtMeasurementDate,
+  measurementsInRange,
+  siteSideValue,
+  siteValue,
+} from '@/types/measurement';
 
 // ── Chart theme ───────────────────────────────────────────────────────────────
 
@@ -1278,6 +1292,345 @@ function CardioTab({
   );
 }
 
+// ── Body measurements tab ─────────────────────────────────────────────────────
+
+type BodyChartKey = MeasurementSiteId | 'peso';
+
+const DELTA_STYLE = {
+  up:   { stroke: 'stroke-primary',          text: 'text-primary',          label: 'Aumentó'  },
+  down: { stroke: 'stroke-blue-500',         text: 'text-blue-500',         label: 'Disminuyó' },
+  flat: { stroke: 'stroke-muted-foreground', text: 'text-muted-foreground', label: 'Sin cambio' },
+} as const;
+
+function deltaKind(delta: number | undefined): keyof typeof DELTA_STYLE {
+  if (delta == null || Math.abs(delta) < MEASUREMENT_NOISE_CM) return 'flat';
+  return delta > 0 ? 'up' : 'down';
+}
+
+function fmtDelta(delta: number | undefined, unit = 'cm'): string {
+  if (delta == null) return '—';
+  return `${delta > 0 ? '+' : ''}${delta.toFixed(1)} ${unit}`;
+}
+
+/** Latest value of a site within the given (sorted) measurements, with its index. */
+function latestSiteValue(list: BodyMeasurement[], site: MeasurementSiteId, before = list.length) {
+  for (let i = before - 1; i >= 0; i--) {
+    const v = siteValue(list[i], site);
+    if (v != null) return { value: v, index: i };
+  }
+  return undefined;
+}
+
+function firstSiteValue(list: BodyMeasurement[], site: MeasurementSiteId) {
+  for (let i = 0; i < list.length; i++) {
+    const v = siteValue(list[i], site);
+    if (v != null) return { value: v, index: i };
+  }
+  return undefined;
+}
+
+function BodyTab({
+  measurements,
+  heightCm,
+  weeksBack,
+  canEdit,
+}: {
+  measurements: BodyMeasurement[];
+  heightCm?: number;
+  weeksBack: number;
+  canEdit: boolean;
+}) {
+  const navigate = useNavigate();
+
+  const inRange = useMemo(
+    () => measurementsInRange(measurements, weeksBack),
+    [measurements, weeksBack],
+  );
+
+  const recordedSites = useMemo(
+    () => MEASUREMENT_SITES.filter((def) => inRange.some((m) => siteValue(m, def.id) != null)),
+    [inRange],
+  );
+  const weights = useMemo(
+    () => inRange.filter((m) => m.weightKg != null).map((m) => m.weightKg!),
+    [inRange],
+  );
+
+  const chartKeys: BodyChartKey[] = useMemo(
+    () => [...(weights.length > 0 ? (['peso'] as const) : []), ...recordedSites.map((d) => d.id)],
+    [weights, recordedSites],
+  );
+  const [chartKey, setChartKey] = useState<BodyChartKey | null>(null);
+  const activeKey = chartKey && chartKeys.includes(chartKey) ? chartKey : chartKeys[0];
+
+  const chartData = useMemo(() => {
+    if (!activeKey) return [];
+    return inRange
+      .map((m) => {
+        const period = fmtMeasurementDate(m.date, { day: 'numeric', month: 'short' });
+        if (activeKey === 'peso') return { period, value: m.weightKg };
+        const def = SITE_BY_ID[activeKey];
+        return def.bilateral
+          ? { period, left: siteSideValue(m, activeKey, 'left'), right: siteSideValue(m, activeKey, 'right') }
+          : { period, value: siteSideValue(m, activeKey, 'center') };
+      })
+      .filter((d) => Object.values(d).some((v) => typeof v === 'number'));
+  }, [inRange, activeKey]);
+
+  const newButton = canEdit && (
+    <Button
+      type="button"
+      className="w-full h-11 gap-2"
+      onClick={() => navigate('/progreso/medidas/nueva')}
+    >
+      <Plus className="h-4 w-4" />
+      Nueva medición
+    </Button>
+  );
+
+  if (measurements.length === 0) {
+    return (
+      <div className="px-4 space-y-4">
+        <div className="flex flex-col items-center gap-3 py-6 text-center">
+          <div className="h-48">
+            <BodyFigure
+              bands={MEASUREMENT_SITES.filter((d) => d.tier === 'basica').map((d) => ({ site: d.id }))}
+            />
+          </div>
+          <p className="text-sm font-semibold">Sigue la evolución de tu cuerpo</p>
+          <p className="text-xs text-muted-foreground max-w-xs">
+            Registra perímetros de cintura, pecho, brazos, piernas y más cada 2 a 4 semanas. La app
+            te guía paso a paso para que cada medición sea comparable.
+          </p>
+        </div>
+        {newButton}
+      </div>
+    );
+  }
+
+  const waistLast = latestSiteValue(inRange, 'cintura');
+  const waistFirst = firstSiteValue(inRange, 'cintura');
+  const waist = waistLast?.value;
+  const hip = latestSiteValue(inRange, 'cadera')?.value;
+  const waistDelta =
+    waistLast && waistFirst && waistLast.index > waistFirst.index
+      ? waistLast.value - waistFirst.value
+      : undefined;
+  const weightDelta = weights.length > 1 ? weights.at(-1)! - weights[0] : undefined;
+  const whtr = waist != null && heightCm ? waist / heightCm : undefined;
+  const whr = waist != null && hip != null ? waist / hip : undefined;
+
+  // Change of each site's latest value vs the previous measurement that recorded it
+  const rows = recordedSites.map((def) => {
+    const last = latestSiteValue(inRange, def.id)!;
+    const prev = latestSiteValue(inRange, def.id, last.index);
+    const first = firstSiteValue(inRange, def.id)!;
+    return {
+      def,
+      value: last.value,
+      deltaPrev: prev ? last.value - prev.value : undefined,
+      deltaFirst: last.index > first.index ? last.value - first.value : undefined,
+    };
+  });
+
+  const activeDef = activeKey && activeKey !== 'peso' ? SITE_BY_ID[activeKey] : undefined;
+
+  return (
+    <div className="space-y-5">
+      <div className="px-4">{newButton}</div>
+
+      {inRange.length === 0 ? (
+        <EmptyState text="Sin mediciones en este período. Prueba con un rango más amplio." />
+      ) : (
+        <>
+          {/* Stats */}
+          <div className="px-4 grid grid-cols-2 gap-2.5">
+            <StatCard
+              label="Peso"
+              value={weights.length > 0 ? `${weights.at(-1)} kg` : '—'}
+              sub={weightDelta != null ? `${fmtDelta(weightDelta, 'kg')} en el período` : 'sin variación registrada'}
+            />
+            <StatCard
+              label="Cintura"
+              value={waist != null ? `${waist.toFixed(1)} cm` : '—'}
+              sub={waistDelta != null ? `${fmtDelta(waistDelta)} en el período` : 'última medida'}
+            />
+            <StatCard
+              label="Cintura / estatura"
+              value={whtr != null ? whtr.toFixed(2) : '—'}
+              sub={
+                whtr != null
+                  ? whtr < 0.5 ? 'Saludable (< 0.5)' : 'Por encima de 0.5'
+                  : heightCm ? 'Mide tu cintura' : 'Agrega tu estatura en Perfil'
+              }
+            />
+            <StatCard
+              label="Cintura / cadera"
+              value={whr != null ? whr.toFixed(2) : '—'}
+              sub={whr != null ? 'índice de distribución' : 'Mide cintura y cadera'}
+            />
+          </div>
+
+          {/* Body map + change table */}
+          {rows.length > 0 && (
+            <div className="px-4 space-y-2">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+                Cambios vs. medición anterior
+              </p>
+              <div className="flex gap-3 items-center">
+                <div className="h-56 shrink-0">
+                  <BodyFigure
+                    bands={rows
+                      .filter((r) => r.def.id !== 'brazo_contraido' || !rows.some((o) => o.def.id === 'brazo_relajado'))
+                      .map((r) => ({ site: r.def.id, className: DELTA_STYLE[deltaKind(r.deltaPrev)].stroke }))}
+                  />
+                </div>
+                <div className="space-y-1.5 text-xs">
+                  {(['up', 'down', 'flat'] as const).map((k) => (
+                    <div key={k} className="flex items-center gap-2">
+                      <span className={`h-1 w-4 rounded-full bg-current ${DELTA_STYLE[k].text}`} />
+                      <span className="text-muted-foreground">{DELTA_STYLE[k].label}</span>
+                    </div>
+                  ))}
+                  <p className="text-[10px] text-muted-foreground pt-2 leading-snug">
+                    Cambios menores a {MEASUREMENT_NOISE_CM} cm pueden ser error de medición.
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-border bg-card overflow-hidden">
+                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-x-3 px-3 py-2 text-[10px] uppercase tracking-wide text-muted-foreground border-b border-border">
+                  <span>Medida</span>
+                  <span className="text-right w-14">Actual</span>
+                  <span className="text-right w-14">Δ ant.</span>
+                  <span className="text-right w-14">Δ inicio</span>
+                </div>
+                {rows.map(({ def, value, deltaPrev, deltaFirst }) => (
+                  <button
+                    key={def.id}
+                    type="button"
+                    onClick={() => setChartKey(def.id)}
+                    className="w-full grid grid-cols-[1fr_auto_auto_auto] gap-x-3 px-3 py-2 text-xs border-b border-border last:border-0 hover:bg-muted/40 text-left"
+                  >
+                    <span className="truncate">{def.label}</span>
+                    <span className="text-right w-14 font-mono font-semibold">{value.toFixed(1)}</span>
+                    <span className={`text-right w-14 font-mono ${DELTA_STYLE[deltaKind(deltaPrev)].text}`}>
+                      {deltaPrev != null ? fmtDelta(deltaPrev, '') : '—'}
+                    </span>
+                    <span className={`text-right w-14 font-mono ${DELTA_STYLE[deltaKind(deltaFirst)].text}`}>
+                      {deltaFirst != null ? fmtDelta(deltaFirst, '') : '—'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Evolution chart */}
+          {activeKey && (
+            <div className="space-y-2">
+              <p className="px-4 text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+                Evolución
+              </p>
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none px-4">
+                {chartKeys.map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setChartKey(k)}
+                    className={`shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                      activeKey === k
+                        ? 'bg-primary border-primary text-primary-foreground'
+                        : 'border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+                    }`}
+                  >
+                    {k === 'peso' ? 'Peso' : SITE_BY_ID[k].label}
+                  </button>
+                ))}
+              </div>
+              <div className="px-4">
+                {chartData.length < 2 ? (
+                  <div className="h-36 flex items-center justify-center text-xs text-muted-foreground text-center">
+                    Registra al menos dos mediciones para ver la evolución.
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height={180}>
+                    <LineChart data={chartData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+                      <XAxis
+                        dataKey="period"
+                        tick={{ fill: C.muted, fontSize: 9 }}
+                        axisLine={false}
+                        tickLine={false}
+                        interval="preserveStartEnd"
+                      />
+                      <YAxis
+                        tick={{ fill: C.muted, fontSize: 9 }}
+                        axisLine={false}
+                        tickLine={false}
+                        domain={[(min: number) => Math.floor(min - 1), (max: number) => Math.ceil(max + 1)]}
+                        allowDecimals={false}
+                      />
+                      {activeDef?.bilateral ? (
+                        <>
+                          <Tooltip content={makeMultiTooltip('cm')} />
+                          <Legend wrapperStyle={{ fontSize: 10 }} />
+                          <Line type="monotone" dataKey="left" name="Izquierdo" stroke={C.primary} strokeWidth={2} dot={{ fill: C.primary, r: 3 }} connectNulls />
+                          <Line type="monotone" dataKey="right" name="Derecho" stroke={C.secondary} strokeWidth={2} dot={{ fill: C.secondary, r: 3 }} connectNulls />
+                        </>
+                      ) : (
+                        <>
+                          <Tooltip content={makeTooltip(activeKey === 'peso' ? 'kg' : 'cm')} />
+                          <Line type="monotone" dataKey="value" stroke={C.primary} strokeWidth={2} dot={{ fill: C.primary, r: 3 }} activeDot={{ r: 5 }} connectNulls />
+                        </>
+                      )}
+                    </LineChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* History */}
+      <div className="px-4 space-y-2">
+        <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+          Historial
+        </p>
+        <div className="space-y-1.5">
+          {[...measurements].reverse().map((m) => {
+            const count = MEASUREMENT_SITES.filter((d) => siteValue(m, d.id) != null).length;
+            return (
+              <button
+                key={m.id}
+                type="button"
+                disabled={!canEdit}
+                onClick={() => navigate(`/progreso/medidas/${m.id}/editar`)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg bg-card border border-border text-left enabled:hover:border-primary/40 transition-colors"
+              >
+                <div className="shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Ruler className="h-4 w-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium">{fmtMeasurementDate(m.date, { dateStyle: 'medium' })}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {count} medida{count !== 1 ? 's' : ''}
+                    {m.notes ? ` · ${m.notes}` : ''}
+                  </p>
+                </div>
+                {m.weightKg != null && (
+                  <p className="text-sm font-bold font-mono text-primary shrink-0">{m.weightKg} kg</p>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Admin user picker ─────────────────────────────────────────────────────────
 
 const ALL_USERS_KEY = '__all__';
@@ -1380,6 +1733,16 @@ export default function ProgressPage() {
     [viewingId, allUsers],
   );
 
+  const getUserMeasurements = useMeasurementStore((s) => s.getUserMeasurements);
+  const allMeasurements = useMeasurementStore((s) => s.measurements);
+  const bodyUserId = isAdmin ? (viewingId === ALL_USERS_KEY ? null : viewingId) : activeUserId;
+  const measurements = useMemo(
+    () => (bodyUserId ? getUserMeasurements(bodyUserId, isAdmin && bodyUserId === activeUserId) : []),
+    [bodyUserId, isAdmin, activeUserId, getUserMeasurements, allMeasurements], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const bodyUser = bodyUserId ? allUsers.find((u) => u.id === bodyUserId) : undefined;
+
+  const [searchParams] = useSearchParams();
   const [timeRangeKey, setTimeRangeKey] = useState('8w');
   const [metric, setMetric] = useState<MetricType>('volume');
 
@@ -1444,7 +1807,7 @@ export default function ProgressPage() {
       )}
 
       <div className="flex-1 overflow-y-auto">
-        <Tabs defaultValue="resumen" className="flex flex-col h-full">
+        <Tabs defaultValue={searchParams.get('tab') ?? 'resumen'} className="flex flex-col h-full">
           {/* Time range */}
           <div className="pt-3 pb-1 border-b border-border">
             <TimeRangeSelector value={timeRangeKey} onChange={setTimeRangeKey} />
@@ -1452,12 +1815,13 @@ export default function ProgressPage() {
 
           {/* Tab bar */}
           <div className="px-4 pt-3">
-            <TabsList className="grid grid-cols-5 w-full h-8">
+            <TabsList className="grid grid-cols-6 w-full h-8">
               <TabsTrigger value="resumen"   className="text-[10px]">Total</TabsTrigger>
               <TabsTrigger value="ejercicio" className="text-[10px]">Ejercicio</TabsTrigger>
               <TabsTrigger value="muscular"  className="text-[10px]">Muscular</TabsTrigger>
               <TabsTrigger value="ppl"       className="text-[10px]">PPL</TabsTrigger>
               <TabsTrigger value="cardio"    className="text-[10px]">Cardio</TabsTrigger>
+              <TabsTrigger value="cuerpo"    className="text-[10px]">Cuerpo</TabsTrigger>
             </TabsList>
           </div>
 
@@ -1500,6 +1864,19 @@ export default function ProgressPage() {
 
           <TabsContent value="cardio" className="pt-4 pb-8">
             <CardioTab sessions={sessions} weeksBack={weeksBack} />
+          </TabsContent>
+
+          <TabsContent value="cuerpo" className="pt-4 pb-8">
+            {bodyUserId ? (
+              <BodyTab
+                measurements={measurements}
+                heightCm={bodyUser?.profile.heightCm}
+                weeksBack={weeksBack}
+                canEdit={bodyUserId === activeUserId}
+              />
+            ) : (
+              <EmptyState text="Selecciona un usuario para ver sus medidas corporales." />
+            )}
           </TabsContent>
         </Tabs>
       </div>

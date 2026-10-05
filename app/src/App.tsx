@@ -7,6 +7,7 @@ import RoutineBuilderPage from '@/pages/RoutineBuilderPage';
 import ExercisesPage from '@/pages/ExercisesPage';
 import ExerciseDetailPage from '@/pages/ExerciseDetailPage';
 import ProgressPage from '@/pages/ProgressPage';
+import MeasurementWizardPage from '@/pages/MeasurementWizardPage';
 import ProfilePage from '@/pages/ProfilePage';
 import AdminPage from '@/pages/AdminPage';
 import QuickSessionPage from '@/pages/QuickSessionPage';
@@ -174,6 +175,8 @@ function AppRoutes() {
         <Route path="ejercicios" element={<ExercisesPage />} />
         <Route path="ejercicios/:code" element={<ExerciseDetailPage />} />
         <Route path="progreso" element={<ProgressPage />} />
+        <Route path="progreso/medidas/nueva" element={<MeasurementWizardPage />} />
+        <Route path="progreso/medidas/:id/editar" element={<MeasurementWizardPage />} />
         <Route path="perfil" element={<ProfilePage />} />
         <Route path="admin" element={<AdminPage />} />
       </Route>
