@@ -280,3 +280,43 @@ export function siteValue(m: BodyMeasurement, site: MeasurementSiteId): number |
   if (vals.length === 0) return undefined;
   return Math.round((vals.reduce((s, n) => s + n, 0) / vals.length) * 10) / 10;
 }
+
+// ── Body composition (fat % / muscle %) ───────────────────────────────────────
+//
+// Recorded separately from circumferences: values come from an external device
+// or method (bioimpedance scale, DEXA, skinfolds…). Different methods are not
+// comparable with each other, so the method is stored with each entry.
+
+export type CompositionMethod = 'bioimpedancia' | 'dexa' | 'pliegues' | 'otro';
+
+export const COMPOSITION_METHOD_LABELS: Record<CompositionMethod, string> = {
+  bioimpedancia: 'Bioimpedancia',
+  dexa: 'DEXA',
+  pliegues: 'Pliegues',
+  otro: 'Otro',
+};
+
+export interface BodyComposition {
+  id: string;
+  userId?: string;
+  /** ISO date (yyyy-mm-dd) */
+  date: string;
+  method: CompositionMethod;
+  fatPct?: number;
+  musclePct?: number;
+  weightKg?: number;
+  notes?: string;
+  createdAt: string;
+}
+
+/** Conditions that keep bioimpedance readings comparable between days */
+export const COMPOSITION_PROTOCOL: string[] = [
+  'Usa siempre el mismo equipo y el mismo método.',
+  'Por la mañana, en ayunas y después de ir al baño.',
+  'Antes de entrenar, sin haber sudado ni tomado una ducha caliente.',
+  'Bien hidratado y sin alcohol en las 24 h previas.',
+  'Pies y manos limpios y secos sobre los electrodos.',
+];
+
+export const FAT_PCT_RANGE = { min: 2, max: 70 } as const;
+export const MUSCLE_PCT_RANGE = { min: 10, max: 75 } as const;

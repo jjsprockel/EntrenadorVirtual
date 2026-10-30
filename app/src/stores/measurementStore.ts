@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { idbStorage } from '@/lib/db';
-import type { BodyMeasurement } from '@/types/measurement';
+import type { BodyComposition, BodyMeasurement } from '@/types/measurement';
 
 // Local-only for now: there is no Supabase table for body measurements yet,
 // so nothing is enqueued in the sync engine.
@@ -13,9 +13,16 @@ interface MeasurementState {
   deleteMeasurement: (id: string) => void;
   /** Sorted oldest → newest. Admin also sees legacy untagged entries. */
   getUserMeasurements: (userId: string, isAdmin: boolean) => BodyMeasurement[];
+
+  compositions: BodyComposition[];
+  addComposition: (c: BodyComposition) => void;
+  updateComposition: (id: string, partial: Partial<BodyComposition>) => void;
+  deleteComposition: (id: string) => void;
+  /** Sorted oldest → newest. Admin also sees legacy untagged entries. */
+  getUserCompositions: (userId: string, isAdmin: boolean) => BodyComposition[];
 }
 
-const byDate = (a: BodyMeasurement, b: BodyMeasurement) =>
+const byDate = (a: { date: string; createdAt: string }, b: { date: string; createdAt: string }) =>
   a.date.localeCompare(b.date) || a.createdAt.localeCompare(b.createdAt);
 
 export const useMeasurementStore = create<MeasurementState>()(
@@ -36,6 +43,23 @@ export const useMeasurementStore = create<MeasurementState>()(
       getUserMeasurements: (userId, isAdmin) =>
         get()
           .measurements.filter((m) => m.userId === userId || (isAdmin && !m.userId))
+          .sort(byDate),
+
+      compositions: [],
+
+      addComposition: (c) => set((state) => ({ compositions: [...state.compositions, c] })),
+
+      updateComposition: (id, partial) =>
+        set((state) => ({
+          compositions: state.compositions.map((c) => (c.id === id ? { ...c, ...partial } : c)),
+        })),
+
+      deleteComposition: (id) =>
+        set((state) => ({ compositions: state.compositions.filter((c) => c.id !== id) })),
+
+      getUserCompositions: (userId, isAdmin) =>
+        get()
+          .compositions.filter((c) => c.userId === userId || (isAdmin && !c.userId))
           .sort(byDate),
     }),
     {

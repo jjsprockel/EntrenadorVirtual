@@ -15,6 +15,7 @@ import {
 import { TrendingUp, TrendingDown, Minus, Trophy, BarChart2, Dumbbell, ChevronDown, Activity, Plus, Ruler } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import BodyFigure from '@/components/measurements/BodyFigure';
+import BodyCompositionSection from '@/components/measurements/BodyCompositionSection';
 import { useMeasurementStore } from '@/stores/measurementStore';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useSessionStore } from '@/stores/sessionStore';
@@ -1334,11 +1335,14 @@ function BodyTab({
   heightCm,
   weeksBack,
   canEdit,
+  composition,
 }: {
   measurements: BodyMeasurement[];
   heightCm?: number;
   weeksBack: number;
   canEdit: boolean;
+  /** Separate body-composition section, rendered below the summary */
+  composition: React.ReactNode;
 }) {
   const navigate = useNavigate();
 
@@ -1404,6 +1408,7 @@ function BodyTab({
           </p>
         </div>
         {newButton}
+        <div className="-mx-4 pt-2">{composition}</div>
       </div>
     );
   }
@@ -1440,7 +1445,10 @@ function BodyTab({
       <div className="px-4">{newButton}</div>
 
       {inRange.length === 0 ? (
-        <EmptyState text="Sin mediciones en este período. Prueba con un rango más amplio." />
+        <>
+          <EmptyState text="Sin mediciones en este período. Prueba con un rango más amplio." />
+          {composition}
+        </>
       ) : (
         <>
           {/* Stats */}
@@ -1470,6 +1478,8 @@ function BodyTab({
               sub={whr != null ? 'índice de distribución' : 'Mide cintura y cadera'}
             />
           </div>
+
+          {composition}
 
           {/* Body map + change table */}
           {rows.length > 0 && (
@@ -1873,6 +1883,15 @@ export default function ProgressPage() {
                 heightCm={bodyUser?.profile.heightCm}
                 weeksBack={weeksBack}
                 canEdit={bodyUserId === activeUserId}
+                composition={
+                  <BodyCompositionSection
+                    userId={bodyUserId}
+                    isAdmin={isAdmin && bodyUserId === activeUserId}
+                    weeksBack={weeksBack}
+                    canEdit={bodyUserId === activeUserId}
+                    lastWeight={measurements.findLast((m) => m.weightKg != null)?.weightKg ?? bodyUser?.profile.bodyWeightKg}
+                  />
+                }
               />
             ) : (
               <EmptyState text="Selecciona un usuario para ver sus medidas corporales." />
