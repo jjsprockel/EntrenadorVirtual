@@ -16,10 +16,6 @@ import {
   UserPlus,
   FlaskConical,
   LogOut,
-  KeyRound,
-  Eye,
-  EyeOff,
-  CheckCircle2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -415,93 +411,6 @@ function AdminUserList() {
   );
 }
 
-// ── Change password ───────────────────────────────────────────────────────────
-
-function ChangePassword() {
-  // Use activeUserId (the profile currently being viewed), not sessionUserId
-  // (who is actually logged in) — otherwise an admin viewing another user's
-  // profile would silently change their OWN password instead of that user's.
-  const { activeUserId, changePassword } = useUsersStore();
-  const updatePassword = useAuthStore((s) => s.updatePassword);
-
-  const [curPw, setCurPw] = useState('');
-  const [newPw, setNewPw] = useState('');
-  const [confirmPw, setConfirmPw] = useState('');
-  const [showCur, setShowCur] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'mismatch' | 'loading'>('idle');
-
-  async function handleChangePassword() {
-    if (newPw !== confirmPw) { setStatus('mismatch'); return; }
-    if (newPw.length < 6) { setStatus('error'); return; }
-    setStatus('loading');
-
-    if (isSupabaseConfigured) {
-      const { error: err } = await updatePassword(newPw);
-      if (err) {
-        setStatus('error');
-        setTimeout(() => setStatus('idle'), 3000);
-      } else {
-        setStatus('success');
-        setNewPw(''); setConfirmPw('');
-        setTimeout(() => setStatus('idle'), 3000);
-      }
-    } else {
-      const ok = await changePassword(activeUserId!, curPw, newPw);
-      if (ok) {
-        setStatus('success');
-        setCurPw(''); setNewPw(''); setConfirmPw('');
-        setTimeout(() => setStatus('idle'), 3000);
-      } else {
-        setStatus('error');
-        setTimeout(() => setStatus('idle'), 3000);
-      }
-    }
-  }
-
-  return (
-    <form onSubmit={(e) => { e.preventDefault(); handleChangePassword(); }} className="space-y-3">
-      {/* Current password only needed in local mode */}
-      {!isSupabaseConfigured && (
-        <div className="space-y-1.5">
-          <Label className="text-sm">Contraseña actual</Label>
-          <div className="relative">
-            <Input type={showCur ? 'text' : 'password'} value={curPw} onChange={e => setCurPw(e.target.value)} className="h-10 pr-10" placeholder="••••••••" />
-            <button type="button" tabIndex={-1} onClick={() => setShowCur(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-              {showCur ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-            </button>
-          </div>
-        </div>
-      )}
-      <div className="space-y-1.5">
-        <Label className="text-sm">Nueva contraseña</Label>
-        <div className="relative">
-          <Input type={showNew ? 'text' : 'password'} value={newPw} onChange={e => setNewPw(e.target.value)} className="h-10 pr-10" placeholder="Mínimo 6 caracteres" />
-          <button type="button" tabIndex={-1} onClick={() => setShowNew(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
-            {showNew ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-          </button>
-        </div>
-      </div>
-      <div className="space-y-1.5">
-        <Label className="text-sm">Confirmar contraseña</Label>
-        <Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} className="h-10" placeholder="Repetir nueva contraseña" />
-      </div>
-      {status === 'mismatch' && <p className="text-xs text-destructive">Las contraseñas no coinciden.</p>}
-      {status === 'error' && <p className="text-xs text-destructive">{isSupabaseConfigured ? 'Error al actualizar. Intenta cerrar sesión y volver a entrar.' : 'Contraseña actual incorrecta o nueva muy corta.'}</p>}
-      {status === 'success' && <p className="text-xs text-green-500 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /> Contraseña actualizada.</p>}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full h-10 gap-2"
-        disabled={(!isSupabaseConfigured && !curPw) || !newPw || !confirmPw || status === 'loading'}
-        onClick={handleChangePassword}
-      >
-        <KeyRound className="h-4 w-4" />
-        {status === 'loading' ? 'Actualizando…' : 'Cambiar contraseña'}
-      </Button>
-    </form>
-  );
-}
 
 // ── Main component ────────────────────────────────────────────────────────────
 
@@ -632,7 +541,7 @@ export default function ProfilePage() {
             size="sm"
             className="h-8 gap-1.5 text-xs text-muted-foreground hover:text-destructive"
             onClick={handleLogout}
-            title="Cerrar sesión"
+            title="Cambiar de perfil"
           >
             <LogOut className="h-3.5 w-3.5" />
           </Button>
@@ -796,12 +705,6 @@ export default function ProfilePage() {
           </FormField>
         </Section>
 
-        <Separator />
-
-        {/* Security */}
-        <Section title="Seguridad">
-          <ChangePassword />
-        </Section>
 
         {/* Save button */}
         <Button

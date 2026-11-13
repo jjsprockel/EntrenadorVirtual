@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import AppShell from '@/components/layout/AppShell';
 import TodayPage from '@/pages/TodayPage';
@@ -21,62 +21,17 @@ import { useUserStore } from '@/stores/userStore';
 import { useUsersStore } from '@/stores/usersStore';
 import { useAuthStore } from '@/stores/authStore';
 import { getExercises } from '@/data/knowledgeBase';
-import { hashPassword } from '@/lib/auth';
 import { syncEngine } from '@/lib/syncEngine';
 import { restoreForUser } from '@/lib/cloudSync';
 import { isSupabaseConfigured } from '@/lib/supabase';
 
-const ADMIN_EMAIL = 'jjsprockel@hotmail.com';
-const ADMIN_PASS  = 'Admin1234';
-
 function AppRoutes() {
   const location = useLocation();
   const legacyProfile = useUserStore((s) => s.profile);
-  const { initAdmin, sessionUserId, setSession } = useUsersStore();
+  const { sessionUserId, setSession, users } = useUsersStore();
   const { hydrated } = useUsersStore();
   const { session: supabaseSession, loading: supabaseLoading, initialize: initAuth } = useAuthStore();
   const setExercises = useExerciseStore((s) => s.setExercises);
-  // Tracks whether the admin bootstrap + migration are complete.
-  // Prevents showing the login page before the admin user exists in the store.
-  const [adminReady, setAdminReady] = useState(false);
-
-  // Admin bootstrap — runs AFTER IDB hydrates to avoid stale-closure overwriting real data.
-  // Also patches existing admins that pre-date the auth system (no email / passwordHash).
-  // All async operations are awaited so setAdminReady(true) is only called once everything is done.
-  useEffect(() => {
-    if (!hydrated) return;
-
-    (async () => {
-      const state = useUsersStore.getState();
-
-      if (!state.initialized || state.users.length === 0) {
-        // Fresh install: create the first admin, then mark ready
-        const hash = await hashPassword(ADMIN_PASS);
-        // Re-read state — another effect might have run while we awaited
-        if (!useUsersStore.getState().initialized) {
-          initAdmin(legacyProfile, ADMIN_EMAIL, hash, ADMIN_PASS);
-        }
-      } else {
-        // Existing install: patch admin credentials if stale
-        const admin = state.users.find((u) => u.role === 'admin');
-        if (admin) {
-          const store = useUsersStore.getState();
-
-          if (!admin.email || admin.email === 'admin@entrenador.app') {
-            store.updateUser(admin.id, { email: ADMIN_EMAIL });
-          }
-
-          // Await so the hash is ready before we mark adminReady
-          if (!admin.passwordHash) {
-            await store.resetUserPassword(admin.id, ADMIN_PASS);
-          }
-        }
-      }
-
-      setAdminReady(true);
-    })();
-  }, [hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // Initialize Supabase auth listener (no-op when not configured)
   useEffect(() => {
     initAuth();
@@ -148,8 +103,7 @@ function AppRoutes() {
   }
 
   // Wait for persistence layer before deciding auth state.
-  // In local mode: also wait for adminReady so the admin user exists before the login form appears.
-  const stillLoading = isSupabaseConfigured ? supabaseLoading : !hydrated || !adminReady;
+  const stillLoading = isSupabaseConfigured ? supabaseLoading : !hydrated;
   if (stillLoading) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-background">
@@ -159,7 +113,10 @@ function AppRoutes() {
   }
 
   // Auth gate: Supabase session (when configured) or local session token
-  const isLoggedIn = isSupabaseConfigured ? !!supabaseSession : !!sessionUserId;
+  // Local mode: the session must point to a profile that still exists on this device
+  const isLoggedIn = isSupabaseConfigured
+    ? !!supabaseSession
+    : !!sessionUserId && users.some((u) => u.id === sessionUserId);
   if (!isLoggedIn) {
     return <LoginPage />;
   }

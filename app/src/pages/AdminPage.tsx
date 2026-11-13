@@ -4,9 +4,6 @@ import {
   Users,
   Dumbbell,
   UserPlus,
-  Eye,
-  EyeOff,
-  KeyRound,
   Edit,
   Trash2,
   FlaskConical,
@@ -15,14 +12,6 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,92 +32,12 @@ import UserAvatar from '@/components/admin/UserAvatar';
 import UserFormModal from '@/components/admin/UserFormModal';
 import type { AppUser } from '@/types/user';
 
-// ── Reset password dialog ─────────────────────────────────────────────────────
-
-function ResetPasswordDialog({
-  user,
-  open,
-  onClose,
-}: {
-  user: AppUser;
-  open: boolean;
-  onClose: () => void;
-}) {
-  const resetUserPassword = useUsersStore((s) => s.resetUserPassword);
-  const [newPw, setNewPw] = useState('');
-  const [showPw, setShowPw] = useState(false);
-  const [done, setDone] = useState(false);
-
-  async function handleReset() {
-    if (!newPw.trim()) return;
-    await resetUserPassword(user.id, newPw.trim());
-    setDone(true);
-    setTimeout(() => {
-      setDone(false);
-      setNewPw('');
-      onClose();
-    }, 1200);
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-xs mx-auto">
-        <DialogHeader>
-          <DialogTitle>Resetear contraseña</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 pt-1">
-          <p className="text-sm text-muted-foreground">
-            Nueva contraseña para <strong>{user.profile.name}</strong>
-          </p>
-          <div className="space-y-1.5">
-            <Label>Nueva contraseña</Label>
-            <div className="relative">
-              <Input
-                type={showPw ? 'text' : 'password'}
-                value={newPw}
-                onChange={(e) => setNewPw(e.target.value)}
-                placeholder="Ingresa nueva contraseña"
-                className="h-10 pr-10"
-              />
-              <button
-                type="button"
-                tabIndex={-1}
-                onClick={() => setShowPw((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              >
-                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-            </div>
-          </div>
-          <Button
-            className="w-full h-10 gap-2"
-            onClick={handleReset}
-            disabled={!newPw.trim() || done}
-          >
-            {done ? (
-              <>
-                <CheckCircle2 className="h-4 w-4" /> Contraseña actualizada
-              </>
-            ) : (
-              <>
-                <KeyRound className="h-4 w-4" /> Resetear contraseña
-              </>
-            )}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
 // ── User card ─────────────────────────────────────────────────────────────────
 
 function UserCredentialCard({ user }: { user: AppUser }) {
   const { deleteUser } = useUsersStore();
   const { getSessionsByUser } = useSessionStore();
-  const [showPw, setShowPw] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [resetOpen, setResetOpen] = useState(false);
   const [emailStatus, setEmailStatus] = useState<'idle' | 'sending' | 'sent' | 'error' | 'unconfigured'>('idle');
 
   async function handleSendEmail() {
@@ -169,8 +78,6 @@ function UserCredentialCard({ user }: { user: AppUser }) {
     return `Hace ${daysSinceLastSession} días`;
   }
 
-  const pwDisplay = user.tempPassword ?? null;
-
   return (
     <>
       <div className="rounded-xl border border-border bg-card p-4 space-y-3">
@@ -192,14 +99,6 @@ function UserCredentialCard({ user }: { user: AppUser }) {
               title="Editar"
             >
               <Edit className="h-3.5 w-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setResetOpen(true)}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10 transition-colors"
-              title="Resetear contraseña"
-            >
-              <KeyRound className="h-3.5 w-3.5" />
             </button>
             {user.role !== 'admin' && (
               <AlertDialog>
@@ -227,34 +126,6 @@ function UserCredentialCard({ user }: { user: AppUser }) {
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            )}
-          </div>
-        </div>
-
-        {/* Credentials */}
-        <div className="rounded-lg bg-muted/40 p-3 space-y-2 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground w-20 shrink-0">Correo</span>
-            <span className="font-mono truncate">{user.email ?? '—'}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground w-20 shrink-0">Contraseña</span>
-            {pwDisplay ? (
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <span className="font-mono">
-                  {showPw ? pwDisplay : '•'.repeat(Math.min(pwDisplay.length, 10))}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setShowPw((v) => !v)}
-                  className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
-                  aria-label="Mostrar/ocultar"
-                >
-                  {showPw ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                </button>
-              </div>
-            ) : (
-              <span className="text-muted-foreground italic">Contraseña actualizada ✓</span>
             )}
           </div>
         </div>
@@ -305,7 +176,6 @@ function UserCredentialCard({ user }: { user: AppUser }) {
       </div>
 
       <UserFormModal open={editOpen} onClose={() => setEditOpen(false)} editUser={user} />
-      <ResetPasswordDialog user={user} open={resetOpen} onClose={() => setResetOpen(false)} />
     </>
   );
 }

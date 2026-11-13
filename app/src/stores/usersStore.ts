@@ -13,13 +13,16 @@ interface UsersState {
   hydrated: boolean;
 
   initAdmin: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string) => void;
-  addUser: (profile: UserProfile, email: string, passwordHash: string, tempPassword?: string, avatarColor?: string, id?: string) => void;
+  addUser: (profile: UserProfile, email?: string, passwordHash?: string, tempPassword?: string, avatarColor?: string, id?: string) => void;
   updateUser: (id: string, partial: Partial<Pick<AppUser, 'role' | 'avatarColor' | 'email'>>) => void;
   updateUserProfile: (id: string, profilePartial: Partial<UserProfile>) => void;
   deleteUser: (id: string) => void;
   setActiveUser: (id: string) => void;
   getActiveUser: () => AppUser | undefined;
   bulkAddUsers: (newUsers: AppUser[]) => void;
+  /** Open access: creates a local profile (no password) and enters with it.
+   *  The first profile on the device becomes its admin. */
+  createProfile: (profile: UserProfile) => string;
 
   // Auth actions
   login: (email: string, password: string) => Promise<boolean>;
@@ -99,6 +102,24 @@ export const useUsersStore = create<UsersState>()(
 
       bulkAddUsers: (newUsers) =>
         set((state) => ({ users: [...state.users, ...newUsers] })),
+
+      createProfile: (profile) => {
+        const { users } = get();
+        const user: AppUser = {
+          id: crypto.randomUUID(),
+          role: users.length === 0 ? 'admin' : 'user',
+          avatarColor: AVATAR_COLORS[users.length % AVATAR_COLORS.length],
+          createdAt: new Date(),
+          profile,
+        };
+        set({
+          users: [...users, user],
+          activeUserId: user.id,
+          sessionUserId: user.id,
+          initialized: true,
+        });
+        return user.id;
+      },
 
       login: async (email, password) => {
         const { users } = get();

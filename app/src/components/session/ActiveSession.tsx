@@ -32,6 +32,7 @@ import ExerciseThumb from '@/components/exercise/ExerciseThumb';
 import ExerciseLightbox from '@/components/exercise/ExerciseLightbox';
 import ExercisePicker from '@/components/routine/ExercisePicker';
 import SetLogger from './SetLogger';
+import { formatWeight, useWeightUnit } from '@/lib/units';
 import RestTimer from './RestTimer';
 import ExerciseHistoryPanel from './ExerciseHistoryPanel';
 import CardioEntryForm from './CardioEntryForm';
@@ -41,6 +42,7 @@ import type { ExerciseSlot } from '@/types/routine';
 
 export default function ActiveSession() {
   const activeSession = useSessionStore((s) => s.activeSession);
+  const [weightUnit] = useWeightUnit();
   const {
     logSet,
     completeSession,
@@ -351,7 +353,7 @@ export default function ActiveSession() {
                             Serie {s.setNumber}
                           </span>
                           <span className="font-mono font-semibold text-foreground">
-                            {s.weight} kg × {s.reps}
+                            {formatWeight(s.weight, weightUnit)} × {s.reps}
                           </span>
                           {s.rir !== undefined && (
                             <span className="text-[10px]">RIR {s.rir}</span>

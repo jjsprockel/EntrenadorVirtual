@@ -3,6 +3,7 @@ import { ChevronDown, History } from 'lucide-react';
 import { useSessionStore } from '@/stores/sessionStore';
 import { useUsersStore } from '@/stores/usersStore';
 import { getExerciseSetHistory } from '@/lib/statsEngine';
+import { formatWeight, useWeightUnit } from '@/lib/units';
 
 interface Props {
   exerciseCode: string;
@@ -10,6 +11,7 @@ interface Props {
 
 export default function ExerciseHistoryPanel({ exerciseCode }: Props) {
   const [open, setOpen] = useState(false);
+  const [weightUnit] = useWeightUnit();
   const { getUserSessions } = useSessionStore();
   const sessions = useSessionStore((s) => s.sessions);
   const activeUserId = useUsersStore((s) => s.activeUserId);
@@ -69,7 +71,7 @@ export default function ExerciseHistoryPanel({ exerciseCode }: Props) {
                         Serie {s.setNumber}
                       </span>
                       <span className="font-mono font-semibold text-foreground">
-                        {s.weight} kg × {s.reps}
+                        {formatWeight(s.weight, weightUnit)} × {s.reps}
                       </span>
                       {s.rir !== undefined && (
                         <span className="text-[10px]">RIR {s.rir}</span>
