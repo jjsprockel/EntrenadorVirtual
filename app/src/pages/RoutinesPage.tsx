@@ -1,7 +1,11 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Zap, Edit, Trash2, Calendar, Dumbbell, ChevronDown, Sparkles } from 'lucide-react';
+import { Plus, Zap, Edit, Trash2, Calendar, Dumbbell, ChevronDown, Sparkles, Save, RotateCcw, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -181,22 +185,111 @@ function RoutineCard({ routine }: { routine: Routine }) {
   );
 }
 
+function SaveSuggestedDialog({
+  open,
+  onClose,
+  suggested,
+  modified,
+  activate,
+  onSave,
+}: {
+  open: boolean;
+  onClose: () => void;
+  suggested: SuggestedRoutine;
+  modified: boolean;
+  /** Pre-selects "activar" (opened from the Activar button) */
+  activate: boolean;
+  onSave: (name: string, activate: boolean) => void;
+}) {
+  const activeUserId = useUsersStore((s) => s.activeUserId);
+  const isAdmin = useUsersStore((s) => s.getActiveUser()?.role === 'admin');
+  const routines = useRoutineStore((s) => s.routines);
+  const getUserRoutines = useRoutineStore((s) => s.getUserRoutines);
+  const [name, setName] = useState(modified ? `${suggested.name} (personalizada)` : suggested.name);
+  const [andActivate, setAndActivate] = useState(activate);
+
+  const taken = useMemo(
+    () => new Set(getUserRoutines(activeUserId ?? '', isAdmin ?? false).map((r) => r.name.trim().toLowerCase())),
+    [getUserRoutines, activeUserId, isAdmin, routines], // eslint-disable-line react-hooks/exhaustive-deps
+  );
+  const trimmed = name.trim();
+  const error = !trimmed
+    ? 'Escribe un nombre para la rutina.'
+    : taken.has(trimmed.toLowerCase())
+    ? 'Ya tienes una rutina con ese nombre.'
+    : '';
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-sm mx-auto">
+        <DialogHeader>
+          <DialogTitle>Guardar en mis rutinas</DialogTitle>
+        </DialogHeader>
+        <form
+          onSubmit={(e) => { e.preventDefault(); if (!error) onSave(trimmed, andActivate); }}
+          className="space-y-4"
+        >
+          <p className="text-xs text-muted-foreground">
+            Basada en <strong>{suggested.name}</strong>
+            {modified ? ', con los cambios que hiciste.' : '.'} La rutina sugerida original no
+            cambia.
+          </p>
+          <div className="space-y-1.5">
+            <Label htmlFor="routine-name">Nombre</Label>
+            <Input
+              id="routine-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="h-11"
+              autoFocus
+              aria-invalid={!!error}
+            />
+            {error && <p className="text-xs text-destructive">{error}</p>}
+          </div>
+          <label className="flex items-center justify-between gap-3 text-sm">
+            <span>Activarla ahora</span>
+            <Switch checked={andActivate} onCheckedChange={setAndActivate} />
+          </label>
+          {/* Base UI Button forces type="button" — onClick handles click; form onSubmit handles Enter */}
+          <Button
+            className="w-full h-11 gap-2"
+            disabled={!!error}
+            onClick={() => onSave(trimmed, andActivate)}
+          >
+            {andActivate ? <Zap className="h-4 w-4" /> : <Save className="h-4 w-4" />}
+            {andActivate ? 'Guardar y activar' : 'Guardar'}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
   const { addRoutine, setActiveRoutine } = useRoutineStore();
   const activeUserId = useUsersStore((s) => s.activeUserId);
   const [expanded, setExpanded] = useState(false);
-  const [confirmActivate, setConfirmActivate] = useState(false);
+  // undefined = closed; otherwise whether "activar" starts selected
+  const [saveDialog, setSaveDialog] = useState<{ activate: boolean } | undefined>(undefined);
   const [days, setDays] = useState<RoutineDay[]>(() => suggested.days());
+  const [modified, setModified] = useState(false);
+  const [savedAs, setSavedAs] = useState<string | null>(null);
 
   function updateDay(index: number, updated: RoutineDay) {
     setDays((prev) => prev.map((d, i) => (i === index ? updated : d)));
+    setModified(true);
   }
 
-  function handleActivate() {
+  function resetDays() {
+    setDays(suggested.days());
+    setModified(false);
+  }
+
+  function handleSave(name: string, activate: boolean) {
     const routine: Routine = {
       id: crypto.randomUUID(),
       userId: activeUserId ?? undefined,
-      name: suggested.name,
+      name,
       objective: suggested.objective,
       level: suggested.level,
       structure: 'custom',
@@ -204,13 +297,18 @@ function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
       durationWeeks: suggested.durationWeeks,
       days,
       periodization: { type: 'ninguna' },
-      active: true,
+      active: activate,
       createdAt: new Date(),
-      startedAt: new Date(),
+      startedAt: activate ? new Date() : undefined,
     };
     addRoutine(routine);
-    setActiveRoutine(routine.id);
-    setConfirmActivate(false);
+    if (activate) setActiveRoutine(routine.id);
+    setSaveDialog(undefined);
+    // The suggestion goes back to its original form, ready to be reused
+    resetDays();
+    setExpanded(false);
+    setSavedAs(name);
+    setTimeout(() => setSavedAs(null), 4000);
   }
 
   return (
@@ -221,6 +319,11 @@ function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
             <p className="font-bold text-base leading-tight flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
               {suggested.name}
+              {modified && (
+                <span className="text-[10px] font-semibold bg-amber-500/15 text-amber-500 px-1.5 py-0.5 rounded-md">
+                  Modificada
+                </span>
+              )}
             </p>
             <p className="text-xs text-muted-foreground mt-0.5">{suggested.description}</p>
           </div>
@@ -235,16 +338,28 @@ function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
           <span className="capitalize">{suggested.objective}</span>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ChevronDown
-            className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
-          />
-          {expanded ? 'Ocultar y editar días' : `Ver y editar ${days.length} días`}
-        </button>
+        <div className="flex items-center justify-between gap-2">
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronDown
+              className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`}
+            />
+            {expanded ? 'Ocultar y editar días' : `Ver y editar ${days.length} días`}
+          </button>
+          {modified && (
+            <button
+              type="button"
+              onClick={resetDays}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Deshacer cambios
+            </button>
+          )}
+        </div>
 
         {expanded && (
           <div className="space-y-2">
@@ -254,31 +369,44 @@ function SuggestedRoutineCard({ suggested }: { suggested: SuggestedRoutine }) {
           </div>
         )}
 
-        <Button
-          size="sm"
-          className="w-full h-9 text-xs gap-1.5"
-          onClick={() => setConfirmActivate(true)}
-        >
-          <Zap className="h-3.5 w-3.5" />
-          Activar rutina
-        </Button>
+        {savedAs && (
+          <p className="text-xs text-success flex items-center gap-1.5">
+            <Check className="h-3.5 w-3.5" />
+            Guardada en Mis rutinas como "{savedAs}"
+          </p>
+        )}
+
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 h-9 text-xs gap-1.5"
+            onClick={() => setSaveDialog({ activate: false })}
+          >
+            <Save className="h-3.5 w-3.5" />
+            Guardar como…
+          </Button>
+          <Button
+            size="sm"
+            className="flex-1 h-9 text-xs gap-1.5"
+            onClick={() => setSaveDialog({ activate: true })}
+          >
+            <Zap className="h-3.5 w-3.5" />
+            Activar rutina
+          </Button>
+        </div>
       </div>
 
-      <AlertDialog open={confirmActivate} onOpenChange={setConfirmActivate}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>¿Activar "{suggested.name}"?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Se añadirá a tus rutinas (con los cambios que hayas hecho) y quedará como la
-              rutina activa. Podrás editarla o desactivarla después.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleActivate}>Activar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {saveDialog && (
+        <SaveSuggestedDialog
+          open
+          onClose={() => setSaveDialog(undefined)}
+          suggested={suggested}
+          modified={modified}
+          activate={saveDialog.activate}
+          onSave={handleSave}
+        />
+      )}
     </>
   );
 }
