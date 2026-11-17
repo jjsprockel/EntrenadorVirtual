@@ -211,6 +211,63 @@ const torsoPiernaPiernaB = (): RoutineDay =>
     slot('PA-02', 3, 15, 20, 45),
   ]);
 
+// ── Híbrido PPL + Torso-Pierna 5 días ────────────────────────────────────────
+// Días 1-3: Pull / Push / Legs pesados (compuestos, 6-10 reps).
+// Días 4-5: Torso / Pierna con más volumen y otros ángulos, así cada grupo
+// muscular se entrena 2 veces por semana.
+
+const hibridoPull = (): RoutineDay =>
+  day('Día 1 — Pull', ['espalda', 'biceps'], [
+    slot('E-01', 4, 6, 8, 150, undefined, ['E-02']),
+    slot('E-03', 4, 8, 10, 120),
+    slot('E-05', 3, 10, 12, 90),
+    slot('E-09', 3, 15, 20, 60),
+    slot('B-01', 3, 8, 10, 75),
+    slot('B-03', 2, 12, 15, 45),
+  ]);
+
+const hibridoPush = (): RoutineDay =>
+  day('Día 2 — Push', ['pecho', 'hombros', 'triceps'], [
+    slot('P-01', 4, 6, 8, 150),
+    slot('H-01', 3, 8, 10, 120),
+    slot('P-02', 3, 10, 12, 90),
+    slot('H-03', 3, 12, 15, 60),
+    slot('T-06', 3, 8, 10, 90),
+    slot('T-02', 2, 12, 15, 60),
+  ]);
+
+const hibridoLegs = (): RoutineDay =>
+  day('Día 3 — Legs', ['cuadriceps', 'isquiotibiales_gluteos', 'pantorrillas', 'core'], [
+    slot('Q-01', 4, 6, 8, 180),
+    slot('I-01', 3, 8, 10, 120),
+    slot('Q-02', 3, 10, 12, 120),
+    slot('I-02', 3, 10, 12, 60),
+    slot('PA-01', 4, 12, 15, 45),
+    slot('C-04', 3, 12, 15, 45),
+  ]);
+
+const hibridoTorso = (): RoutineDay =>
+  day('Día 4 — Torso', ['espalda', 'pecho', 'hombros', 'biceps', 'triceps'], [
+    slot('E-02', 3, 10, 12, 90),
+    slot('P-04', 3, 10, 12, 90),
+    slot('E-07', 3, 10, 12, 90),
+    slot('H-02', 3, 10, 12, 90),
+    slot('P-06', 3, 12, 15, 60),
+    slot('H-05', 3, 15, 20, 45),
+    slot('B-02', 3, 10, 12, 60),
+    slot('T-04', 3, 10, 12, 60),
+  ]);
+
+const hibridoPierna = (): RoutineDay =>
+  day('Día 5 — Pierna', ['isquiotibiales_gluteos', 'cuadriceps', 'pantorrillas', 'core'], [
+    slot('I-03', 4, 8, 12, 120),
+    slot('Q-07', 3, 10, 12, 90, 'Por pierna'),
+    slot('Q-05', 3, 12, 15, 60),
+    slot('I-02', 3, 12, 15, 60),
+    slot('PA-02', 4, 15, 20, 45),
+    slot('C-07', 3, 10, 12, 45, 'Por lado'),
+  ]);
+
 // ── Rutina de Hellen — Split 5 días ──────────────────────────────────────────
 
 const hellenLunes = (): RoutineDay =>
@@ -353,6 +410,23 @@ export const SUGGESTED_ROUTINES: SuggestedRoutine[] = [
       torsoPiernaPiernaA(),
       torsoPiernaTorsoB(),
       torsoPiernaPiernaB(),
+    ],
+  },
+  {
+    id: 'ppl-torso-pierna-5dias',
+    name: 'PPL + Torso-Pierna 5 días',
+    description:
+      'Pull, Push y Legs pesados los 3 primeros días; Torso y Pierna con más volumen los 2 siguientes. Cada grupo muscular se trabaja 2 veces por semana.',
+    objective: 'hipertrofia',
+    level: 'intermedio',
+    daysPerWeek: 5,
+    durationWeeks: 0,
+    days: () => [
+      hibridoPull(),
+      hibridoPush(),
+      hibridoLegs(),
+      hibridoTorso(),
+      hibridoPierna(),
     ],
   },
   {
